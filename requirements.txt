@@ -1,0 +1,11 @@
+scipy
+keras
+tensorflow
+sklearn
+scikit-image
+mlextend
+matplotlib
+jupyter
+pandas
+texttable
+git+https://github.com/vishnubob/python-midi
