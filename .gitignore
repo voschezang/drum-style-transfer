@@ -1,6 +1,7 @@
 *.pdf
 *.csv
 *.png
+*.webloc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

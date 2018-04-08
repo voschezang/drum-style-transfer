@@ -16,9 +16,6 @@ ls:
 deps:
 	pip3 install -r requirements.txt
 
-install:
-	pip3 install -r requirements.txt
-
 deps2:
 	pip install -r requirements.txt
 
