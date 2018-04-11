@@ -6,12 +6,19 @@ start:
 default:
 	python3 src/main.py
 
+train:
+	make clear
+	python3 src/main.py
+
 logs:
-	rm -Rf $(LOG_DIR)/*
+	open http:localhost:6006
 	tensorboard --logdir=$(LOG_DIR)
 
+test_midi:
+	python3 src/test_midi.py
+
 clear:
-	rm -r $(LOG_DIR)/*
+	rm -rf $(LOG_DIR)/*
 
 ls:
 	ls $(LOG_DIR)/

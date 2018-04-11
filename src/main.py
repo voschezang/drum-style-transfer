@@ -1,32 +1,46 @@
-# import rtmidi
+import os, numpy as np, pandas
+np.random.seed(333)
+os.chdir('src')
+import mido, rtmidi, rtmidi_
+import keras
+from keras.callbacks import TensorBoard
 
-# import time
-# import rtmidi
-# import rtmidi_
+# local libs
+import config, models
+from data import data, midi
 
-# from rtmidi_.midiconstants import NOTE_OFF, NOTE_ON
+context = data.init()
 
-# print(NOTE_OFF)
+dirname = config.dataset_dir + 'examples/'
+n = 8
+files = os.listdir(dirname)
+filenames = [f for f in files if not f == '.DS_Store'][:n]
 
-# NOTE = 60  # middle C
+# filenames = os.listdir(dirname)[:n]
+midis = []
+for fn in filenames:
+    print('reading file: %s' % fn)
+    mid = mido.MidiFile(dirname + fn)
+    midis.append(mid)
 
-# midiout = rtmidi.RtMidiOut()
+arrays = [midi.encode(m) for m in midis]
+print([arr.shape for arr in arrays])
+x_train = np.stack(arrays)
+y_train = keras.utils.to_categorical(np.random.randint(0, 3, n))
+# y_train = np.array([[1, 0], [0, 1], [[0, 1]]])
 
-# with (midiout.open_port(0) if midiout.get_ports() else
-#       midiout.open_virtual_port("My virtual output")):
-#     note_on = [NOTE_ON, NOTE, 112]
-#     note_off = [NOTE_OFF, NOTE, 0]
-#     midiout.send_message(note_on)
-#     time.sleep(0.5)
-#     midiout.send_message(note_off)
+model, summary = models.init(x_train, y_train)
+print(summary())
 
-# del midiout
+batch_size = 8
+# n epochs = n iterations over all the training data
+epochs = 16
 
-import mido
-
-# port = mido.open_output()
-# port.send(msg)
-
-mid = mido.MidiFile('mary.mid')
-# for msg in mid.play():
-# port.send(msg)
+# model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size)
+model.fit(
+    x_train,
+    y_train,
+    epochs=epochs,
+    batch_size=batch_size,
+    validation_split=1 / 6,
+    callbacks=[TensorBoard(log_dir=config.tmp_model_dir)])
