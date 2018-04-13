@@ -1,0 +1,10 @@
+# Musical representation
+
+## GCT General Chord Type
+	I ii iii IV V vi vii
+	harmonic structure
+		+ min/maj
+
+## Direct Interval Class
+
+

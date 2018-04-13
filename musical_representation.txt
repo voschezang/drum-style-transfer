@@ -1,0 +1,85 @@
+computational musicology
+
+performance (i.e. audio)
+representation
+
+
+'problem' of music
+	as f incereases: fm - am - rythm - bars - songs
+		+ parallel f: harmony, polyrythms
+			e.g. 2-3 rythm, or quint-harmony
+
+Beware what when using harmonic anaylis, midi-conversion
+	lots of processing is already implicitly embodied in the used representations (..)
+
+
+
+midi, notenschrift, tabs
+spectogram, waveform
+
+
+GCT General Chord Type
+	I ii iii IV V vi vii
+	harmonic structure
+		+ min/maj
+	icm key + mode
+
+	almost holistic approach: 
+		individual notes, inversersions are discarded
+
+	works only for 'known' scales
+		not for atonal music
+
+	requires decoder(audio/midi)
+
+	Consonance vector: length 12, with 0 for dissonant and 1 for consonant
+
+	Pitch scale hierarchy: 
+
+
+DIC Direct Interval Class
+	Lewin's interval function
+
+other
+	root + seq of relative pitches (notes) (+ d root)
+
+
+
+spectorgram
+	loudness of every f
+
+
+
+
+rythms (long term time)
+
+beat detection -> e.g. every x ms
+	pca ~ polyrythms	parallel beat detection
+	e.g.
+		for every note
+			compute f with respect to x prev notes
+			keep patterns with at least y constitent occurences
+		 - use min/max f time
+		 - (optional) rmv overlapping cycles (e.g. double f)
+
+
+
+normalizing 	C3 -> C
+quantizing		443 -> 440 Hz
+quantizing		x ms -> quarter note
+
+
+scale detection
+	normalized set of all notes in previous x bars
+	nn -> predict next notes, predict new note
+
+
+
+id, for rythms (independent voices/notes)
+	instead of a x-matrix: [time, notes]
+	use: [notes, time]
+	then add sparse layers (or convolutional) with padding (3,1)
+		that connect notes
+	only after that add dense layers that connect different notes
+	- assume that there is more correlation between occurences within an isntrument (note) than between instruments (notes).
+

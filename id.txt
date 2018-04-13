@@ -1,6 +1,50 @@
-database van drumloops
+Database
+
+database van drumloops - genoeg keuze, maar geen structuur in labels etc (veel overlappende labels)
 
 noten corresponderen niet met instrumenten
  - geen inherent verchil tussen HH en OH
 
- 
+
+
+
+doel project
+ - onderzoek midi in ml
+ 	- toetsen van generatieve modellen?
+
+ - werkende applicatie (?)
+ 	- technieken: python server, midi-input/recording, tensorflow.js, keras.js, elm
+
+
+---
+
+Haalbaarheid
+
+verschillende onderwerpen
+- (poly) ritme herkenning 		
+	- maatherkenning
+	- deconstructie van partijen 		e.g. 3 over 2
+
+- generatieve modellen
+	- variatie
+	- variatie naar stijlen/genres  	(variatie over 1 component)
+		- analyse van kwaliteit van componenten (overeenkomst met stijl)
+
+- herkennen van stijl
+
+- web-applicatie
+	- input midi file (loop)
+	- analyseer tempo/ritme
+	- genereer variaties
+
+
+polyphony?
+
+
+
+---
+
+tools
+
+pretrained models - google magenta
+

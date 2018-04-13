@@ -7,7 +7,9 @@ matplotlib
 jupyter
 pandas
 texttable
-rtmidi
+
+Cython
+python-rtmidi
 mido
 
 
