@@ -11,7 +11,7 @@ texttable
 Cython
 python-rtmidi
 mido
-
+mypy
 
 
 pyknon
