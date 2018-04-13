@@ -1,25 +1,29 @@
-import os, pandas, numpy as np, collections
+import os, re, time, datetime, pandas, numpy as np, collections
 import mido
 
 import config
 from data import data, midi
 
 
-def import_data(c, dirname, n=2):
+def import_data(c, dirname='../datasets/examples/', n=2):
     # c :: data.Context
+    if not dirname[-1] == '/': dirname += '/'
     files = os.listdir(dirname)
     filenames = [f for f in files if not f == '.DS_Store'][:n]
     # filenames = os.listdir(dirname)[:n]
 
     midis = []
     for fn in filenames:
-        print('reading file: %s' % fn)
-        mid = mido.MidiFile(dirname + fn)
-        midis.append(mid)
+        midis.append(import_midifile(dirname + fn))
     return midis
 
 
-def export_midifile(mid, filename='song_export.mid'):
+def import_midifile(filename='../mary.mid'):
+    config.info('reading file: %s' % filename)
+    return mido.MidiFile(filename)
+
+
+def export_midifile(mid, filename='../song_export.mid'):
     mid.save(filename)
 
 

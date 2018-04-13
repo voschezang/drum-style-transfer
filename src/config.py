@@ -16,9 +16,9 @@ info_ = True
 
 def debug(*args):
     if debug_:
-        print('DEBUG --- --- ---')
+        print('< DEBUG >')
         for a in args:
-            print(a)
+            print(' |> ', a)
 
 
 def info(*args):

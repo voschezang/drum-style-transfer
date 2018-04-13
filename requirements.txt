@@ -9,7 +9,7 @@ pandas
 texttable
 rtmidi
 mido
-
+mypy
 
 
 pyknon

@@ -8,12 +8,19 @@ import config, io
 from data import data, midi
 from utils import io
 
-n = 2
+n: int = 2
 context, x_train = data.init(n)
-
 print(x_train.shape)
 
-m = midi.decode(context, x_train[0])
-print(type(m), m)
+dn = config.dataset_dir
+# mid = io.import_midifile(dn + 'song_export.mid')
+mid = io.import_midifile(dn + 'examples/01 8th Cym.mid')
 
-io.export_midifile(m)
+# encoded = midi.encode(context, mid)
+encoded = x_train[0]
+decoded = midi.decode(context, encoded)
+m = decoded
+print(type(m), m)
+print(mid.length, m.length)
+
+io.export_midifile(m, dn + 'song_export_copy.mid')

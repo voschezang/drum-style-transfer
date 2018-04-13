@@ -1,38 +1,57 @@
 """ Functions that are specific to our dataset
+
+Context contains (global) values that are relevant for all midi and other data
+
 """
 import os, pandas, numpy as np, collections
 import mido
 
 import config
+
 from utils import io
 from data import midi
 # from utils import utils
 
-Context = collections.namedtuple('Context',
-                                 ['max_t', 'dt', 'n_instances', 'note_length'])
+Context = collections.namedtuple('Context', [
+    'max_t',
+    'dt',
+    'n_instances',
+    'note_length',
+    'bpm',
+    'tempo',
+    'ticks_per_beat',
+])
 
 print(""" Context :: namedtuple(
-['max_t' = float
-,'dt'= float
-,'n_instances' = int
-,'note_length' = int
+[ max_t = float
+, dt = float
+, n_instances = int
+, note_length = int
+, bpm = float
+, tempo = float
+, ticks_per_beat = int
 ]
 """)
 
 
-def init(n=2):
+def init(n: int = 2):
     print('Setting up params\n')
-    max_t = 1.
-    dt = 0.0001  # quantized time
+    max_t: float = 10.
+    dt = 0.01  # quantized time, must be > 0
     n_instances = round(max_t / dt)  # vector length
-    note_length = 0.3
-    context = Context(max_t, dt, n_instances, note_length)
+    note_length = 0.03  # seconds
+    bpm = 120.  # bpm
+    tempo = mido.bpm2tempo(bpm)
+    ticks_per_beat = 96  # 480 # midi resolution
+    context = Context(max_t, dt, n_instances, note_length, bpm, tempo,
+                      ticks_per_beat)
+    print(' >>', context)
 
     print('Importing midi-data\n')
     dirname = config.dataset_dir + 'examples/'
     midis = io.import_data(context, dirname, n)
 
-    print('Encoding midi-data\n', midis)
+    print('\nEncoding midi-data\n', midis)
     arrays = [midi.encode(context, m) for m in midis]
     x_train = np.stack(arrays)
     return context, x_train

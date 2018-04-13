@@ -31,6 +31,9 @@ deps2:
 	pip install -r requirements.txt
 	pip2 install -r requirements-python2.txt
 
+dialyzer:
+	mypy src/test_midi.py
+
 predict:
 	python3 src/main.py $(book)
 
