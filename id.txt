@@ -1,3 +1,14 @@
+
+midi files
+     multiple midi tracks
+              - ignore all?
+
+
+
+
+
+
+
 Database
 
 database van drumloops - genoeg keuze, maar geen structuur in labels etc (veel overlappende labels)

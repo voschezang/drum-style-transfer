@@ -34,55 +34,116 @@ NOTE_ON = 'note_on'
 #     return _normalize(np.array(ls))
 
 
+class Notes(np.ndarray):
+    # array with value in range [0,1] for every (midi) note
+    # to be used as note-on messages at an instance
+    def __new__(cls):
+        arr = np.zeros(N_NOTES)
+        return arr.view(cls)
+
+
+class Track(np.ndarray):
+    # array of Notes, with length 'track-length'
+    def __new__(cls, length, dt):
+        # values: list of length N_NOTES with values in range
+        arr = np.stack([Notes() for _ in range(length)])
+        return arr.view(cls)
+
+    def __init__(self, length=100, dt=0.01):
+        self.dt = dt  # seconds
+
+    def length(self):
+        # n instances * dt, in seconds
+        return self.shape[0] * self.dt
+
+
+def solo():
+    # extract a single track from a mido.MidiFile
+    pass
+
+
 def encode(c, midi, stretch=False):
     # c :: data.Context
-    # TODO
-    # if bpm is given: 'normalize' t
+    # TODO # if bpm is given: 'normalize' t
 
-    # matrix :: [ vector per instance ]
-    # vector :: [ notes ]
-    matrix = np.zeros([c.n_instances, N_NOTES])
+    # matrix :: [ [notes] per instance ]
+    matrix = Track(c.n_instances, c.dt)
     t = 0
-    if not midi.type == 0:
-        config.debug('WARNING', 'type not == 0')
+
     # length = midi.length # in seconds
-    midi.ticks_per_beat  # e.g. 96 pulses per quarter note (PPQ)
+    midi.ticks_per_beat  # e.g. 96 PPQ pulses per quarter note (beat)
     # default tempo: 500000 microseconds per beat (120 bpm)
     #   use set_tempo to change tempo during a song
     # mido.bpm2tempo(bpm)
+
+    # a midifile that consists of multiple tracks is interpreted as multiple independent files
+    if midi.type == 2:
+        # type = async
+        errors.typeError('mido.MidiFile.type 0 | 1', 2)
+    elif midi.type == 1:
+        config.debug('WARNING', 'type not == 0')
+    #     midis = midi.tracks
+    # elif midi.type == 0:
+    #     midis = [midi]
 
     # this auto-converts midi msgs.time to seconds
     # alternative: use
     #  for i, track in midi.tracks
     #    msg = track[index]
     for msg in midi:
-        t += msg.time
+        t += msg.time  # seconds for type 1,2
         i = round(t / c.dt)  # instance index (time-step)
-        if i <= c.n_instances:
-            # prevent too high i due to rounding errors
-            if i == c.n_instances: i -= 1
+        if i < c.n_instances:
+            # if i <= c.n_instances:
+            # # prevent too high i due to rounding errors
+            # if i == c.n_instances: i -= 1
             vector = encode_vector(msg)
-            matrix[i, ] = matrix[i]
-            result = combine_vectors(matrix[i], vector)
+            # matrix[i, ] = matrix[i]
+            # result = combine_vectors(matrix[i], vector)
             matrix[i, ] = combine_vectors(matrix[i], vector)
         else:
             config.debug('to_array: msg.time > max_t', t, c.n_instances)
+            # max t reached: return matrix
+            return matrix
     return matrix
+
+
+# def encode_track(c, miditrack, ticks_per_beat, tempo):
+#     matrix = np.zeros([c.n_instances, N_NOTES])
+#     t = 0
+#     ticks_per_beat =
+#     # this auto-converts midi msgs.time to seconds
+#     # alternative: use
+#     #  for i, track in midi.tracks
+#     #    msg = track[index]
+#     for msg in miditrack:
+#         t += msg.time
+#         i = round(t / c.dt)  # instance index (time-step)
+#         if i <= c.n_instances:
+#             # prevent too high i due to rounding errors
+#             if i == c.n_instances: i -= 1
+#             vector = encode_vector(msg)
+#             matrix[i, ] = matrix[i]
+#             result = combine_vectors(matrix[i], vector)
+#             matrix[i, ] = combine_vectors(matrix[i], vector)
+#         else:
+#             config.debug('to_array: msg.time > max_t', t, c.n_instances)
+#     return matrix
 
 
 def decode(c, matrix):
     # c :: data.Context
     # matrix :: [ vector per instance ]
     # vector :: [ notes ]
+    mid = mido.MidiFile()
+    mid.ticks_per_beat = c.ticks_per_beat
     track = mido.MidiTrack()
+    mid.tracks.append(track)
     for i, vector in enumerate(matrix):
         t = i * c.dt
         msgs = decode_vector(c, vector, t)
         for msg in msgs:
             track.append(msg)
-    mid = mido.MidiFile()
-    mid.ticks_per_beat = c.ticks_per_beat
-    mid.tracks.append(track)
     return mid
 
 
@@ -90,7 +151,7 @@ def encode_vector(msg):
     # midi :: mido midi msg
     # TODO
     # ignore msg.velocity for now
-    notes = np.zeros(N_NOTES)
+    notes = Notes()
     # TODO
     # for each instance
     #   for each channel: [note], [velocity]
@@ -105,6 +166,8 @@ def encode_vector(msg):
 
 
 def decode_vector(c, vector: np.array, t: float = 0) -> List[mido.Message]:
+    # :vector :: instance
+    # :t :: seconds
     if not isinstance(vector, np.ndarray):  # np.generic
         errors.typeError('numpy.ndarray', vector)
     msgs = []
