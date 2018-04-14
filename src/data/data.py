@@ -42,7 +42,8 @@ def init(n: int = 2):
     note_length = 0.03  # seconds
     bpm = 120.  # default bpm
     tempo = mido.bpm2tempo(bpm)
-    ticks_per_beat = 480  # 96, 220, 480 # midi resolution
+    ticks_per_beat = mido.MidiFile(
+    ).ticks_per_beat  # 480  # 96, 220, 480 # midi resolution
     context = Context(max_t, dt, n_instances, note_length, bpm, tempo,
                       ticks_per_beat)
     print(' >>', context)

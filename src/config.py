@@ -16,15 +16,13 @@ info_ = True
 
 def debug(*args):
     if debug_:
-        print('< DEBUG >')
+        print('[DEBUG] >')
         for a in args:
             print(' |> ', a)
 
 
 def info(*args):
     if info_:
-        print(' \________ ')
-        print(' | [INFO] \ __ __ __')
+        print('[INFO] :')
         for a in args:
-            print(' |  ', a)
-        print(' \ \n  |\n /')
+            print(' | ', a)

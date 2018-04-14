@@ -129,24 +129,34 @@ def encode(c, midi, stretch=False):
 #     return matrix
 
 
-def decode_track(c, matrix):
+def decode_track(c, matrix: Track) -> mido.MidiTrack:
     # c :: data.Context
     # matrix :: [ vector per instance ]
     # vector :: [ notes ]
-    mid = mido.MidiFile()
-    mid.ticks_per_beat = c.ticks_per_beat
+
+    # decode notes for each instance
     track = mido.MidiTrack()
-    mid.tracks.append(track)
+    # msgs = []
+    t = 0
     for i, vector in enumerate(matrix):
-        notes = Notes(vector)
-        t = i * c.dt
-        msgs = decode_notes(c, vector, t)
+        # msgs :: mido.Message, with absolute t in seconds
+        msgs = decode_notes(c, Notes(vector), t)
         for msg in msgs:
             track.append(msg)
+        t += c.dt
+
+    # convert absolute time in seconds to relative ticks
+    track.sort(key=lambda msg: msg.time)
+    track = convert_time_to_relative_value(msgs, lambda t: second2tick(c, t))
+
+    mid = mido.MidiFile()
+    mid.ticks_per_beat = c.ticks_per_beat
+    mid.tracks.append(track)
+    config.info('len', mid.length, c.max_t)
     return mid
 
 
-def encode_msg(msg):
+def encode_msg(msg: mido.Message) -> Notes:
     # midi :: mido midi msg
     # TODO
     # ignore msg.velocity for now
@@ -164,20 +174,18 @@ def encode_msg(msg):
     return notes
 
 
-def decode_notes(c, vector: Notes, t: float = 0) -> List[mido.Message]:
-    # :vector :: instance
+def decode_notes(c, notes: Notes, t) -> List[mido.Message]:
     # :t :: seconds
-    if not isinstance(vector, np.ndarray):  # np.generic
-        errors.typeError('numpy.ndarray', vector)
+    # msg.time = absolute, in seconds
+    if not isinstance(notes, Notes):  # np.generic
+        errors.typeError('numpy.ndarray', notes)
     msgs = []
-    for note, value in enumerate(vector):
+    for note, value in enumerate(notes):
         if value > 0:
-            ticks = second2tick(c, t)
-            ticks2 = second2tick(c, t + c.note_length)
             # value *= RANGE
-            msg1 = mido.Message('note_on', note=note, velocity=127, time=ticks)
+            msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)
             msg2 = mido.Message(
-                'note_off', note=note, velocity=127, time=ticks2)
+                NOTE_OFF, note=note, velocity=127, time=t + c.note_length)
             msgs.append(msg1)
             msgs.append(msg2)
     return msgs
@@ -189,6 +197,19 @@ def second2tick(c, t):
 
 def combine_notes(v1, v2):
     return Notes((v1 + v2).clip(0, 1))
+
+
+def convert_time_to_relative_value(ls, convert_time):
+    # convert in place
+    current_t = 0
+    for msg in ls:
+        old_t = msg.time
+        if old_t < current_t:
+            config.debug('old current', old_t, current_t)
+        dt = old_t - current_t
+        msg.time = convert_time(dt)
+        current_t += dt
+    return ls
 
 
 def to_midi(arr):
