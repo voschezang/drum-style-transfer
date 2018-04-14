@@ -15,7 +15,7 @@ print(x_train.shape)
 dn = config.dataset_dir
 mid = io.import_midifile()
 encoded = midi.encode(context, mid)
-decoded = midi.decode(context, encoded)
+decoded = midi.decode_track(context, encoded)
 
 # # mid = io.import_midifile(dn + 'song_export.mid')
 # mid = io.import_midifile(dn + 'examples/01 8th Cym.mid')

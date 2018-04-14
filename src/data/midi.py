@@ -35,17 +35,15 @@ NOTE_ON = 'note_on'
 
 
 class Notes(np.ndarray):
-    # array with value in range [0,1] for every (midi) note
+    # array with floats in range [0,1] for every (midi) note
     # to be used as note-on messages at an instance
-    def __new__(cls):
-        arr = np.zeros(N_NOTES)
-        return arr.view(cls)
+    def __new__(cls, array=np.zeros(N_NOTES)):
+        return array.view(cls)
 
 
 class Track(np.ndarray):
     # array of Notes, with length 'track-length'
     def __new__(cls, length, dt):
-        # values: list of length N_NOTES with values in range
         arr = np.stack([Notes() for _ in range(length)])
         return arr.view(cls)
 
@@ -97,10 +95,10 @@ def encode(c, midi, stretch=False):
             # if i <= c.n_instances:
             # # prevent too high i due to rounding errors
             # if i == c.n_instances: i -= 1
-            vector = encode_vector(msg)
+            vector = encode_msg(msg)
             # matrix[i, ] = matrix[i]
             # result = combine_vectors(matrix[i], vector)
-            matrix[i, ] = combine_vectors(matrix[i], vector)
+            matrix[i, ] = combine_notes(matrix[i], vector)
         else:
             config.debug('to_array: msg.time > max_t', t, c.n_instances)
             # max t reached: return matrix
@@ -131,7 +129,7 @@ def encode(c, midi, stretch=False):
 #     return matrix
 
 
-def decode(c, matrix):
+def decode_track(c, matrix):
     # c :: data.Context
     # matrix :: [ vector per instance ]
     # vector :: [ notes ]
@@ -140,14 +138,15 @@ def decode(c, matrix):
     track = mido.MidiTrack()
     mid.tracks.append(track)
     for i, vector in enumerate(matrix):
+        notes = Notes(vector)
         t = i * c.dt
-        msgs = decode_vector(c, vector, t)
+        msgs = decode_notes(c, vector, t)
         for msg in msgs:
             track.append(msg)
     return mid
 
 
-def encode_vector(msg):
+def encode_msg(msg):
     # midi :: mido midi msg
     # TODO
     # ignore msg.velocity for now
@@ -165,7 +164,7 @@ def encode_vector(msg):
     return notes
 
 
-def decode_vector(c, vector: np.array, t: float = 0) -> List[mido.Message]:
+def decode_notes(c, vector: Notes, t: float = 0) -> List[mido.Message]:
     # :vector :: instance
     # :t :: seconds
     if not isinstance(vector, np.ndarray):  # np.generic
@@ -188,8 +187,8 @@ def second2tick(c, t):
     return round(mido.second2tick(t, c.ticks_per_beat, c.tempo))
 
 
-def combine_vectors(v1, v2):
-    return (v1 + v2).clip(0, 1)
+def combine_notes(v1, v2):
+    return Notes((v1 + v2).clip(0, 1))
 
 
 def to_midi(arr):
