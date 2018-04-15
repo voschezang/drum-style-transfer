@@ -1,13 +1,12 @@
 """ NN models
 """
+import config  # incl. random seed
 import numpy as np
 # import nn libs
 from sklearn.decomposition import PCA
 import keras
-from keras import backend as K
 from keras.utils import to_categorical
-from keras.models import Sequential
-from keras.optimizers import SGD, Adam
+from keras import optimizers
 from keras.layers import Input, Dense, Activation, Conv2D, Dropout, Flatten
 from keras.layers import Conv2DTranspose, Reshape, MaxPooling2D, UpSampling2D
 from keras.layers import Conv1D, MaxPooling1D, UpSampling1D
@@ -29,7 +28,7 @@ def init(x_train, y_train):
 
     learning_rate = 0.01
     # sgd = Keras.optimizers.SGD(lr=0.01, clipnorm=1.)
-    optimizer = Adam(lr=learning_rate)
+    optimizer = optimizers.Adam(lr=learning_rate)
     # top_k_categorical_accuracy(y_true, y_pred, k=5)
     # https://keras.io/metrics/
     metrics = ['accuracy']  # , 'mean_squared_error']

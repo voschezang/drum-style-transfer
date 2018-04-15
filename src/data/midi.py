@@ -37,7 +37,11 @@ NOTE_ON = 'note_on'
 class Notes(np.ndarray):
     # array with floats in range [0,1] for every (midi) note
     # to be used as note-on messages at an instance
-    def __new__(cls, array=np.zeros(N_NOTES)):
+    # def __new__(cls, array=np.zeros(N_NOTES)):
+    # note: function default args are evaluated once, before runtime
+    def __new__(cls, array=None):
+        if array is None:
+            array = np.zeros(N_NOTES)
         return array.view(cls)
 
 
@@ -147,7 +151,7 @@ def decode_track(c, matrix: Track) -> mido.MidiTrack:
 
     # convert absolute time in seconds to relative ticks
     track.sort(key=lambda msg: msg.time)
-    track = convert_time_to_relative_value(msgs, lambda t: second2tick(c, t))
+    track = convert_time_to_relative_value(track, lambda t: second2tick(c, t))
 
     mid = mido.MidiFile()
     mid.ticks_per_beat = c.ticks_per_beat
@@ -156,10 +160,12 @@ def decode_track(c, matrix: Track) -> mido.MidiTrack:
     return mid
 
 
-def encode_msg(msg: mido.Message) -> Notes:
+# def encode_msg(msg: mido.Message) -> Notes:
+def encode_msg(msg):
     # midi :: mido midi msg
     # TODO
     # ignore msg.velocity for now
+    notes = 0
     notes = Notes()
     # TODO
     # for each instance
@@ -202,8 +208,12 @@ def combine_notes(v1, v2):
 def convert_time_to_relative_value(ls, convert_time):
     # convert in place
     current_t = 0
+    prev_t = 0
     for msg in ls:
         old_t = msg.time
+        if prev_t > old_t:
+            config.debug('prev-t >', prev_t, old_t)
+        prev_t = old_t
         if old_t < current_t:
             config.debug('old current', old_t, current_t)
         dt = old_t - current_t

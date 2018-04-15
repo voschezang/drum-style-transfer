@@ -19,11 +19,15 @@ def import_data(c, dirname='../datasets/examples/', n=2):
 
 
 def import_midifile(filename='../mary.mid'):
+    if not filename[-4:] == '.mid':
+        filename += '.mid'
     config.info('reading file: %s' % filename)
     return mido.MidiFile(filename)
 
 
 def export_midifile(mid, filename='../song_export.mid'):
+    if not filename[-4:] == '.mid':
+        filename += '.mid'
     mid.save(filename)
 
 

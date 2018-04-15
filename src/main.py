@@ -44,3 +44,6 @@ model.fit(
     batch_size=batch_size,
     validation_split=1 / 6,
     callbacks=[TensorBoard(log_dir=config.tmp_model_dir)])
+
+m = config.model_dir + 'model'
+model = models.load_model(m)
