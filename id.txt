@@ -3,7 +3,12 @@ midi files
      multiple midi tracks
               - ignore all?
 
-
+TODO
+change encoder:
+       [ [ occurences per instance ] per note ]
+       then use conv layers to decrease the amount of nodes
+       (notes are considered to be independent instruments)
+       combine the nodes post, with some sparse layers (conv removes too much info)
 
 
 

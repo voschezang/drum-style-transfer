@@ -1,6 +1,6 @@
 """ NN models
 """
-
+import numpy as np
 # import nn libs
 from sklearn.decomposition import PCA
 import keras
@@ -10,6 +10,7 @@ from keras.models import Sequential
 from keras.optimizers import SGD, Adam
 from keras.layers import Input, Dense, Activation, Conv2D, Dropout, Flatten
 from keras.layers import Conv2DTranspose, Reshape, MaxPooling2D, UpSampling2D
+from keras.layers import Conv1D, MaxPooling1D, UpSampling1D
 from keras.layers import LocallyConnected1D, LocallyConnected2D
 from keras.models import Model
 
@@ -52,6 +53,25 @@ def model1(input_shape, output_length, dropout=0.10):
     x = Dense(100, activation='relu')(x)
     x = Dense(100, activation='relu')(x)
     x = Dense(output_length, activation='softmax')(x)
+    model = Model(inputs=input_layer, outputs=x)
+    #     model.add(Dropout(dropout))
+    return model, model.summary
+
+
+def encoder(input_shape, output_shape, dropout=0.10):
+    t = 1000
+    input_layer = Input(shape=input_shape)
+    x = input_layer
+    x = Flatten()(x)
+    x = Dense(100, activation='relu')(x)
+    shape = (10, 100)  # 1 additional dimension
+    x = Dense(np.prod(shape), activation='relu')(x)  # 4*4*8 = 128
+    x = Reshape(shape)(x)
+    x = UpSampling1D(10)(x)
+    x = Conv1D(100, 2, strides=2, activation='relu')(x)  # 50,100
+    x = UpSampling1D(output_shape[0] / 50)(x)
+    x = Dense(output_shape[1], activation='relu')(x)  #
+    # x = Dense(output_length, activation='softmax')(x)
     model = Model(inputs=input_layer, outputs=x)
     #     model.add(Dropout(dropout))
     return model, model.summary
