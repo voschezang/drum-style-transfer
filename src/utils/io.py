@@ -15,7 +15,7 @@ def import_data(c, dirname='../datasets/examples/', n=2):
     midis = []
     for fn in filenames:
         midis.append(import_midifile(dirname + fn))
-    return midis
+    return midis, filenames
 
 
 def import_midifile(filename='../mary.mid'):

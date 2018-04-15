@@ -7,17 +7,26 @@ default:
 	python3 src/main.py
 
 train:
-	make clear
+	make clear-logs
 	python3 src/main.py
 
 logs:
 	open http:localhost:6006
 	tensorboard --logdir=$(LOG_DIR)
 
+refresh-logs:
+	make clear-logs
+	make logs
+
+save-logs:
+	rm -rf logs/
+	mkdir logs
+	cp $(LOG_DIR)/* logs/
+
 test_midi:
 	python3 src/test_midi.py
 
-clear:
+clear-logs:
 	rm -rf $(LOG_DIR)/*
 
 ls:

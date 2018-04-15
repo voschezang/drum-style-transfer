@@ -11,6 +11,13 @@ change encoder:
        combine the nodes post, with some sparse layers (conv removes too much info)
 
 
+id:
+  simulate recorders with multiple sample rates,
+  by using LSTM networks with different input windows
+
+
+large amount (10k) of inputs
+ - hierarchical softmax, negative sampling
 
 
 

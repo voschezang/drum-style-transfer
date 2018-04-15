@@ -50,12 +50,12 @@ def init(n: int = 2):
 
     print('Importing midi-data\n')
     dirname = config.dataset_dir + 'examples/'
-    midis = io.import_data(context, dirname, n)
+    midis, labels = io.import_data(context, dirname, n)
 
     print('\nEncoding midi-data\n', midis)
     arrays = [midi.encode(context, m) for m in midis]
     x_train = np.stack(arrays)
-    return context, x_train
+    return context, x_train, labels
 
 
 # TODO omit channel info?
