@@ -12,7 +12,7 @@ from data import data, midi
 context = data.init()
 
 dirname = config.dataset_dir + 'examples/'
-n = 8
+n = 16
 files = os.listdir(dirname)
 filenames = [f for f in files if not f == '.DS_Store'][:n]
 

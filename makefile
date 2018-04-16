@@ -6,6 +6,9 @@ start:
 default:
 	python3 src/main.py
 
+test_midi:
+	python3 src/test_midi.py
+
 train:
 	make clear-logs
 	python3 src/main.py
@@ -23,11 +26,11 @@ save-logs:
 	mkdir logs
 	cp $(LOG_DIR)/* logs/
 
-test_midi:
-	python3 src/test_midi.py
-
 clear-logs:
 	rm -rf $(LOG_DIR)/*
+
+load-logs:
+	cp logs/* $(LOG_DIR)/
 
 ls:
 	ls $(LOG_DIR)/

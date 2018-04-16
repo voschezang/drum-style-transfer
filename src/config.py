@@ -4,7 +4,7 @@
 
 This module should not have any dependencies
 """
-tmp_logs_dir = '/tmp/pattern-recognition_ml_models'  # !important: see makefile/LOG_DIR
+tmp_log_dir = '/tmp/pattern-recognition_ml_models'  # !important: see makefile/LOG_DIR
 dataset_dir = '../datasets/'
 model_dir = dataset_dir + 'models/'
 export_dir = '../midis/'

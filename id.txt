@@ -1,13 +1,17 @@
 So far
 	convert midi to matrices
-	autoencoder, normal + lstm
+	unsipervised, autoencoder, normal + lstm
+		few drumloops as input
 		high accuracy caused by 95% of the data being 0
 	output is still different than inut
+
+	look at different loss functions (binary, catagorical crossentropy)
 
 
 todo
 	sparse matrices (scipy/tensorflow)
-		or generators
+		batch generator to convert the current batch to a dense matrix
+		e.g. sparse column matrix
 
 
 id:
