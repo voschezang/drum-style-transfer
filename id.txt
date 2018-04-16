@@ -1,23 +1,22 @@
+So far
+	convert midi to matrices
+	autoencoder, normal + lstm
+		high accuracy caused by 95% of the data being 0
+	output is still different than inut
 
-midi files
-     multiple midi tracks
-              - ignore all?
 
-TODO
-change encoder:
-       [ [ occurences per instance ] per note ]
-       then use conv layers to decrease the amount of nodes
-       (notes are considered to be independent instruments)
-       combine the nodes post, with some sparse layers (conv removes too much info)
+todo
+	sparse matrices (scipy/tensorflow)
+		or generators
 
 
 id:
   simulate recorders with multiple sample rates,
   by using LSTM networks with different input windows
-
-
-large amount (10k) of inputs
- - hierarchical softmax, negative sampling
+  - just like with recording
+  - so that multiple patterns with different frequences can be analysed
+  	e.g. HH of 2 Hz, BD of 0.25 Hz
+  	e.g. 3 over 2
 
 
 
@@ -26,7 +25,23 @@ Database
 database van drumloops - genoeg keuze, maar geen structuur in labels etc (veel overlappende labels)
 
 noten corresponderen niet met instrumenten
- - geen inherent verchil tussen HH en OH
+ - no inherent difference between HH, OH
+
+
+
+
+change encoder:
+       [ [ occurences per instance ] per note ]
+       then use conv layers to decrease the amount of nodes
+       (notes are considered to be independent instruments)
+       combine the nodes post, with some sparse layers (conv removes too much info)
+
+
+large amount (10k) of inputs
+ - hierarchical softmax, negative sampling
+
+
+
 
 
 
@@ -34,10 +49,6 @@ noten corresponderen niet met instrumenten
 doel project
  - onderzoek midi in ml
  	- toetsen van generatieve modellen?
-
- - werkende applicatie (?)
- 	- technieken: python server, midi-input/recording, tensorflow.js, keras.js, elm
-
 
 ---
 
