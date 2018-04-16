@@ -1,5 +1,7 @@
 LOG_DIR := /tmp/pattern-recognition_ml_models
 
+.PHONY: logs test
+
 start:
 	jupyter notebook src/
 
