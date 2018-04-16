@@ -18,7 +18,7 @@ from utils import io
 ###
 
 n: int = 2
-context, x_train, labels = data.init(n)
+context, x_train, labels = data.import_data(data.init(), n)
 print(x_train.shape)
 
 dn = config.dataset_dir

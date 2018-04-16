@@ -7,7 +7,7 @@ default:
 	python3 src/main.py
 
 test_midi:
-	python3 src/test_midi.py
+	python3 src/test_midi2.py
 
 train:
 	make clear-logs

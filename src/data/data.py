@@ -34,7 +34,7 @@ print(""" Context :: namedtuple(
 """)
 
 
-def init(n: int = 2):
+def init():
     print('Setting up params\n')
     max_t: float = 10.
     dt = 0.01  # quantized time, must be > 0
@@ -42,12 +42,15 @@ def init(n: int = 2):
     note_length = 0.03  # seconds
     bpm = 120.  # default bpm
     tempo = mido.bpm2tempo(bpm)
-    ticks_per_beat = mido.MidiFile(
-    ).ticks_per_beat  # 480  # 96, 220, 480 # midi resolution
+    # ticks_per_beat: 96 | 220 | 480 # midi resolution
+    ticks_per_beat = mido.MidiFile().ticks_per_beat
     context = Context(max_t, dt, n_instances, note_length, bpm, tempo,
                       ticks_per_beat)
     print(' >>', context)
+    return context
 
+
+def import_data(context, n: int = 2):
     print('Importing midi-data\n')
     dirname = config.dataset_dir + 'examples/'
     midis, labels = io.import_data(context, dirname, n)

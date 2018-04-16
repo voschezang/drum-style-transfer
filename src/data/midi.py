@@ -17,6 +17,7 @@ import mido, rtmidi  #, rtmidi_
 from typing import List, Dict
 
 import config, errors
+from utils import utils
 
 N_NOTES = 127
 RANGE = 127
@@ -65,6 +66,8 @@ def solo():
 
 
 def encode(c, midi, stretch=False):
+    if not isinstance(midi, mido.MidiFile):  # np.generic
+        errors.typeError('mido.MidiFile', midi)
     # c :: data.Context
     # TODO # if bpm is given: 'normalize' t
 
@@ -94,7 +97,7 @@ def encode(c, midi, stretch=False):
     #    msg = track[index]
     for msg in midi:
         t += msg.time  # seconds for type 1,2
-        i = round(t / c.dt)  # instance index (time-step)
+        i = utils.round_(t / c.dt)  # instance index (time-step)
         if i < c.n_instances:
             # if i <= c.n_instances:
             # # prevent too high i due to rounding errors
@@ -104,33 +107,10 @@ def encode(c, midi, stretch=False):
             # result = combine_vectors(matrix[i], vector)
             matrix[i, ] = combine_notes(matrix[i], vector)
         else:
-            config.debug('to_array: msg.time > max_t', t, c.n_instances)
+            config.debug('to_array: msg.time > max_t; t, n', t, c.n_instances)
             # max t reached: return matrix
             return matrix
     return matrix
-
-
-# def encode_track(c, miditrack, ticks_per_beat, tempo):
-#     matrix = np.zeros([c.n_instances, N_NOTES])
-#     t = 0
-#     ticks_per_beat =
-#     # this auto-converts midi msgs.time to seconds
-#     # alternative: use
-#     #  for i, track in midi.tracks
-#     #    msg = track[index]
-#     for msg in miditrack:
-#         t += msg.time
-#         i = round(t / c.dt)  # instance index (time-step)
-#         if i <= c.n_instances:
-#             # prevent too high i due to rounding errors
-#             if i == c.n_instances: i -= 1
-#             vector = encode_vector(msg)
-#             matrix[i, ] = matrix[i]
-#             result = combine_vectors(matrix[i], vector)
-#             matrix[i, ] = combine_vectors(matrix[i], vector)
-#         else:
-#             config.debug('to_array: msg.time > max_t', t, c.n_instances)
-#     return matrix
 
 
 def decode_track(c, matrix: Track) -> mido.MidiTrack:

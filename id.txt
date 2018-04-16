@@ -9,6 +9,11 @@ So far
 
 
 todo
+  cascades / recursive search
+    functions that compute frequencies
+      encoder can encode more important information
+      decoder can use these layers in parallel, and then use maxpooling to combine layers
+
 	sparse matrices (scipy/tensorflow)
 		batch generator to convert the current batch to a dense matrix
 		e.g. sparse column matrix
@@ -21,6 +26,9 @@ id:
   - so that multiple patterns with different frequences can be analysed
   	e.g. HH of 2 Hz, BD of 0.25 Hz
   	e.g. 3 over 2
+
+
+
 
 
 
