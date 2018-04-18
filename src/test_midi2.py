@@ -6,7 +6,7 @@ import mido  # , rtmidi, rtmidi_
 # local libs
 import config
 from data import data, midi, midi_generators as g
-from utils import io
+from utils import utils, io
 
 ###
 
@@ -15,16 +15,19 @@ context = data.init()
 dn = config.dataset_dir
 
 # print(g.render())
-mid = g.render_midi(context)
+mid = g.render_midi(context, f=1)
 
-for m in mid:
-    print(m)
+# for m in mid:
+#     print(m)
 
-io.export_midifile(mid, dn + 'cycle.mid')
+# io.export_midifile(mid, dn + 'cycle.mid')
 
 result = g.gen_data(context, 2)
 print(type(result))
 print(result.shape)
+
+# print(utils.max_f(0.5), utils.max_f(1))
+# print(utils.min_f(1), utils.min_f(10))
 
 # fn = dn + '4-floor-120bpm.mid'
 # mid = io.import_midifile(fn)

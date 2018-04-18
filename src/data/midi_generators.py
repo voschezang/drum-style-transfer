@@ -5,18 +5,18 @@ import numpy as np
 import mido, rtmidi  #, rtmidi_
 
 from data import midi
+from utils import utils
 
 
-def gen_data(c, n=100):
-    min_f = 0.1
-    max_f = 10
+def gen_data(c, n=100) -> np.ndarray:
+    min_f = utils.min_f(c.max_t)
+    max_f = utils.max_f(c.dt)
     fs = np.random.random(n) * (max_f - min_f) + min_f
     midis = [midi.encode(c, render_midi(c, np.random.random())) for f in fs]
     return np.stack(midis)
 
 
 def render_midi(c, f=1, max_t=10, phase=0):
-    print(f)
     mid = mido.MidiFile()
     track = mido.MidiTrack()
     mid.tracks.append(track)
@@ -26,8 +26,9 @@ def render_midi(c, f=1, max_t=10, phase=0):
     t = start_t  # absolute t in seconds
 
     while t < max_t:
-        track.append(mido.Message('note_on', velocity=127, time=t))
-        track.append(mido.Message('note_off', velocity=127, time=t + c.dt))
+        track.append(mido.Message('note_on', note=60, velocity=127, time=t))
+        track.append(
+            mido.Message('note_off', note=60, velocity=127, time=t + c.dt))
         t += dt
 
     track.sort(key=lambda msg: msg.time)

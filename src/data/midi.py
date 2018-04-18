@@ -136,7 +136,7 @@ def decode_track(c, matrix: Track) -> mido.MidiTrack:
     mid = mido.MidiFile()
     mid.ticks_per_beat = c.ticks_per_beat
     mid.tracks.append(track)
-    config.info('len', mid.length, c.max_t)
+    config.info('len, max_t', mid.length, c.max_t)
     return mid
 
 

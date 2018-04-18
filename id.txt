@@ -28,6 +28,11 @@ id:
   	e.g. 3 over 2
 
 
+alt encoding
+    list of length(max notes per some t)
+        [(A1, 0.3),(B1, 0.4)]
+          note = vector127
+
 
 
 
