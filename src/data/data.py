@@ -36,7 +36,7 @@ print(""" Context :: namedtuple(
 
 def init():
     print('Setting up params\n')
-    max_t: float = 10.
+    max_t: float = 3.
     dt = 0.1  # T, sampling interval. quantized time, must be > 0
     n_instances = round(max_t / dt)  # vector length
     note_length = 0.03  # seconds
@@ -44,8 +44,6 @@ def init():
     tempo = mido.bpm2tempo(bpm)
     # ticks_per_beat: 96 | 220 | 480 # midi resolution
     ticks_per_beat = mido.MidiFile().ticks_per_beat
-
-    max_f = 1 / dt
     context = Context(max_t, dt, n_instances, note_length, bpm, tempo,
                       ticks_per_beat)
     print(' >>', context)

@@ -19,8 +19,10 @@ from typing import List, Dict
 import config, errors
 from utils import utils
 
-N_NOTES = 127
-RANGE = 127
+LOWEST_NOTE = 60
+HIGHEST_NOTE = 64
+N_NOTES = HIGHEST_NOTE - LOWEST_NOTE
+VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
 
@@ -153,10 +155,11 @@ def encode_msg(msg):
     if msg.is_meta:
         # config.debug('to_vector: msg is meta')
         return notes
-    # TODO
-    # ignore note_off for now
+    # ignore note_off TODO
     if msg.type == NOTE_ON:
-        notes[msg.note] = 1.
+        normalized_note = max(min(msg.note, HIGHEST_NOTE), LOWEST_NOTE)
+        note_index = normalized_note - LOWEST_NOTE - 1
+        notes[note_index] = 1.
     return notes
 
 
@@ -166,7 +169,10 @@ def decode_notes(c, notes: Notes, t) -> List[mido.Message]:
     if not isinstance(notes, Notes):  # np.generic
         errors.typeError('numpy.ndarray', notes)
     msgs = []
-    for note, value in enumerate(notes):
+    for note_index, value in enumerate(notes):
+        note = LOWEST_NOTE + note_index
+        if note > HIGHEST_NOTE:
+            config.debug('decode_note: note value > highest note')
         if value > 0:
             # value *= RANGE
             msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)

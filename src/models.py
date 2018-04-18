@@ -45,6 +45,14 @@ def init(x_train, y_train):
 # functional syntax: lambda x: lambda y: z
 
 
+def resolution_reducer(input_shape, amt=2):
+    input_layer = Input(shape=input_shape)
+    x = input_layer
+    x = MaxPooling1D(pool_size=amt, strides=amt)(x)
+    model = Model(inputs=input_layer, outputs=x)
+    return model
+
+
 def model1(input_shape, output_length, dropout=0.10):
     input_layer = Input(shape=input_shape)
     x = input_layer

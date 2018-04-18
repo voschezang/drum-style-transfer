@@ -48,7 +48,7 @@ def render(sin=np.sin, f=1, n_samples=10, dt=0.01, phase=0):
     max_t = n_samples * dt
     """
     samples = np.arange(n_samples) * dt
-    return ac_to_dc(sin(2 * np.pi * f * samples + phase))
+    return ac_to_dc(sin(2 * np.pi * f * samples + 2 * np.pi * phase))
 
 
 def normalize(array):
