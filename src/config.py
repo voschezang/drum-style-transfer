@@ -12,6 +12,13 @@ plots_dir = 'results/'
 
 seed = 377
 
+
+class Colors:
+    default = '\033[0m'
+    green = '\033[92m'
+    red = '\033[91m'
+
+
 # Verbose modes
 result_ = True
 debug_ = True
@@ -20,13 +27,13 @@ info_ = True
 
 def debug(*args):
     if debug_:
-        print('[DEBUG] >')
+        print(Colors.red, '[DEBUG] >', Colors.default)
         for a in args:
             print(' |> ', a)
 
 
 def info(*args):
     if info_:
-        print('[INFO] :')
+        print(Colors.green, '[INFO] :', Colors.default)
         for a in args:
             print(' | ', a)
