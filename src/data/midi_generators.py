@@ -8,10 +8,11 @@ from data import midi
 from utils import utils
 
 
-def gen_data(c, n=100) -> np.ndarray:
+def gen_data(c, n=100, fs=None) -> np.ndarray:
     min_f = utils.min_f(c.max_t)
     max_f = utils.max_f(c.dt)
-    fs = np.random.random(n) * (max_f - min_f) + min_f
+    if fs is None:
+        fs = np.random.random(n) * (max_f - min_f) + min_f
     midis = [midi.encode(c, render_midi(c, np.random.random())) for f in fs]
     return np.stack(midis)
 

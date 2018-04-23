@@ -8,7 +8,7 @@ import mido
 
 import config
 
-from utils import io
+from utils import utils, io
 from data import midi
 # from utils import utils
 
@@ -36,8 +36,8 @@ print(""" Context :: namedtuple(
 
 def init():
     print('Setting up params\n')
-    max_t: float = 3.
-    dt = 0.1  # T, sampling interval. quantized time, must be > 0
+    max_t: float = 10.
+    dt = 0.02  # T, sampling interval. quantized time, must be > 0
     n_instances = round(max_t / dt)  # vector length
     note_length = 0.03  # seconds
     bpm = 120.  # default bpm
@@ -46,6 +46,7 @@ def init():
     ticks_per_beat = mido.MidiFile().ticks_per_beat
     context = Context(max_t, dt, n_instances, note_length, bpm, tempo,
                       ticks_per_beat)
+    print('max min f', utils.max_f(dt), utils.min_f(max_t))
     print(' >>', context)
     return context
 
