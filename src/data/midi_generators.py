@@ -4,13 +4,17 @@
 import numpy as np
 import mido, rtmidi  #, rtmidi_
 
+import config
 from data import midi
 from utils import utils
 
 
 def gen_data(c, n=100, fs=None) -> np.ndarray:
-    min_f = utils.min_f(c.max_t)
-    max_f = utils.max_f(c.dt)
+    f_margin = 0.10  # 10%
+    min_f = utils.min_f(c.max_t) * (1 + f_margin)
+    max_f = utils.max_f(c.dt) * (1 - f_margin)
+    if min_f < max_f:
+        config.debug('min_f < max_f')
     if fs is None:
         fs = np.random.random(n) * (max_f - min_f) + min_f
     midis = [midi.encode(c, render_midi(c, np.random.random())) for f in fs]
