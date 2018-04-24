@@ -9,7 +9,8 @@ from keras.callbacks import TensorBoard
 import config, models
 from data import data, midi
 
-context = data.init()
+n: int = 2
+context, x_train, labels = data.import_data(data.init(), n)
 
 dirname = config.dataset_dir + 'examples/'
 n = 16

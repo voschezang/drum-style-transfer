@@ -10,7 +10,8 @@ from utils import utils, io
 
 ###
 
-context = data.init()
+n: int = 2
+context, x_train, labels = data.import_data(data.init(), n)
 
 dn = config.dataset_dir
 

@@ -25,6 +25,7 @@ N_NOTES = HIGHEST_NOTE - LOWEST_NOTE
 VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
+MIDI_NOISE_FLOOR = 0.01  # real values below this number will be ignored by midi decoders
 
 # def to_matrix(midi):
 #     # midi :: mido.midi
@@ -88,7 +89,8 @@ def encode(c, midi, stretch=False):
         # type = async
         errors.typeError('mido.MidiFile.type 0 | 1', 2)
     elif midi.type == 1:
-        config.debug('WARNING', 'type not == 0')
+        # config.debug('WARNING', 'type not == 0')
+        print('WARNING', 'type not == 0')
     #     midis = midi.tracks
     # elif midi.type == 0:
     #     midis = [midi]
@@ -173,7 +175,7 @@ def decode_notes(c, notes: Notes, t) -> List[mido.Message]:
         note = LOWEST_NOTE + note_index
         if note > HIGHEST_NOTE:
             config.debug('decode_note: note value > highest note')
-        if value > 0:
+        if value > MIDI_NOISE_FLOOR:
             # value *= RANGE
             msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)
             msg2 = mido.Message(

@@ -9,10 +9,12 @@ from data import midi
 from utils import utils
 
 
-def gen_data(c, n=100, fs=None) -> np.ndarray:
+def gen_data(c, n=100, fs=None, max_f=None, min_f=None) -> np.ndarray:
     f_margin = 0.10  # 10%
-    min_f = utils.min_f(c.max_t) * (1 + f_margin)
-    max_f = utils.max_f(c.dt) * (1 - f_margin)
+    if max_f is None:
+        max_f = utils.max_f(c.dt) * (1 - f_margin)
+    if min_f is None:
+        min_f = utils.min_f(c.max_t) * (1 + f_margin)
     if min_f < max_f:
         config.debug('min_f < max_f')
     if fs is None:
@@ -23,7 +25,7 @@ def gen_data(c, n=100, fs=None) -> np.ndarray:
     return np.stack(midis)
 
 
-def render_midi(c, f=1, max_t=10, phase=0):
+def render_midi(c, f=1, max_t=10, phase=0, polyphonic=True):
     mid = mido.MidiFile()
     track = mido.MidiTrack()
     mid.tracks.append(track)
@@ -33,9 +35,17 @@ def render_midi(c, f=1, max_t=10, phase=0):
     t = start_t  # absolute t in seconds
 
     while t < max_t:
-        track.append(mido.Message('note_on', note=60, velocity=127, time=t))
-        track.append(
-            mido.Message('note_off', note=60, velocity=127, time=t + c.dt))
+        if polyphonic:
+            notes = range(midi.LOWEST_NOTE, midi.HIGHEST_NOTE)
+        else:
+            notes = [midi.LOWEST_NOTE]
+
+        for note in notes:
+            track.append(
+                mido.Message('note_on', note=note, velocity=127, time=t))
+            track.append(
+                mido.Message(
+                    'note_off', note=note, velocity=127, time=t + c.dt))
         t += dt
 
     track.sort(key=lambda msg: msg.time)

@@ -113,4 +113,88 @@ def autoencoder(input_shape,
     return encode, decode, model, model.summary
 
 
-# TODO not yet, rnn, but just autoencoder + latent space
+def resolution_reducer(input_shape, amt=2):
+    input_layer = Input(shape=input_shape)
+    x = input_layer
+    x = MaxPooling1D(pool_size=amt, strides=amt)(x)
+    model = Model(inputs=input_layer, outputs=x)
+    return model
+
+
+"""
+# Define an input sequence and process it.
+encoder_inputs = Input(shape=(None, num_encoder_tokens))
+encoder = LSTM(latent_dim, return_state=True)
+_, state_h, state_c = encoder(encoder_inputs)
+# We discard `encoder_outputs` and only keep the states.
+encoder_states = [state_h, state_c]
+
+# Set up the decoder, using `encoder_states` as initial state.
+decoder_inputs = Input(shape=(None, num_decoder_tokens))
+# We set up our decoder to return full output sequences,
+# and to return internal states as well. We don't use the
+# return states in the training model, but we will use them in inference.
+decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True)
+decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
+decoder_dense = Dense(num_decoder_tokens, activation='sigmoid')
+decoder_outputs = decoder_dense(decoder_outputs)
+
+# Define the model that will turn
+# `encoder_input_data` & `decoder_input_data` into `decoder_target_data`
+model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+model.summary()
+"""
+"""
+encoder_model = Model(encoder_inputs, encoder_states)
+
+decoder_state_input_h = Input(shape=(latent_dim,))
+decoder_state_input_c = Input(shape=(latent_dim,))
+decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
+decoder_outputs, state_h, state_c = decoder_lstm(decoder_inputs, initial_state=decoder_states_inputs)
+decoder_states = [state_h, state_c]
+decoder_outputs = decoder_dense(decoder_outputs)
+decoder_model = Model(
+    [decoder_inputs] + decoder_states_inputs,
+    [decoder_outputs] + decoder_states)
+"""
+"""
+def decode_sequence(input_seq, encoder_model, decoder_model):
+    max_decoder_seq_length = 500
+    
+    # Encode the input as state vectors.
+    states_value = encoder_model.predict(input_seq)
+
+    # Generate empty target sequence of length 1.
+    target_seq = np.zeros((1, 1, num_decoder_tokens))
+
+    # Sampling loop for a batch of sequences
+    # (to simplify, here we assume a batch of size 1).
+    stop_condition = False
+    decoded_sentence = []
+    while not stop_condition:
+        output_tokens, h, c = decoder_model.predict([target_seq] + states_value)
+        print(output_tokens.shape)
+
+        output_ = output_tokens[0, -1, :] # identity in case of 1 batch?
+        # Sample a token
+        sampled_token_index = np.argmax(output_tokens[0, -1, :])
+        # sampled_char = sampled_token_index # reverse_target_char_index[sampled_token_index]
+        decoded_sentence.append(output_)
+
+        # Exit condition: either hit max length
+        # or find stop character.
+        if len(decoded_sentence) >= max_decoder_seq_length:
+            stop_condition = True
+
+        # Update the target sequence (of length 1).
+        target_seq = np.zeros((1, 1, num_decoder_tokens))
+        # target_seq[0, 0, :] = output_
+        target_seq[0, 0, :] = output_
+
+
+        # Update states
+        states_value = [h, c]
+
+    return np.stack(decoded_sentence)
+
+"""
