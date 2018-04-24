@@ -19,7 +19,7 @@ from typing import List, Dict
 import config, errors
 from utils import utils
 
-SILENT_NOTES = 1  # 0: no silent notes | int: silent notes
+SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
 LOWEST_NOTE = 60
 HIGHEST_NOTE = 62
 N_NOTES = HIGHEST_NOTE - LOWEST_NOTE + SILENT_NOTES
