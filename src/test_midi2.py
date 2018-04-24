@@ -24,10 +24,13 @@ mid = g.render_midi(context, f=1)
 # io.export_midifile(mid, dn + 'cycle.mid')
 
 result = g.gen_data(context, 2)
+result = g.gen_data_complex(context, 2)
 print(type(result))
 print(result.shape)
 
-print(result[0, :10])
+print(result[0, :15])
+print(result[0, :, 0].max())
+print(result[0, :, -1].max())
 # print(utils.max_f(0.5), utils.max_f(1))
 # print(utils.min_f(1), utils.min_f(10))
 
