@@ -17,7 +17,9 @@ def gen_data(c, n=100, fs=None) -> np.ndarray:
         config.debug('min_f < max_f')
     if fs is None:
         fs = np.random.random(n) * (max_f - min_f) + min_f
-    midis = [midi.encode(c, render_midi(c, np.random.random())) for f in fs]
+    midis = [
+        midi.encode(c, render_midi(c, f, phase=np.random.random())) for f in fs
+    ]
     return np.stack(midis)
 
 
