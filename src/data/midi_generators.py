@@ -15,8 +15,8 @@ def gen_data(c, n=100, fs=None, max_f=None, min_f=None) -> np.ndarray:
         max_f = utils.max_f(c.dt) * (1 - f_margin)
     if min_f is None:
         min_f = utils.min_f(c.max_t) * (1 + f_margin)
-    if min_f < max_f:
-        config.debug('min_f < max_f')
+    if min_f > max_f:
+        config.debug('min_f > max_f', min_f, max_f)
     if fs is None:
         fs = np.random.random(n) * (max_f - min_f) + min_f
     midis = [
@@ -41,6 +41,7 @@ def render_midi(c, f=1, max_t=10, phase=0, polyphonic=True):
             notes = [midi.LOWEST_NOTE]
 
         for note in notes:
+            note += midi.SILENT_NOTES
             track.append(
                 mido.Message('note_on', note=note, velocity=127, time=t))
             track.append(

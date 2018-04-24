@@ -19,13 +19,16 @@ from typing import List, Dict
 import config, errors
 from utils import utils
 
+SILENT_NOTES = 1  # 0: no silent notes | int: silent notes
 LOWEST_NOTE = 60
-HIGHEST_NOTE = 64
-N_NOTES = HIGHEST_NOTE - LOWEST_NOTE
+HIGHEST_NOTE = 62
+N_NOTES = HIGHEST_NOTE - LOWEST_NOTE + SILENT_NOTES
 VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
-MIDI_NOISE_FLOOR = 0.01  # real values below this number will be ignored by midi decoders
+MIDI_NOISE_FLOOR = 0.5  # real values below this number will be ignored by midi decoders
+
+# 0.5 to be compatible with binary crossentropy
 
 # def to_matrix(midi):
 #     # midi :: mido.midi
@@ -53,6 +56,8 @@ class Track(np.ndarray):
     # array of Notes, with length 'track-length'
     def __new__(cls, length, dt):
         arr = np.stack([Notes() for _ in range(length)])
+        # at every timestep, fill notes with index in range 0:SILENT_NOTES with 1
+        arr[:, :SILENT_NOTES] = 1.
         return arr.view(cls)
 
     def __init__(self, length=100, dt=0.01):
@@ -160,7 +165,7 @@ def encode_msg(msg):
     # ignore note_off TODO
     if msg.type == NOTE_ON:
         normalized_note = max(min(msg.note, HIGHEST_NOTE), LOWEST_NOTE)
-        note_index = normalized_note - LOWEST_NOTE - 1
+        note_index = SILENT_NOTES + normalized_note - LOWEST_NOTE - 1
         notes[note_index] = 1.
     return notes
 
@@ -172,16 +177,17 @@ def decode_notes(c, notes: Notes, t) -> List[mido.Message]:
         errors.typeError('numpy.ndarray', notes)
     msgs = []
     for note_index, value in enumerate(notes):
-        note = LOWEST_NOTE + note_index
-        if note > HIGHEST_NOTE:
-            config.debug('decode_note: note value > highest note')
-        if value > MIDI_NOISE_FLOOR:
-            # value *= RANGE
-            msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)
-            msg2 = mido.Message(
-                NOTE_OFF, note=note, velocity=127, time=t + c.note_length)
-            msgs.append(msg1)
-            msgs.append(msg2)
+        if note_index >= SILENT_NOTES:
+            note = LOWEST_NOTE + note_index - SILENT_NOTES
+            if note > HIGHEST_NOTE:
+                config.debug('decode_note: note value > highest note')
+            if value > MIDI_NOISE_FLOOR:
+                # value *= RANGE
+                msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)
+                msg2 = mido.Message(
+                    NOTE_OFF, note=note, velocity=127, time=t + c.note_length)
+                msgs.append(msg1)
+                msgs.append(msg2)
     return msgs
 
 
@@ -190,7 +196,17 @@ def second2tick(c, t):
 
 
 def combine_notes(v1, v2):
-    return Notes((v1 + v2).clip(0, 1))
+    v = Notes((v1 + v2).clip(0, 1))
+    if SILENT_NOTES > 0:
+        # use a placeholder note to indicate the absence of a note_on msg
+        # if for v1 & v2, no notes (except a SILENT_NOTE) are 1,
+        #   SILENT_NOTE must be 1 else 0
+        if v1[SILENT_NOTES:].max(
+        ) < MIDI_NOISE_FLOOR and v2[SILENT_NOTES:].max() < MIDI_NOISE_FLOOR:
+            v[:SILENT_NOTES] = 1.
+        else:
+            v[:SILENT_NOTES] = 0
+    return v
 
 
 def convert_time_to_relative_value(ls, convert_time):

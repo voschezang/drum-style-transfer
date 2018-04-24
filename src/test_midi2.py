@@ -27,6 +27,7 @@ result = g.gen_data(context, 2)
 print(type(result))
 print(result.shape)
 
+print(result[0, :10])
 # print(utils.max_f(0.5), utils.max_f(1))
 # print(utils.min_f(1), utils.min_f(10))
 
