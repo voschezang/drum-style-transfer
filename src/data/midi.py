@@ -73,7 +73,7 @@ def solo():
     pass
 
 
-def encode(c, midi, stretch=False):
+def encode(c, midi, stretch=False, squash=False):
     if not isinstance(midi, mido.MidiFile):  # np.generic
         errors.typeError('mido.MidiFile', midi)
     # c :: data.Context
