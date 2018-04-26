@@ -10,6 +10,11 @@ Thus, the midi-time resolution may change during conversion.
 
 Note-off messages are ignored during encoding, for they often are independent of the actual length of a sound. (The length/decay of the sound of the majority of percussion instruments is determined by the instrument itself, and not by the player)
 
+Midi can be represented in numpy ndarrays, either as
+  Track
+  MultiTrack
+
+
 """
 
 import numpy as np, collections
@@ -58,25 +63,6 @@ class NoteList(np.ndarray):
             # transform a list of float to a list of Note
             return np.expand_dims(array, axis=1).view(cls)
         return array.view(cls)
-
-
-# class NoteList():
-#     # TODO subclass of defaultdict(Note) ?
-#     # A sparse list of instances of class Note
-#     # def __new__(cls, array=None):
-#     #     if array is None:
-#     #         array = np.zeros(1)
-#     #     return array.view(cls)
-
-#     def __init__(self):
-#         # start with a 'sparse array'
-#         return collections.defaultdict(Note)
-
-#     def to_dense():
-#         pass
-
-#     def to_array():
-#         pass
 
 
 class Notes(np.ndarray):
