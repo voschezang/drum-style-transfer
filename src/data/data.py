@@ -56,8 +56,10 @@ def import_data(context, n: int = 2):
     dirname = config.dataset_dir + 'examples/'
     midis, labels = io.import_data(context, dirname, n)
 
+    multiTrack = False
     print('\nEncoding midi-data\n', midis)
-    arrays = [midi.encode(context, m) for m in midis]
+    print('> - multi-track =', multiTrack)
+    arrays = [midi.encode(context, m, multiTrack=multiTrack) for m in midis]
     x_train = np.stack(arrays)
     return context, x_train, labels
 
