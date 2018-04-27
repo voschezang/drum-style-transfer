@@ -191,19 +191,22 @@ def split_tracks(matrix: MultiTrack):
     return tracks
 
 
-def decode_track(c, matrix) -> mido.MidiTrack:
+def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
     # c :: data.Context
     # matrix :: [ vector per instance ]
     # vector :: [ notes ]
 
-    if isinstance(matrix, Track):
-        multi = False
-    elif isinstance(matrix, MultiTrack):
-        multi = True
-    else:
-        config.debug('decode_track - input was not Track | MultiTrack.',
+    if not isinstance(matrix, MultiTrack):
+        config.debug('decode_track - input was not MultiTrack.',
                      'Assuming MultiTrack')
-        multi = True
+    # if isinstance(matrix, Track):
+    #     multi = False
+    # elif isinstance(matrix, MultiTrack):
+    #     multi = True
+    # else:
+    #     config.debug('decode_track - input was not Track | MultiTrack.',
+    #                  'Assuming MultiTrack')
+    #     multi = True
 
     # decode notes for each instance
     track = mido.MidiTrack()
@@ -211,7 +214,7 @@ def decode_track(c, matrix) -> mido.MidiTrack:
     t = 0
     for i, vector in enumerate(matrix):
         # msgs :: mido.Message, with absolute t in seconds
-        msgs = decode_notes(c, Notes(vector), t, multi=multi)
+        msgs = decode_notes(c, Notes(vector), t)
         for msg in msgs:
             track.append(msg)
         t += c.dt
