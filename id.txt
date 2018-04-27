@@ -2,22 +2,28 @@ So far
 	convert midi to matrices
 	unsipervised, autoencoder, normal + lstm
 		few drumloops as input
-		high accuracy caused by 95% of the data being 0
-	output is still different than inut
+    high accuracy, but not 100% (perhaps due to lack of training epochs)
 
-	look at different loss functions (binary, catagorical crossentropy)
-
+problems
+  definitions of note-indices change between sources - note-64 can be a snare/tom/hh 
+   - relative note values are meaningless
+     (stil, often bassdrum is the lowest note)
 
 todo
+  train first AE on a single track
+   - then use second AE to encode relations between tracks
+   - beware: holism, perhaps the musical structure cannot be fully learned by deconstruction the parts individually
   cascades / recursive search
     functions that compute frequencies
       encoder can encode more important information
       decoder can use these layers in parallel, and then use maxpooling to combine layers
 
-	sparse matrices (scipy/tensorflow)
+	(optional) sparse matrices (scipy/tensorflow)
 		batch generator to convert the current batch to a dense matrix
 		e.g. sparse column matrix
 
+  compress data: convolution layers to reduce the dimensionality (actually, speed up the tempo)
+    then an AE trained on 2Hz data, can also predict 1Hz data
 
 id:
   simulate recorders with multiple sample rates,

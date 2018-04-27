@@ -128,7 +128,7 @@ def encode(c, midi, stretch=False, squash=False, multiTrack=True):
     # matrix :: [ [notes] per instance ]
     # all midinotes will be grouped into 1 MultiTrack per midichannel
     matrix = MultiTrack(c.n_instances, c.dt)
-    # TODO rm non-multitrack code in encoders
+    # todo rm non-multitrack code in encoders
     # else:
     #     # all midinotes will be converted to independent miditracks
     #     matrix = [Track(c.n_instances, c.dt)]
@@ -270,6 +270,11 @@ def decode_notes(c, notes: Notes, t) -> List[mido.Message]:
                 msgs.append(msg2)
     return msgs
 
+def extend_midi_track(track1, track2: mido.MidiTrack):
+    # mido.track is OOP; the track is edited in place
+    for msg in track2:
+        track1.append(msg)
+    return track1
 
 def second2tick(c, t):
     return round(mido.second2tick(t, c.ticks_per_beat, c.tempo))
