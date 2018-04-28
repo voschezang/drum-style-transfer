@@ -76,18 +76,18 @@ class Notes(np.ndarray):
         return array.view(cls)
 
 
-class Track(np.ndarray):
-    # array of Notes, with length 'track-length'
-    def __new__(cls, length, dt):
-        arr = np.stack([Note() for _ in range(length)])
-        return arr.view(cls)
+# class Track(np.ndarray):
+#     # array of Notes, with length 'track-length'
+#     def __new__(cls, length, dt):
+#         arr = np.stack([Note() for _ in range(length)])
+#         return arr.view(cls)
 
-    def __init__(self, length=100, dt=0.01):
-        self.dt = dt  # seconds
+#     def __init__(self, length=100, dt=0.01):
+#         self.dt = dt  # seconds
 
-    def length_in_seconds(self):
-        # n instances * dt, in seconds
-        return self.shape[0] * self.dt
+#     def length_in_seconds(self):
+#         # n instances * dt, in seconds
+#         return self.shape[0] * self.dt
 
 
 class MultiTrack(np.ndarray):
@@ -131,7 +131,7 @@ def encode(c, midi, stretch=False, squash=False, multiTrack=True):
     # todo rm non-multitrack code in encoders
     # else:
     #     # all midinotes will be converted to independent miditracks
-    #     matrix = [Track(c.n_instances, c.dt)]
+    #     matrix = [MultiTrack(c.n_instances, c.dt)]
     t = 0
 
     # length = midi.length # in seconds
@@ -270,11 +270,6 @@ def decode_notes(c, notes: Notes, t) -> List[mido.Message]:
                 msgs.append(msg2)
     return msgs
 
-def extend_midi_track(track1, track2: mido.MidiTrack):
-    # mido.track is OOP; the track is edited in place
-    for msg in track2:
-        track1.append(msg)
-    return track1
 
 def second2tick(c, t):
     return round(mido.second2tick(t, c.ticks_per_beat, c.tempo))
