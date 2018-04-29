@@ -20,10 +20,8 @@ def gen_data(c, n=100, fs=None, max_f=None, min_f=None) -> np.ndarray:
         config.debug('min_f > max_f', min_f, max_f)
     if fs is None:
         fs = np.random.random(n) * (max_f - min_f) + min_f
-    midis = [
-        midi.encode(c, render_midi(c, f, phase=np.random.random())) for f in fs
-    ]
-    return np.stack(midis)
+    midis = [render_midi(c, f, phase=np.random.random()) for f in fs]
+    return midi.encode_midiFiles(c, midis)
 
 
 def gen_data_complex(c,
@@ -45,10 +43,14 @@ def gen_data_complex(c,
         n_channels = 2
         ffs = np.random.random([n, n_polyrythms, n_channels]) * (
             max_f - min_f) + min_f
-    midis = [
-        midi.encode(c, render_midi_poly(c, fs), multiTrack=multiTrack)
-        for fs in ffs
-    ]
+    midis = [render_midi_poly(c, fs) for fs in ffs]
+    matrices = midi.encode_midiFiles(c, midis, multiTrack)
+    # mid = matrices[0]
+    # print('gen data complex', mid[:10], mid.shape, ffs[0])
+
+    # result = np.stack([mid, mid])
+    # print(' res', result.shape, result[:10])
+    # print(' 001 ', mid.shape, mid)
     # mid = midis[0]
     # print('\n // midi ------- n =', n)
     # print('len', len(midis), mid[0].shape)
@@ -56,11 +58,7 @@ def gen_data_complex(c,
     #     print('-  multi track - ')
     #     tracks = midi.split_tracks(mid)
     #     print(len(tracks), tracks[0].shape)
-    if not multiTrack:
-        # print(np.concatenate(midis).shape)
-        # concatenate the list of list of NoteList
-        return np.concatenate(midis)
-    return np.stack(midis)
+    return matrices
 
 
 def render_midi(c, f=1, max_t=10, phase=0, polyphonic=True):

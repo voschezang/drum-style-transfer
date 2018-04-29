@@ -36,7 +36,7 @@ print(""" Context :: namedtuple(
 
 def init():
     print('Setting up params\n')
-    max_t = 10.
+    max_t = 3.
     dt = 0.02  # T, sampling interval. quantized time, must be > 0
     n_instances = round(max_t / dt)  # vector length
     note_length = 0.03  # seconds
@@ -51,17 +51,17 @@ def init():
     return context
 
 
-def import_data(context, n: int = 2):
+def import_data(context, n=2, multiTrack=True):
+    # multiTrack = flag to enable matrices with multiple notes (defined in data.midi)
     print('Importing midi-data\n')
     dirname = config.dataset_dir + 'examples/'
     midis, labels = io.import_data(context, dirname, n)
 
-    multiTrack = False
     print('\nEncoding midi-data\n', midis)
-    print('> - multi-track =', multiTrack)
-    arrays = [midi.encode(context, m, multiTrack=multiTrack) for m in midis]
-    x_train = np.stack(arrays)
-    return context, x_train, labels
+    print('> -> multi-track =', multiTrack)
+    # arrays = [midi.encode(context, m, multiTrack=multiTrack) for m in midis]
+    matrices = midi.encode_midiFiles(context, midis, multiTrack)
+    return context, matrices, labels
 
 
 # TODO omit channel info?
@@ -69,7 +69,6 @@ def midi_to_matrix(midi):
     ls = []
     for msg in midi:
         print('is_meta: %s | bytes():' % msg.is_meta, msg.bytes())
-        print(msg)
         if not msg.is_meta:
             ls.append(msg.bytes())
     return np.array(ls)

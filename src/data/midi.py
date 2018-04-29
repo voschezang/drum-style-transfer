@@ -11,9 +11,11 @@ Thus, the midi-time resolution may change during conversion.
 Note-off messages are ignored during encoding, for they often are independent of the actual length of a sound. (The length/decay of the sound of the majority of percussion instruments is determined by the instrument itself, and not by the player)
 
 Midi can be represented in numpy ndarrays, either as
-  Track
-  MultiTrack
+  Track :: (timesteps, note)
+  MultiTrack :: (timesteps, notes)
 
+note = [0] | [1]
+notes = [i] for i in range(n_notes)
 
 """
 
@@ -26,7 +28,7 @@ from utils import utils
 
 SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
 LOWEST_NOTE = 60
-HIGHEST_NOTE = 62
+HIGHEST_NOTE = 64
 N_NOTES = HIGHEST_NOTE - LOWEST_NOTE + SILENT_NOTES
 VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
@@ -47,6 +49,7 @@ MIDI_NOISE_FLOOR = 0.5  # real values below this number will be ignored by midi 
 
 
 class Note(np.ndarray):
+    # array :: [0] | [1]
     # array with a single float in range [0,1]
     # to be used as a note-on message at an instance
     # note: function default args are evaluated once, before runtime
@@ -56,16 +59,8 @@ class Note(np.ndarray):
         return array.view(cls)
 
 
-class NoteList(np.ndarray):
-    # array :: (timesteps, Note)
-    def __new__(cls, array):
-        if len(array.shape) == 1:
-            # transform a list of float to a list of Note
-            return np.expand_dims(array, axis=1).view(cls)
-        return array.view(cls)
-
-
 class Notes(np.ndarray):
+    # array :: (notes)
     # array with floats in range [0,1] for every (midi) note
     # to be used as note-on messages at an instance
     # def __new__(cls, array=np.zeros(N_NOTES)):
@@ -74,6 +69,19 @@ class Notes(np.ndarray):
         if array is None:
             array = np.zeros(N_NOTES)
         return array.view(cls)
+
+
+class Track(np.ndarray):
+    # array :: (timesteps, Note)
+    def __new__(cls, array):
+        if len(array.shape) == 1:
+            # transform a list of float to a list of Note
+            return np.expand_dims(array, axis=1).view(cls)
+        return array.view(cls)
+
+    def length_in_seconds(self):
+        # n instances * dt, in seconds
+        return self.shape[0] * self.dt
 
 
 # class Track(np.ndarray):
@@ -91,6 +99,7 @@ class Notes(np.ndarray):
 
 
 class MultiTrack(np.ndarray):
+    # array :: (timesteps, Notes)
     # array of Notes, with length 'track-length'
     def __new__(cls, length, dt):
         arr = np.stack([Notes() for _ in range(length)])
@@ -112,14 +121,22 @@ def solo():
     pass
 
 
-def notes_to_notelist(notes_list):
-    # notes :: array (samples, timesteps, notes)
-    # return array (samples * notes, timesteps, note-value)
-    notelist_list = [split_tracks(track) for track in notes_list]
-    return np.concatenate(notelist_list)
+# def notes_to_notelist(notes_list):
+#     # notes :: array (samples, timesteps, notes)
+#     # return array (samples * notes, timesteps, note-value)
+#     notelist_list = [multiTrack_to_list_of_Track(m) for m in notes_list]
+#     return np.concatenate(notelist_list)
 
 
-def encode(c, midi, stretch=False, squash=False, multiTrack=True):
+def encode_midiFiles(c, midis, multiTrack=True):
+    matrices = [encode_midiFile(c, m, multiTrack=multiTrack) for m in midis]
+    if multiTrack:
+        return np.stack(matrices)
+    return np.concatenate(matrices)
+
+
+def encode_midiFile(c, midi, stretch=False, squash=False, multiTrack=True):
+    # TODO stretch, squash
     if not isinstance(midi, mido.MidiFile):
         errors.typeError('mido.MidiFile', midi)
     # c :: data.Context
@@ -128,10 +145,6 @@ def encode(c, midi, stretch=False, squash=False, multiTrack=True):
     # matrix :: [ [notes] per instance ]
     # all midinotes will be grouped into 1 MultiTrack per midichannel
     matrix = MultiTrack(c.n_instances, c.dt)
-    # todo rm non-multitrack code in encoders
-    # else:
-    #     # all midinotes will be converted to independent miditracks
-    #     matrix = [MultiTrack(c.n_instances, c.dt)]
     t = 0
 
     # length = midi.length # in seconds
@@ -140,14 +153,14 @@ def encode(c, midi, stretch=False, squash=False, multiTrack=True):
     #   use set_tempo to change tempo during a song
     # mido.bpm2tempo(bpm)
 
-    # a midifile that consists of multiple tracks is interpreted as multiple independent files
+    # TODO? a midifile that consists of multiple tracks is interpreted
+    # as multiple independent files
     if midi.type == 2:
         # type = async
         errors.typeError('mido.MidiFile.type 0 | 1', 2)
-    elif midi.type == 1:
-        # TODO are multiple midichannels concatenated?
-        # config.debug('WARNING', 'type not == 0')
-        print('WARNING', 'type is 1, not 0')
+    # elif midi.type == 1:
+    # TODO are multiple midichannels concatenated?
+    # config.debug('WARNING', 'type not == 0')
     #     midis = midi.tracks
     # elif midi.type == 0:
     #     midis = [midi]
@@ -171,24 +184,24 @@ def encode(c, midi, stretch=False, squash=False, multiTrack=True):
             # max t reached: return matrix
             if multiTrack:
                 return matrix
-            return split_tracks(matrix)
+            return multiTrack_to_list_of_Track(matrix)
 
     if multiTrack:
         return matrix
-    return split_tracks(matrix)
+    return multiTrack_to_list_of_Track(matrix)
 
 
-def split_tracks(matrix: MultiTrack):
-    # :: MultiTrack -> list Note
+def multiTrack_to_list_of_Track(matrix: MultiTrack):
+    # def split_tracks(matrix: MultiTrack):
+    # :: MultiTrack -> list NoteList
     # matrix = array (timesteps, notes)
     tracks = []
     note_indices = matrix.shape[1]
     for i in range(note_indices):
+        # ignore notes indices that are not present
         if matrix[:, i].max() > MIDI_NOISE_FLOOR:
-            # print(matrix[:, i])
-            tracks.append(NoteList(matrix[:, i]))
-    print(len(tracks), tracks[0].shape)
-    return tracks
+            tracks.append(Track(matrix[:, i]))
+    return np.stack(tracks)
 
 
 def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
