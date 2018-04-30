@@ -1,8 +1,13 @@
 So far
 	convert midi to matrices
-	unsipervised, autoencoder, normal + lstm
+	unsupervised, autoencoder, normal + lstm
+    generators for training data (patterns of x Hz)
 		few drumloops as input
     high accuracy, but not 100% (perhaps due to lack of training epochs)
+    generate new rhythm
+
+  lstm was not so successful
+
 
 problems
   definitions of note-indices change between sources - note-64 can be a snare/tom/hh 
