@@ -1,12 +1,15 @@
 So far
 	convert midi to matrices
-	unsupervised, autoencoder, normal + lstm
-    generators for training data (patterns of x Hz)
+	unsupervised, autoencoder, normal (static) + lstms (variable input)
+    generators for training data (poly patterns of x Hz)
+       - try to make an AE that can return the input data
 		few drumloops as input
-    high accuracy, but not 100% (perhaps due to lack of training epochs)
-    generate new rhythm
 
-  lstm was not so successful
+    real data: accuracy stuck at .99
+    generated data: accurcy stuck at 0.7, 0.8
+              (perhaps due to lack of training epochs)
+
+    lstm usually lower loss scores (0.5, 0.25)
 
 
 problems
@@ -14,7 +17,17 @@ problems
    - relative note values are meaningless
      (stil, often bassdrum is the lowest note)
 
+  keras sparse layer?      accept sparse input, but is there a difference in processing?
+
+  high accuracy for 'real' data
+       e.g. a note that occurs once
+
+
+
+
 todo
+  use both lstm + static model?
+
   train first AE on a single track
    - then use second AE to encode relations between tracks
    - beware: holism, perhaps the musical structure cannot be fully learned by deconstruction the parts individually
