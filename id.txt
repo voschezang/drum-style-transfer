@@ -1,3 +1,6 @@
+
+
+
 So far
 	convert midi to matrices
 	unsipervised, autoencoder, normal + lstm
@@ -52,7 +55,7 @@ noten corresponderen niet met instrumenten
 
 
 
-
+variational ae
 change encoder:
        [ [ occurences per instance ] per note ]
        then use conv layers to decrease the amount of nodes
