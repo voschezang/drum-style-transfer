@@ -35,6 +35,8 @@ NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
 MIDI_NOISE_FLOOR = 0.5  # real values below this number will be ignored by midi decoders
 
+DTYPE = 'float32'
+
 # 0.5 to be compatible with binary crossentropy
 
 # def to_matrix(midi):
@@ -55,8 +57,8 @@ class Note(np.ndarray):
     # note: function default args are evaluated once, before runtime
     def __new__(cls, array=None):
         if array is None:
-            array = np.zeros(1)
-        return array.view(cls)
+            array = np.zeros(1, dtype=DTYPE)
+        return array.astype(DTYPE).view(cls)
 
 
 class Notes(np.ndarray):
@@ -68,7 +70,7 @@ class Notes(np.ndarray):
     def __new__(cls, array=None):
         if array is None:
             array = np.zeros(N_NOTES)
-        return array.view(cls)
+        return array.astype(DTYPE).view(cls)
 
 
 class Track(np.ndarray):
@@ -77,7 +79,7 @@ class Track(np.ndarray):
         if len(array.shape) == 1:
             # transform a list of float to a list of Note
             return np.expand_dims(array, axis=1).view(cls)
-        return array.view(cls)
+        return array.astype(DTYPE).view(cls)
 
     def length_in_seconds(self):
         # n instances * dt, in seconds
@@ -105,7 +107,7 @@ class MultiTrack(np.ndarray):
         arr = np.stack([Notes() for _ in range(length)])
         # at every timestep, fill notes with index in range 0:SILENT_NOTES with 1
         arr[:, :SILENT_NOTES] = 1.
-        return arr.view(cls)
+        return arr.astype(DTYPE).view(cls)
 
     def __init__(self, length=100, dt=0.01):
         self.dt = dt  # seconds
