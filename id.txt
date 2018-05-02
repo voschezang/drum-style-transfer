@@ -1,5 +1,10 @@
 
+data augmentation (never see the same data twice) (might affect genre-info)
+ - tempo
+ - phase (start t), cropping
+ - reverse (?)
 
+reduce training time: batch normalization (https://arxiv.org/abs/1502.03167)
 
 So far
 	convert midi to matrices
