@@ -1,4 +1,16 @@
 
+input whitening: zero mean + unit variances
+      - ZCA > PSA for conv layers (imgs)
+
+
+use both conv + convTranspose?
+
+
+reduce sparseness by blurring midi events:  [1,0,0] => [1,1,1]
+ - not too much, as we are working with instances
+   (use a higher threshold for the second note)
+
+
 data augmentation (never see the same data twice) (might affect genre-info)
  - tempo
  - phase (start t), cropping
