@@ -10,28 +10,32 @@ from utils import utils, io
 
 ###
 
-n = 2
-context, x_train, labels = data.import_data(data.init(), n)
+n = 1
+multiTrack = False
+context, x_train, labels = data.import_data(
+    data.init(), n, multiTrack=multiTrack)
+config.info('arrays2', x_train.shape)
+# context, x_train, labels = data.import_data(data.init(), n, multiTrack=True)
+# config.info('arrays2', x_train.shape)
 
 dn = config.dataset_dir
 
 # print(g.render())
-mid = g.render_midi(context, f=1)
+# mid = g.render_midi(context, f=1)
 
 # for m in mid:
 #     print(m)
 
 # io.export_midifile(mid, dn + 'cycle.mid')
 
-print(' no multi')
-result = g.gen_data(context, 2)
-result = g.gen_data_complex(context, 3)
-print(type(result))
-print(result.shape)
-
-print('\n multi')
-multi = False
-result = g.gen_data_complex(context, 3, multiTrack=multi)
+# print(' no multi')
+# result = g.gen_data(context, 2)
+result = g.gen_data_complex(context, 4, multiTrack=multiTrack)
+config.info('arrays2', result.shape)
+result = g.gen_data_complex(context, 4, multiTrack=True)
+config.info('arrays2', result.shape)
+# print(' 000 ', result.shape, result[:10, :])
+result = x_train
 print(type(result))
 print(result.shape)
 
