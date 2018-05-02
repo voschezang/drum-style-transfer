@@ -34,6 +34,7 @@ VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
 MIDI_NOISE_FLOOR = 0.5  # real values below this number will be ignored by midi decoders
+PADDING = 3  # n array cells after an instance of a note-on msg (should be > 0)
 
 DTYPE = 'float32'
 
@@ -173,20 +174,22 @@ def encode_midiFile(c, midi, stretch=False, squash=False, multiTrack=True):
     #    msg = track[index]
     for msg in midi:
         t += msg.time  # seconds for type 1,2
-        i = utils.round_(t / c.dt)  # instance index (time-step)
-        if i < c.n_instances:
-            # TODO?
-            # if i <= c.n_instances:
-            # # prevent too high i due to rounding errors
-            # if i == c.n_instances: i -= 1
-            vector = encode_msg(msg)
-            matrix[i, ] = combine_notes(matrix[i], vector)
-        else:
-            config.debug('to_array: msg.time > max_t; t, n', t, c.n_instances)
-            # max t reached: return matrix
-            if multiTrack:
-                return matrix
-            return multiTrack_to_list_of_Track(matrix)
+        i_ = utils.round_(t / c.dt)  # instance index (time-step)
+        for i in range(i_, i_ + PADDING):
+            if i < c.n_instances:
+                # TODO?
+                # if i <= c.n_instances:
+                # # prevent too high i due to rounding errors
+                # if i == c.n_instances: i -= 1
+                vector = encode_msg(msg)
+                matrix[i, ] = combine_notes(matrix[i], vector)
+            else:
+                config.debug('to_array: msg.time > max_t; t, n', t,
+                             c.n_instances)
+                # max t reached: return matrix
+                if multiTrack:
+                    return matrix
+                return multiTrack_to_list_of_Track(matrix)
 
     if multiTrack:
         return matrix
@@ -228,8 +231,11 @@ def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
     # msgs = []
     t = 0
     for i, vector in enumerate(matrix):
+        # lookahead_matrix = the part of the matrix that occurred within
+        # 'PADDING' cells before 'i'
+        lookahead_matrix = matrix[i - PADDING:i]
         # msgs :: mido.Message, with absolute t in seconds
-        msgs = decode_notes(c, Notes(vector), t)
+        msgs = decode_notes(c, Notes(vector), t, lookahead_matrix)
         for msg in msgs:
             track.append(msg)
         t += c.dt
@@ -265,25 +271,34 @@ def encode_msg(msg: mido.Message) -> Notes:
     return notes
 
 
-def decode_notes(c, notes: Notes, t) -> List[mido.Message]:
+def decode_notes(c, notes: Notes, t,
+                 lookahead_matrix=None) -> List[mido.Message]:
     # :t :: seconds
     # msg.time = absolute, in seconds
     if not isinstance(notes, Notes):  # np.generic
         errors.typeError('numpy.ndarray', notes)
     msgs = []
     for note_index, value in enumerate(notes):
-        if note_index >= SILENT_NOTES:
-            note = LOWEST_NOTE + note_index - SILENT_NOTES
-            if note > HIGHEST_NOTE:
-                config.debug('decode_note: note value > highest note')
-            if value > MIDI_NOISE_FLOOR:
-                # value *= RANGE
-                msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)
-                msg2 = mido.Message(
-                    NOTE_OFF, note=note, velocity=127, time=t + c.note_length)
-                msgs.append(msg1)
-                msgs.append(msg2)
+        if lookahead_matrix is None or lookahead_matrix[:, note_index].max(
+        ) < MIDI_NOISE_FLOOR:
+            msgs.extend(decode_note(c, note_index, value, t))
     return msgs
+
+
+def decode_note(c, note_index, value, t):
+    # return ::  [] | a list of midi messages (note on, note off)
+    if value < MIDI_NOISE_FLOOR:
+        return []
+    if note_index < SILENT_NOTES:
+        return []
+    note = LOWEST_NOTE + note_index - SILENT_NOTES
+    if note > HIGHEST_NOTE:
+        config.debug('decode_note: note value > highest note')
+    # value *= RANGE
+    msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)
+    msg2 = mido.Message(
+        NOTE_OFF, note=note, velocity=127, time=t + c.note_length)
+    return [msg1, msg2]
 
 
 def second2tick(c, t):
