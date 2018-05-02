@@ -11,5 +11,7 @@ Cython==0.28.2
 python-rtmidi==1.1.0
 mido==1.2.8
 mypy==0.560
+pydot
+graphviz
 
 pyknon==1.2
