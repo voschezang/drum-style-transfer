@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 import keras
 from keras.utils import to_categorical
-from keras import optimizers
+from keras import optimizers, backend as K
 from keras.layers import Input, Dense, Activation, Conv2D, Dropout, Flatten
 from keras.layers import Conv2DTranspose, Reshape, MaxPooling2D, UpSampling2D
 from keras.layers import Conv1D, MaxPooling1D, UpSampling1D
@@ -14,29 +14,35 @@ from keras.layers import LocallyConnected1D, LocallyConnected2D
 from keras.models import Model
 
 ########################################################################
-### Init
+### Functions
 ########################################################################
 
 
-def init(x_train, y_train):
-    n_samples = x_train[0]
-    input_shape = x_train.shape[1:]  # shape of a single sample
-    output_length = y_train.shape[1]  # length of an individual label
+def sample(args, z_mean, z_log_var, latent_dim, epsilon_std):
+    z_mean, z_log_var = args
+    epsilon = K.random_normal(
+        shape=(K.shape(z_mean)[0], latent_dim), mean=0., stddev=epsilon_std)
+    return z_mean + K.exp(z_log_var) * epsilon
 
-    dropout = 0.
-    model, summary = model1(input_shape, output_length, dropout)
 
-    learning_rate = 0.01
-    # sgd = Keras.optimizers.SGD(lr=0.01, clipnorm=1.)
-    optimizer = optimizers.Adam(lr=learning_rate)
-    # top_k_categorical_accuracy(y_true, y_pred, k=5)
-    # https://keras.io/metrics/
-    metrics = ['accuracy']  # , 'mean_squared_error']
-    model.compile(
-        optimizer=optimizer, loss='categorical_crossentropy', metrics=metrics)
+# def init(x_train, y_train):
+#     n_samples = x_train[0]
+#     input_shape = x_train.shape[1:]  # shape of a single sample
+#     output_length = y_train.shape[1]  # length of an individual label
 
-    return model, summary
+#     dropout = 0.
+#     model, summary = model1(input_shape, output_length, dropout)
 
+#     learning_rate = 0.01
+#     # sgd = Keras.optimizers.SGD(lr=0.01, clipnorm=1.)
+#     optimizer = optimizers.Adam(lr=learning_rate)
+#     # top_k_categorical_accuracy(y_true, y_pred, k=5)
+#     # https://keras.io/metrics/
+#     metrics = ['accuracy']  # , 'mean_squared_error']
+#     model.compile(
+#         optimizer=optimizer, loss='categorical_crossentropy', metrics=metrics)
+
+#     return model, summary
 
 ########################################################################
 ### Models

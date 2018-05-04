@@ -26,6 +26,6 @@ def composition(ls, result=lambda x: x, verbose=False):
     # this should succeed without errors
     # compose([(lambda x: x) for _ in range(1000000)])(1)
     for f in ls[1:]:
-        print(f)
+        if verbose: print(f)
         result = f(result)
     return result
