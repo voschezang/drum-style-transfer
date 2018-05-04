@@ -2,16 +2,16 @@ import os, numpy as np, pandas
 np.random.seed(333)
 os.chdir('src')
 import mido  # , rtmidi, rtmidi_
+import matplotlib.pyplot as plt
 
 # local libs
 import config
 from data import data, midi, midi_generators as g
-from utils import utils, io
-
+from utils import utils, io, plot
 ###
 
 n = 1
-multiTrack = False
+multiTrack = True
 context, x_train, labels = data.import_data(
     data.init(), n, multiTrack=multiTrack)
 config.info('arrays2', x_train.shape)
@@ -28,16 +28,30 @@ dn = config.dataset_dir
 
 # io.export_midifile(mid, dn + 'cycle.mid')
 
-# print(' no multi')
-# result = g.gen_data(context, 2)
-result = g.gen_data_complex(context, 4, multiTrack=multiTrack)
-config.info('arrays2', result.shape)
-result = g.gen_data_complex(context, 4, multiTrack=True)
+print('\n\n\n', '-MIDI-')
+f = 5
+# result = g.example(context)
+# result = g.gen_data(context, 2, min_f=f, max_f=f)
+result = g.gen_data_complex(
+    context,
+    1,
+    min_f=f,
+    max_f=f,
+    n_polyrythms=1,
+    n_channels=midi.N_NOTES,
+    multiTrack=True)
 config.info('arrays2', result.shape)
 # print(' 000 ', result.shape, result[:10, :])
-result = x_train
 print(type(result))
-print(result.shape)
+print('result', result.shape)
+print(result[0, :5])
+
+print(result[0, 0])
+plot.multi(result[0, :30])
+# v = result[0, :30, 1:2]
+# print(v.shape)
+# print(v)
+# plot.single(v)
 
 # print(result[0, :15])
 # print(result[0, :, 0].max())
