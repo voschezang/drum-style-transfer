@@ -59,8 +59,10 @@ def import_data(context, n=2, multiTrack=True):
 
     print('\nEncoding midi-data\n', midis)
     print('> -> multi-track =', multiTrack)
-    # arrays = [midi.encode(context, m, multiTrack=multiTrack) for m in midis]
-    matrices = midi.encode_midiFiles(context, midis, multiTrack)
+    reduce_dims = True  # rm unused midi-notes
+    velocity = 1
+    matrices = midi.encode_midiFiles(context, midis, multiTrack, reduce_dims,
+                                     velocity)
     return context, matrices, labels
 
 

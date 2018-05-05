@@ -27,8 +27,8 @@ import config, errors
 from utils import utils
 
 SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
-LOWEST_NOTE = 60
-HIGHEST_NOTE = 63
+LOWEST_NOTE = 50
+HIGHEST_NOTE = 80
 N_NOTES = HIGHEST_NOTE - LOWEST_NOTE + SILENT_NOTES
 VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
@@ -122,14 +122,39 @@ def solo():
 #     return np.concatenate(notelist_list)
 
 
-def encode_midiFiles(c, midis, multiTrack=True):
-    matrices = [encode_midiFile(c, m, multiTrack=multiTrack) for m in midis]
+def encode_midiFiles(c,
+                     midis,
+                     multiTrack=True,
+                     reduce_dims=True,
+                     force_velocity=False):
+    ls = [
+        encode_midiFile(
+            c, m, multiTrack=multiTrack, force_velocity=force_velocity)
+        for m in midis
+    ]
     if multiTrack:
-        return np.stack(matrices)
-    return np.concatenate(matrices)
+        tracks = np.stack(ls)
+    else:
+        tracks = np.concatenate(ls)
+
+    if reduce_dims:
+        indices = []
+        print(tracks.shape)
+        for note_i in np.arange(tracks.shape[-1]):
+            if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
+                indices.append(note_i)
+        tracks = tracks[:, :, indices]
+        config.info('reduced dims:', tracks.shape)
+
+    return tracks
 
 
-def encode_midiFile(c, midi, stretch=False, squash=False, multiTrack=True):
+def encode_midiFile(c,
+                    midi,
+                    stretch=False,
+                    squash=False,
+                    multiTrack=True,
+                    force_velocity=None):
     # TODO stretch, squash
     if not isinstance(midi, mido.MidiFile):
         errors.typeError('mido.MidiFile', midi)
@@ -164,7 +189,6 @@ def encode_midiFile(c, midi, stretch=False, squash=False, multiTrack=True):
     #  for i, track in midi.tracks
     #    msg = track[index]
     for msg in midi:
-        print(msg)
         t += msg.time  # seconds for type 1,2
         i = utils.round_(t / c.dt)  # instance index (time-step)
         if not i < c.n_instances:
@@ -174,7 +198,7 @@ def encode_midiFile(c, midi, stretch=False, squash=False, multiTrack=True):
                 return matrix
             return multiTrack_to_list_of_Track(matrix)
 
-        matrix = encode_msg_in_matrix(c, msg, i, matrix)
+        matrix = encode_msg_in_matrix(c, msg, i, matrix, force_velocity)
 
     if multiTrack:
         return matrix
@@ -236,11 +260,15 @@ def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
     return mid
 
 
-def encode_msg_in_matrix(c, msg: mido.Message, i_, matrix):
+def encode_msg_in_matrix(c, msg: mido.Message, i_, matrix, velocity=None):
+    # :velocity = None | float in range(0,1)
     if msg.is_meta:
         # config.info('to_vector: msg is meta')
         return matrix
-    velocity = min(msg.velocity, VELOCITY_RANGE) / float(VELOCITY_RANGE)
+
+    if velocity is None:
+        velocity = min(msg.velocity, VELOCITY_RANGE) / float(VELOCITY_RANGE)
+
     for i in range(i_, i_ + PADDING):
         if i < c.n_instances:
             vector = encode_single_msg(msg, velocity)
@@ -266,7 +294,8 @@ def encode_single_msg(msg: mido.Message, velocity=None) -> Notes:
     if msg.type == NOTE_ON:
         if velocity is None:
             velocity = default_note
-        normalized_note = max(min(msg.note, HIGHEST_NOTE), LOWEST_NOTE)
+        highest_note_i = HIGHEST_NOTE - 1
+        normalized_note = max(min(msg.note, highest_note_i), LOWEST_NOTE)
         note_index = SILENT_NOTES + normalized_note - LOWEST_NOTE
         notes[note_index] = velocity
     return notes
@@ -307,7 +336,9 @@ def second2tick(c, t):
 
 
 def combine_notes(v1, v2):
-    v = Notes((v1 + v2).clip(0, 1))
+    # v = Notes((v1 + v2).clip(0, 1))
+    v = np.maximum(v1, v2)
+
     if SILENT_NOTES > 0:
         # use a placeholder note to indicate the absence of a note_on msg
         # if for v1 & v2, no notes (except a SILENT_NOTE) are 1,
