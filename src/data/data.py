@@ -36,7 +36,7 @@ print(""" Context :: namedtuple(
 
 def init():
     print('Setting up params\n')
-    max_t = 3.
+    max_t = 2.
     dt = 0.02  # T, sampling interval. quantized time, must be > 0
     n_instances = round(max_t / dt)  # vector length
     note_length = 0.03  # seconds
