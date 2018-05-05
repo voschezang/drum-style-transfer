@@ -58,6 +58,7 @@ def import_data(context, n=2, multiTrack=True):
     midis, labels = io.import_data(context, dirname, n)
 
     print('\nEncoding midi-data\n', midis)
+
     print('> -> multi-track =', multiTrack)
     reduce_dims = True  # rm unused midi-notes
     velocity = 1.

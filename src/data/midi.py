@@ -136,8 +136,6 @@ def encode_midiFiles(c,
     else:
         tracks = np.concatenate(track_list)
 
-    print('MX', tracks.max())
-
     if reduce_dims:
         indices = []
         for note_i in np.arange(tracks.shape[-1]):
@@ -266,7 +264,6 @@ def encode_msg_in_matrix(c, msg: mido.Message, i_, matrix, velocity=None):
         # config.info('to_vector: msg is meta')
         return matrix
 
-    print('encode_msg_in_', velocity, velocity is None)
     if velocity is None:
         velocity = min(msg.velocity, VELOCITY_RANGE) / float(VELOCITY_RANGE)
 
