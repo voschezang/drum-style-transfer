@@ -38,7 +38,7 @@ ls:
 	ls $(LOG_DIR)/
 
 deps:
-  conda install theano pygpu
+	conda install theano pygu
 	pip3 install -r requirements.txt
 	pip2 install -r requirements-python2.txt
 
