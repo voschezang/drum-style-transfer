@@ -126,20 +126,20 @@ def encode_midiFiles(c,
                      midis,
                      multiTrack=True,
                      reduce_dims=True,
-                     force_velocity=False):
-    ls = [
-        encode_midiFile(
-            c, m, multiTrack=multiTrack, force_velocity=force_velocity)
+                     velocity=None):
+    track_list = [
+        encode_midiFile(c, m, multiTrack=multiTrack, velocity=velocity)
         for m in midis
     ]
     if multiTrack:
-        tracks = np.stack(ls)
+        tracks = np.stack(track_list)
     else:
-        tracks = np.concatenate(ls)
+        tracks = np.concatenate(track_list)
+
+    print('MX', tracks.max())
 
     if reduce_dims:
         indices = []
-        print(tracks.shape)
         for note_i in np.arange(tracks.shape[-1]):
             if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
                 indices.append(note_i)
@@ -154,7 +154,7 @@ def encode_midiFile(c,
                     stretch=False,
                     squash=False,
                     multiTrack=True,
-                    force_velocity=None):
+                    velocity=None):
     # TODO stretch, squash
     if not isinstance(midi, mido.MidiFile):
         errors.typeError('mido.MidiFile', midi)
@@ -198,7 +198,7 @@ def encode_midiFile(c,
                 return matrix
             return multiTrack_to_list_of_Track(matrix)
 
-        matrix = encode_msg_in_matrix(c, msg, i, matrix, force_velocity)
+        matrix = encode_msg_in_matrix(c, msg, i, matrix, velocity)
 
     if multiTrack:
         return matrix
@@ -266,6 +266,7 @@ def encode_msg_in_matrix(c, msg: mido.Message, i_, matrix, velocity=None):
         # config.info('to_vector: msg is meta')
         return matrix
 
+    print('encode_msg_in_', velocity, velocity is None)
     if velocity is None:
         velocity = min(msg.velocity, VELOCITY_RANGE) / float(VELOCITY_RANGE)
 

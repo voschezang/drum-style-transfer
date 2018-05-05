@@ -65,10 +65,10 @@ def gen_data_complex(c,
         config.debug('min_f > max_f', min_f, max_f)
 
     n_channels = min(n_channels, midi.N_NOTES)
-    # r :: (samples, channels, frequencies)
-    r = np.random.random([n, n_channels, n_polyrythms]) * (
+    # params :: (samples, channels, frequencies)
+    params = np.random.random([n, n_channels, n_polyrythms]) * (
         max_f - min_f) + min_f
-    midis = [render_midi_poly(c, ffs) for ffs in r]
+    midis = [render_midi_poly(c, ffs) for ffs in params]
     matrices = midi.encode_midiFiles(c, midis, multiTrack)
     return matrices
 
@@ -97,6 +97,7 @@ def render_midi_poly(c, ffs=[[1]], max_t=10):
             track = add_sin_to_midi_track(
                 c, track, f, max_t, phase, polyphonic=False, note=note)
         note += 1
+
     track.sort(key=lambda msg: msg.time)
     track = midi.convert_time_to_relative_value(
         track, lambda t: midi.second2tick(c, t))

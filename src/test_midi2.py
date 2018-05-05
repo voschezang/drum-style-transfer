@@ -27,8 +27,7 @@ dn = config.dataset_dir
 #     print(m)
 
 # io.export_midifile(mid, dn + 'cycle.mid')
-# plot.multi(x_train[3, :30])
-plot.multi(x_train[8, :30])
+# plot.multi(x_train[8, :30])
 
 print('\n\n\n', '-MIDI-')
 f = 5
@@ -40,7 +39,7 @@ result = g.gen_data_complex(
     min_f=f,
     max_f=f,
     n_polyrythms=1,
-    n_channels=max(3, midi.N_NOTES),
+    n_channels=3,
     multiTrack=True)
 config.info('arrays2', result.shape)
 # print(' 000 ', result.shape, result[:10, :])
@@ -48,7 +47,7 @@ print(type(result))
 print('result', result.shape)
 # print(result[0, :5])
 
-# plot.multi(result[0, :30])
+plot.multi(result[0, :30])
 
 # fn = dn + '4-floor-120bpm.mid'
 # mid = io.import_midifile(fn)
