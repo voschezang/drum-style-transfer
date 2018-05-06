@@ -20,7 +20,7 @@ notes = [i] for i in range(n_notes)
 """
 
 import numpy as np, collections
-import mido, rtmidi  #, rtmidi_
+import mido
 from typing import List, Dict
 
 import config, errors

@@ -2,7 +2,7 @@
 """
 
 import numpy as np
-import mido, rtmidi  #, rtmidi_
+import mido
 
 import config
 from data import midi
@@ -51,7 +51,9 @@ def gen_data_complex(c,
                      n_polyrythms=2,
                      n_channels=2,
                      d_phase=True,
-                     multiTrack=True) -> np.ndarray:
+                     return_params=False,
+                     dim4=False,
+                     multiTrack=True):
     """
     :n = n independent samples
     :n_polyrythms = n 'sinewaves' per channel
@@ -72,7 +74,10 @@ def gen_data_complex(c,
     params = np.random.random([n, n_channels, n_polyrythms]) * (
         max_f - min_f) + min_f
     midis = [render_midi_poly(c, ffs, d_phase=d_phase) for ffs in params]
-    matrices = midi.encode_midiFiles(c, midis, multiTrack)
+    matrices = midi.encode_midiFiles(c, midis, multiTrack, dim4=dim4)
+
+    if return_params:
+        return matrices, params
     return matrices
 
 

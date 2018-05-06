@@ -51,7 +51,7 @@ def init():
     return context
 
 
-def import_data(context, n=2, multiTrack=True):
+def import_data(context, n=2, multiTrack=True, dim4=False):
     # multiTrack = flag to enable matrices with multiple notes (defined in data.midi)
     print('Importing midi-data\n')
     dirname = config.dataset_dir + 'examples/'
@@ -62,8 +62,8 @@ def import_data(context, n=2, multiTrack=True):
     print('> -> multi-track =', multiTrack)
     reduce_dims = True  # rm unused midi-notes
     velocity = 1.
-    matrices = midi.encode_midiFiles(context, midis, multiTrack, reduce_dims,
-                                     velocity)
+    matrices = midi.encode_midiFiles(
+        context, midis, multiTrack, reduce_dims, velocity, dim4=dim4)
     return context, matrices, labels
 
 

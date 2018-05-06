@@ -6,20 +6,10 @@ White indicates a rest
 
 import matplotlib.pyplot as plt
 
-
-def single(v):
-    # v = v.reshape((v.shape[1], v.shape[0]))
-    v = v.transpose()
-    # fig, ax = plt.subplots()
-    plt.imshow(v, interpolation='nearest', cmap='gray_r')
-    # fig.canvas.set_window_title(name + '...')
-    # fig.set_title(name)
-    # fig.set_xlabel('Time [iterations]')
-    # fig.set_ylabel('Score')
-    plt.show()
+from data import midi
 
 
-def multi(m):
+def single(m: midi.MultiTrack):
     # m :: MultiTrack | Track
     print('m', m.shape)
     m = m.transpose()
@@ -30,6 +20,10 @@ def multi(m):
     # fig.set_xlabel('Time [iterations]')
     # fig.set_ylabel('Score')
     plt.show()
+
+
+def multi(m):
+    return single(m)
 
 
 def line(matrix):
