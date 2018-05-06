@@ -195,7 +195,7 @@ def encode_midiFile(c,
         t += msg.time  # seconds for type 1,2
         i = utils.round_(t / c.dt)  # instance index (time-step)
         if not i < c.n_instances:
-            config.debug('to_array: msg.time > max_t; t, n', t, c.n_instances)
+            # config.info('to_array: msg.time > max_t; t, n', t, c.n_instances)
             # max t reached: return matrix
             if multiTrack:
                 return matrix
