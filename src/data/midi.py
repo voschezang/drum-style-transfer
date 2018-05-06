@@ -126,7 +126,10 @@ def encode_midiFiles(c,
                      midis,
                      multiTrack=True,
                      reduce_dims=True,
-                     velocity=None):
+                     velocity=None,
+                     dim4=False):
+    # reduce dims filters out unused dimensions
+    # dim4 adds a dimension, so that the output will fit a keras ImageDataGenerator
     track_list = [
         encode_midiFile(c, m, multiTrack=multiTrack, velocity=velocity)
         for m in midis
@@ -144,6 +147,8 @@ def encode_midiFiles(c,
         tracks = tracks[:, :, indices]
         config.info('reduced dims:', tracks.shape)
 
+    if dim4:
+        return tracks.reshape(list(tracks.shape) + [1])
     return tracks
 
 

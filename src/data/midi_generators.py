@@ -50,11 +50,14 @@ def gen_data_complex(c,
                      min_f=None,
                      n_polyrythms=2,
                      n_channels=2,
+                     d_phase=True,
                      multiTrack=True) -> np.ndarray:
     """
     :n = n independent samples
     :n_polyrythms = n 'sinewaves' per channel
     :n_channels = n different note indices (e.g. 60,62,64)
+
+    set d_phase to False to let every pattern start at t=0
     """
     f_margin = 0.10  # 10%
     if max_f is None:
@@ -68,7 +71,7 @@ def gen_data_complex(c,
     # params :: (samples, channels, frequencies)
     params = np.random.random([n, n_channels, n_polyrythms]) * (
         max_f - min_f) + min_f
-    midis = [render_midi_poly(c, ffs) for ffs in params]
+    midis = [render_midi_poly(c, ffs, d_phase=d_phase) for ffs in params]
     matrices = midi.encode_midiFiles(c, midis, multiTrack)
     return matrices
 
@@ -86,14 +89,16 @@ def render_midi(c, f=1, max_t=10, phase=0, polyphonic=False):
     return mid
 
 
-def render_midi_poly(c, ffs=[[1]], max_t=10):
+def render_midi_poly(c, ffs=[[1]], max_t=10, d_phase=True):
     # ffs :: (notes, frequency values)
     mid = mido.MidiFile()
     track = mido.MidiTrack()
     note = midi.LOWEST_NOTE
+    phase = 0
     for fs in ffs:
         for f in fs:
-            phase = np.random.random()
+            if d_phase:
+                phase = np.random.random()
             track = add_sin_to_midi_track(
                 c, track, f, max_t, phase, polyphonic=False, note=note)
         note += 1

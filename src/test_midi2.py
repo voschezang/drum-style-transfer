@@ -40,6 +40,7 @@ result = g.gen_data_complex(
     max_f=f,
     n_polyrythms=1,
     n_channels=3,
+    d_phase=False,
     multiTrack=True)
 config.info('arrays2', result.shape)
 # print(' 000 ', result.shape, result[:10, :])
