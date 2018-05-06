@@ -105,27 +105,42 @@ class Capsule(Layer):
     def compute_output_shape(self, input_shape):
         return (None, self.num_capsule, self.dim_capsule)
 
+# def apply_capsule_p(inputs):
+#     # :input :: (batches, capsules, features)
+#     batch_size = K.shape(inputs)[0]
+#     input_num_capsule = K.shape(inputs)[1]
+#     probabilities = inputs[:,0,:]
+#     # o = K.zeros_like(inputs)
+#     threshold = 0.1
+#     for batch in range(batch_size):
+#         for capsule in range(input_num_capsule):
+#             if inputs[batch, capsule,0] < threshold:
+#                 # clear feature-array
+#                 inputs *= 0.
 
-class Length(Layer):
-    """ from .capsulelayers from https://github.com/XifengGuo/CapsNet-Keras
-    TODO assert that Length() == Lambda(lambda z: K.sqrt(K.sum(K.square(z), 2)))
+#     return o
 
+Length = Lambda(lambda z: K.sqrt(K.sum(K.square(z), -1)))
 
-    Compute the length of vectors. This is used to compute a Tensor that has
-    the same shape with y_true in margin_loss. Using this layer as model's
-    output can directly predict labels by using
-      `y_pred = np.argmax(model.predict(x), 1)`
+# class Length(Layer):
+#     """ from .capsulelayers from https://github.com/XifengGuo/CapsNet-Keras
+#     Length() == Lambda(lambda z: K.sqrt(K.sum(K.square(z), -1)))
 
-    inputs: shape=[None, num_vectors, dim_vector]
-    output: shape=[None, num_vectors]
-    """
+#     Compute the length of vectors. This is used to compute a Tensor that has
+#     the same shape with y_true in margin_loss. Using this layer as model's
+#     output can directly predict labels by using
+#       `y_pred = np.argmax(model.predict(x), 1)`
 
-    def call(self, inputs, **kwargs):
-        return K.sqrt(K.sum(K.square(inputs), -1))
+#     inputs: shape=[None, num_vectors, dim_vector]
+#     output: shape=[None, num_vectors]
+#     """
 
-    def compute_output_shape(self, input_shape):
-        return input_shape[:-1]
+#     def call(self, inputs, **kwargs):
+#         return K.sqrt(K.sum(K.square(inputs), -1))
 
-    def get_config(self):
-        config = super(Length, self).get_config()
-        return config
+#     def compute_output_shape(self, input_shape):
+#         return input_shape[:-1]
+
+#     def get_config(self):
+#         config = super(Length, self).get_config()
+#         return config
