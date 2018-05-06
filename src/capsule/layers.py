@@ -109,9 +109,10 @@ class Capsule(Layer):
         # - what does n_routing (high level)?
         # The prior for coupling coefficient, initialized as zeros. (?)
         b = K.zeros_like(hat_inputs[:, :, :, 0])
+        outputs = None
         for i in range(self.routings):
             c = softmax(b, 1)
-            if K.backend() == 'theano':
+            if K.backend() == 'theano' and outputs is not None:
                 outputs = K.sum(outputs, axis=1)
             outputs = self.activation(K.batch_dot(c, hat_inputs, [2, 2]))
             if i < self.routings - 1:
