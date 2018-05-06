@@ -37,6 +37,12 @@ load-logs:
 ls:
 	ls $(LOG_DIR)/
 
+mk-env:
+	conda env create --file environment.txt
+
+activate:
+	source activate pattern_recognition_env
+
 deps:
 	conda install theano pygpu
 	pip3 install -r requirements.txt
