@@ -1,0 +1,54 @@
+# This is an Anaconda project file.
+#
+# Here you can describe your project and how to run it.
+#
+# run project:
+#	  source activate envs/default
+#   make run
+#
+# add deps:
+#  anaconda-project add-packages
+
+name: pattern-recognition
+
+description: pattern recognition project
+
+platforms:
+- osx-64
+- linux-64
+
+commands:
+  activate:
+    unix: source activate envs/default
+    env_spec: default
+
+
+  notebook:
+    unix: jupyter notebook src/
+    env_spec: default
+env_specs:
+  pattern_recognition:
+    packages: []
+    channels: []
+  default:
+    packages:
+    - pip:
+      - scipy==1.0.1
+      - Keras==2.1.5
+      - tensorflow==1.5.0
+      - scikit-image==0.13.1
+      - matplotlib==2.1.2
+      - jupyter==1.0.0
+      - pandas==0.22.0
+      - texttable==1.2.1
+      - Cython==0.28.2
+      - python-rtmidi==1.1.0
+      - mido==1.2.8
+      - mypy
+      - pydot
+      - graphviz
+      - pyknon==1.2
+    channels: []
+packages: [numpy, mido, pygpu, theano, Keras, tensorflow, pandas, matplotlib, jupyter,
+  Cython, mypy, python.app, scikit-learn]
+channels: [roebel, anaconda]
