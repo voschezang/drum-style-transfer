@@ -2,7 +2,7 @@ import numpy as np
 from keras import activations
 import keras.backend as K
 # from keras import initializers
-from keras.layers import Layer
+from keras.layers import Layer, Lambda
 
 from capsule.capsulefunctions import squash, softmax  #, margin_loss
 
@@ -104,6 +104,7 @@ class Capsule(Layer):
 
     def compute_output_shape(self, input_shape):
         return (None, self.num_capsule, self.dim_capsule)
+
 
 # def apply_capsule_p(inputs):
 #     # :input :: (batches, capsules, features)
