@@ -248,8 +248,7 @@ def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
         lookahead_matrix = matrix[i - PADDING:i]
         # msgs :: mido.Message, with absolute t in seconds
         msgs = decode_notes(c, Notes(vector), t, lookahead_matrix)
-        for msg in msgs:
-            track.append(msg)
+        track.extend(msgs)
         t += c.dt
 
     # convert absolute time in seconds to relative ticks
@@ -311,26 +310,33 @@ def decode_notes(c, notes: Notes, t,
     if not isinstance(notes, Notes):  # np.generic
         errors.typeError('numpy.ndarray', notes)
     msgs = []
-    for note_index, value in enumerate(notes):
+    for note_index, velocity in enumerate(notes):
         if lookahead_matrix is None or lookahead_matrix[:, note_index].max(
         ) < MIDI_NOISE_FLOOR:
-            msgs.extend(decode_note(c, note_index, value, t))
+            msgs.extend(decode_note(c, note_index, velocity, t))
     return msgs
 
 
-def decode_note(c, note_index, value, t):
+def decode_note(c, note_index, velocity, t):
     # return ::  [] | a list of midi messages (note on, note off)
-    if value < MIDI_NOISE_FLOOR:
+    if velocity < MIDI_NOISE_FLOOR:
         return []
     if note_index < SILENT_NOTES:
         return []
+    # Convert note_index in array to actual note-value
     note = LOWEST_NOTE + note_index - SILENT_NOTES
     if note > HIGHEST_NOTE:
-        config.debug('decode_note: note value > highest note')
-    # value *= RANGE
+        config.debug('decode_note: note index > highest note')
+    return gen_note_on_off(c, note_index, 127, t)
+
+
+def gen_note_on_off(c, note, velocity, t):
+    # :t :: seconds
+    # return ::  [] | a list of midi messages (note on, note off)
+    # velocity *= RANGE
     msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)
     msg2 = mido.Message(
-        NOTE_OFF, note=note, velocity=127, time=t + c.note_length)
+        NOTE_OFF, note=note, velocity=velocity, time=t + c.note_length)
     return [msg1, msg2]
 
 

@@ -37,7 +37,7 @@ result = g.gen_data_complex(
     context,
     1,
     min_f=f,
-    max_f=f,
+    max_f=f + 1,
     n_polyrythms=1,
     n_channels=3,
     d_phase=False,

@@ -8,6 +8,8 @@ import config
 from data import midi
 from utils import utils
 
+LOWEST_F = 0.01  # 1/f = T: 1/0.01 = 100 s
+
 
 def example(c):
     mid = mido.MidiFile()
@@ -73,10 +75,12 @@ def gen_data_complex(c,
     # params :: (samples, channels, frequencies)
     params = np.random.random([n, n_channels, n_polyrythms]) * (
         max_f - min_f) + min_f
+    params[np.where(params < LOWEST_F)] = 0.
     midis = [render_midi_poly(c, ffs, d_phase=d_phase) for ffs in params]
     matrices = midi.encode_midiFiles(c, midis, multiTrack, dim4=dim4)
 
     if return_params:
+
         return matrices, params
     return matrices
 
@@ -86,7 +90,7 @@ def render_midi(c, f=1, max_t=10, phase=0, polyphonic=False):
     # set polyphonic to true to duplicate the pattern to multiple notes
     mid = mido.MidiFile()
     track = mido.MidiTrack()
-    track = add_sin_to_midi_track(c, track, f, max_t, phase, polyphonic)
+    track = gen_square_wave(c, track, f, max_t, phase, polyphonic)
     track.sort(key=lambda msg: msg.time)
     track = midi.convert_time_to_relative_value(
         track, lambda t: midi.second2tick(c, t))
@@ -104,8 +108,14 @@ def render_midi_poly(c, ffs=[[1]], max_t=10, d_phase=True):
         for f in fs:
             if d_phase:
                 phase = np.random.random()
-            track = add_sin_to_midi_track(
-                c, track, f, max_t, phase, polyphonic=False, note=note)
+            track = gen_square_wave(
+                c,
+                track,
+                f,
+                max_t,
+                phase_offset=phase,
+                polyphonic=False,
+                note=note)
         note += 1
 
     track.sort(key=lambda msg: msg.time)
@@ -115,35 +125,46 @@ def render_midi_poly(c, ffs=[[1]], max_t=10, d_phase=True):
     return mid
 
 
-def add_sin_to_midi_track(c,
-                          track,
-                          f=1,
-                          max_t=10,
-                          phase=0,
-                          polyphonic=True,
-                          note=None):
-    dt = 1. / f
-    start_t = dt * phase
-    t = start_t  # absolute t in seconds
-
-    while t < max_t:
-        if note:
-            notes = [note]
-        elif polyphonic:
-            notes = range(midi.LOWEST_NOTE, midi.HIGHEST_NOTE)
-        else:
-            notes = [midi.LOWEST_NOTE]
-
+def gen_square_wave(c,
+                    track=[],
+                    f=1,
+                    max_t=10,
+                    phase_offset=0,
+                    polyphonic=True,
+                    note=None) -> []:
+    # Generate a sequence of notes, spaced evenly over time
+    # The pulse-width is defined by c.note_length
+    # :track :: list | mido.MidiTrack
+    notes = gen_note_values(polyphonic, note)
+    if f < LOWEST_F:
+        # Return a single note
         for note in notes:
-            note += midi.SILENT_NOTES
-            track.append(
-                mido.Message('note_on', note=note, velocity=127, time=t))
-            track.append(
-                mido.Message(
-                    'note_off', note=note, velocity=127, time=t + c.dt))
+            track.extend(midi.gen_note_on_off(c, note, 127, t=0))
+        return track
+
+    dt = 1. / f
+    start_t = dt * phase_offset
+    t = start_t  # absolute t in seconds
+    while t < max_t:
+        for note in notes:
+            track.extend(midi.gen_note_on_off(c, note, 127, t))
+
         t += dt
 
     return track
+
+
+def gen_note_values(polyphonic=False, note=None):
+    if polyphonic:
+        # Generate all possible notes
+        notes = np.arange(midi.LOWEST_NOTE, midi.HIGHEST_NOTE)
+    else:
+        if note:
+            notes = np.array([note])
+        else:
+            notes = np.array([midi.LOWEST_NOTE])
+
+    return notes + midi.SILENT_NOTES
 
 
 def render(sin=np.sin, f=1, n_samples=10, dt=0.01, phase=0):
