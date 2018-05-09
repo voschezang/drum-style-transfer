@@ -1,25 +1,12 @@
 
-input whitening: zero mean + unit variances
-      - ZCA > PSA for conv layers (imgs)
 
+input normalizen (whitening) bij VAE?
+      midi data between genres is by nature not normally distributed
+- reduce training time: batch normalization (https://arxiv.org/abs/1502.03167)
 
-use both conv + convTranspose?
-
-
-reduce sparseness by blurring midi events:  [1,0,0] => [1,1,1]
- - not too much, as we are working with instances
-   (use a higher threshold for the second note)
-
-
-data augmentation (never see the same data twice) (might affect genre-info)
- - tempo
- - phase (start t), cropping
- - reverse (?)
-
-reduce training time: batch normalization (https://arxiv.org/abs/1502.03167)
 
 So far
-	convert midi to matrices
+	encoders midi <-> matrices
 	unsupervised, autoencoder, normal (static) + lstms (variable input)
     generators for training data (poly patterns of x Hz)
        - try to make an AE that can return the input data
