@@ -17,8 +17,7 @@ activate:
 
 deps:
 	conda install anaconda-project
-	make run
-
+# make run
 
 test_midi:
 	pythonw src/test_midi2.py
