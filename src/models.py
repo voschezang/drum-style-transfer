@@ -44,12 +44,9 @@ def sample(args, z_mean, z_log_var, latent_dim, epsilon_std):
 
 #     return model, summary
 
-phase_mod = 0.1
-whitening = False
-
 
 class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
-    def __init__(self, x, batch_size=32):
+    def __init__(self, x, batch_size=32, phase_mod=0.2, whitening=False):
         keras.preprocessing.image.ImageDataGenerator.__init__(
             self,
             featurewise_center=False,  # set input mean to 0 over the dataset
