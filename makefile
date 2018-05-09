@@ -7,8 +7,8 @@ LOG_DIR := /tmp/pattern-recognition_ml_models
 start:
 	jupyter notebook src/
 
-run:
-	anaconda-project run
+# run:
+# 	anaconda-project run
 
 
 activate:
