@@ -44,60 +44,98 @@ def sample(args, z_mean, z_log_var, latent_dim, epsilon_std):
 
 #     return model, summary
 
+phase_mod = 0.1
+whitening = False
 
-class DataGenerator(keras.utils.Sequence):
-    def __init__(self, x, y=None, batch_size=32, shuffle=True, return_y=False):
+
+class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
+    def __init__(self, x, batch_size=32):
+        keras.preprocessing.image.ImageDataGenerator.__init__(
+            self,
+            featurewise_center=False,  # set input mean to 0 over the dataset
+            samplewise_center=False,  # set each sample mean to 0
+            featurewise_std_normalization=False,  # divide inputs by dataset std
+            samplewise_std_normalization=False,  # divide each input by its std
+            # zca_epsilon=10,
+            zca_whitening=whitening,
+            rotation_range=0,  # randomly rotate images in 0 to 180 degrees
+            width_shift_range=0.,  # note-channel mod, but not shuffled
+            height_shift_range=phase_mod,  # start_t, phase
+            horizontal_flip=False,  # reverse
+            vertical_flip=False)
+
         self.x = x
-        self.y = y if y is not None else x
-        self.return_y = return_y
-        self.n = x.shape[0]
+        self.fit(x)
         self.batch_size = batch_size
-        self.shuffle_samples = shuffle
-        self.shuffle_notes = shuffle
-        self.indices = []
-        self.on_epoch_end()
-
-    def on_epoch_end(self):
-        self.indices = np.arange(self.n)
-        if self.shuffle_samples:
-            np.random.shuffle(self.indices)
 
     def __len__(self):
         # n batches / epoch = #samples / batch_size
         # floor() to prevent occurences of samples multiple times
         return int(np.floor(self.x.shape[0] / self.batch_size))
 
-    def __data_generation(self, batch_indices):
-        # x_batch :: (samples, timesteps, notes)
-        if batch_indices[-1] > self.x.shape[0]:
-            print('__data_generation - batch_indices too large',
-                  batch_indices[-1], self.x.shape)
-        if not self.shuffle_notes:
-            x_batch = self.x[batch_indices]  # .copy() if mutating
-        else:
-            # gen batch placeholder
-            x_batch = np.empty_like(self.x[batch_indices])
-            for relative_batch_i, batch_i in enumerate(batch_indices):
-                note_indices = np.arange(self.x.shape[-1])
-                np.random.shuffle(note_indices)
-                for note_i, note_j in enumerate(note_indices):
-                    x_batch[relative_batch_i, :, note_i] = self.x[batch_i, :,
-                                                                  note_j]
-        if self.return_y:
-            return x_batch, x_batch
-        return x_batch, None
+    def shuffle_3rd_dim(self, x_batch):
+        # Generate a new batch using the superclass
+        # x_batch :: (samples, timesteps, 3rd_dim, channels)
+        z_batch = np.empty_like(x_batch)
+        for batch_i in range(x_batch.shape[0]):
+            indices = np.arange(x_batch.shape[-2])
+            np.random.shuffle(indices)
+            for i, j in enumerate(indices):
+                z_batch[batch_i, :, i] = x_batch[batch_i, :, j]
 
-    def __getitem__(self, i):
-        # get batch
-        if i >= self.__len__():
-            print('i >= __len__, index should be smaller', i, self.__len__())
-            i -= 1
-        batch_indices = np.arange(i * self.batch_size,
-                                  (i + 1) * self.batch_size) - 1
-        return self.__data_generation(batch_indices)
+        return z_batch
 
 
-# training_gen = DataGenerator(x_train, x_train, **params)
+# class DataGenerator2(keras.utils.Sequence):
+#     def __init__(self, x, y=None, batch_size=32, shuffle=True, return_y=False):
+#         self.x = x
+#         self.y = y if y is not None else x
+#         self.return_y = return_y
+#         self.n = x.shape[0]
+#         self.batch_size = batch_size
+#         self.shuffle_samples = shuffle
+#         self.shuffle_notes = shuffle
+#         self.indices = []
+#         self.on_epoch_end()
+
+#     def on_epoch_end(self):
+#         self.indices = np.arange(self.n)
+#         if self.shuffle_samples:
+#             np.random.shuffle(self.indices)
+
+#     def __len__(self):
+#         # n batches / epoch = #samples / batch_size
+#         # floor() to prevent occurences of samples multiple times
+#         return int(np.floor(self.x.shape[0] / self.batch_size))
+
+#     def __data_generation(self, batch_indices):
+#         # x_batch :: (samples, timesteps, notes)
+#         if batch_indices[-1] > self.x.shape[0]:
+#             print('__data_generation - batch_indices too large',
+#                   batch_indices[-1], self.x.shape)
+#         if not self.shuffle_notes:
+#             x_batch = self.x[batch_indices]  # .copy() if mutating
+#         else:
+#             # gen batch placeholder
+#             x_batch = np.empty_like(self.x[batch_indices])
+#             for relative_batch_i, batch_i in enumerate(batch_indices):
+#                 note_indices = np.arange(self.x.shape[-1])
+#                 np.random.shuffle(note_indices)
+#                 for note_i, note_j in enumerate(note_indices):
+#                     x_batch[relative_batch_i, :, note_i] = self.x[batch_i, :,
+#                                                                   note_j]
+#         if self.return_y:
+#             return x_batch, x_batch
+#         return x_batch, None
+
+#     def __getitem__(self, i):
+#         # get batch
+#         if i >= self.__len__():
+#             print('i >= __len__, index should be smaller', i, self.__len__())
+#             i -= 1
+#         batch_indices = np.arange(i * self.batch_size,
+#                                   (i + 1) * self.batch_size) - 1
+#         return self.__data_generation(batch_indices)
 
 ########################################################################
 ### Models
