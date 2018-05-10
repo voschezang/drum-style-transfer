@@ -3,6 +3,8 @@
 Context contains (global) values that are relevant for all midi and other data
 
 """
+from __future__ import division
+
 import os, pandas, numpy as np, collections
 import mido
 
@@ -48,6 +50,8 @@ def init():
                       ticks_per_beat)
     print('max min f', utils.max_f(dt), utils.min_f(max_t))
     print(' >>', context)
+    print(' sample length: % f' % (max_t / dt))
+    print(' max_f: %f, min_f: %f' % (utils.max_f(dt), utils.min_f(max_t)))
     return context
 
 
@@ -58,7 +62,7 @@ def import_data(context,
                 dirname='examples',
                 r=False):
     # multiTrack = flag to enable matrices with multiple notes (defined in data.midi)
-    print('Importing midi-data\n')
+    print('\nImporting midi-data')
     dirname = config.dataset_dir + dirname + '/'
     midis, labels = io.import_mididata(context, dirname, n, r)
 

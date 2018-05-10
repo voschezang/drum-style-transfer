@@ -34,7 +34,7 @@ VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
 MIDI_NOISE_FLOOR = 0.5  # real values below this number will be ignored by midi decoders
-PADDING = 4  # n array cells after an instance of a note-on msg (should be > 0)
+PADDING = 3  # n array cells after an instance of a note-on msg (should be > 0)
 VELOCITY_DECAY = 0.6  # velocity decay for every padded-cell
 
 DTYPE = 'float32'
@@ -130,6 +130,9 @@ def encode_midiFiles(c,
                      dim4=False):
     # reduce dims filters out unused dimensions
     # dim4 adds a dimension, so that the output will fit a keras ImageDataGenerator
+
+    # TODO split long files in samples
+
     track_list = [
         encode_midiFile(c, m, multiTrack=multiTrack, velocity=velocity)
         for m in midis
@@ -152,13 +155,7 @@ def encode_midiFiles(c,
     return tracks
 
 
-def encode_midiFile(c,
-                    midi,
-                    stretch=False,
-                    squash=False,
-                    multiTrack=True,
-                    velocity=None):
-    # TODO stretch, squash
+def encode_midiFile(c, midi, multiTrack=True, velocity=None, reduce_dims=True):
     if not isinstance(midi, mido.MidiFile):
         errors.typeError('mido.MidiFile', midi)
     # c :: data.Context
@@ -202,6 +199,15 @@ def encode_midiFile(c,
             return multiTrack_to_list_of_Track(matrix)
 
         matrix = encode_msg_in_matrix(c, msg, i, matrix, velocity)
+
+    # if reduce_dims:
+    #     matrix = reduce_dims(matrix)
+    #     indices = []
+    #     for note_i in np.arange(matrix.shape[-1]):
+    #         if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
+    #             indices.append(note_i)
+    #     tracks = tracks[:, :, indices]
+    #     config.info('reduced dims:', tracks.shape)
 
     if multiTrack:
         return matrix

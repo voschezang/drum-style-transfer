@@ -2,7 +2,8 @@ import os, re, time, datetime, pandas, numpy as np, collections
 import mido
 
 import config
-from data import data, midi
+
+# from data import midi
 
 
 def import_mididata(c, dirname='../datasets/examples/', n=2, r=False):
@@ -41,7 +42,7 @@ def walk_and_search(dirname, add_cond, max_n=100):
 def import_midifile(filename='../mary.mid'):
     if not filename[-4:] == '.mid':
         filename += '.mid'
-    config.info('reading file: %s' % filename)
+    # config.info('reading file: %s' % filename)
     return mido.MidiFile(filename)
 
 
