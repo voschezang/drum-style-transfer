@@ -65,3 +65,9 @@ predict:
 
 clean:
 	find . -name \*.pyc -delete
+
+build-docs:
+	mkdocs build --clean
+
+deploy:
+	mkdocs gh-deploy

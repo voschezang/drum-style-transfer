@@ -55,14 +55,14 @@ def import_data(context,
                 n=2,
                 multiTrack=True,
                 dim4=False,
-                dirname='examles',
+                dirname='examples',
                 r=False):
     # multiTrack = flag to enable matrices with multiple notes (defined in data.midi)
     print('Importing midi-data\n')
     dirname = config.dataset_dir + dirname + '/'
     midis, labels = io.import_mididata(context, dirname, n, r)
 
-    print('\nEncoding midi-data\n', midis)
+    print('\nEncoding midi-data\n', len(midis))
 
     print('> -> multi-track =', multiTrack)
     reduce_dims = True  # rm unused midi-notes
