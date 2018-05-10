@@ -1,5 +1,7 @@
 PROJECT := pattern-recognition
 LOG_DIR := /tmp/pattern-recognition_ml_models
+# SHELL=/bin/bash
+# SOURCE=$(shell bash -c ./setenv.sh)
 
 .PHONY: logs test
 
@@ -12,12 +14,12 @@ start:
 
 
 activate:
-	source activate envs/default
-
+	bash -c "source setenv.sh; env | sed 's/=/:=/' | sed 's/^/export /' > makeenv"
+	include makeenv
+# bash setenv.sh
 
 deps:
 	conda install anaconda-project
-# make run
 
 test_midi:
 	pythonw src/test_midi2.py
