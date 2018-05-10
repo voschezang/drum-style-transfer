@@ -21,8 +21,9 @@ activate:
 deps:
 	conda install anaconda-project
 
-test_midi:
-	pythonw src/test_midi2.py
+test:
+	pythonw src/test_import.py
+# pythonw src/test_midi2.py
 
 archive:
 	anaconda-project archive $(PROJECT).zip

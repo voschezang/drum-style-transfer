@@ -5,17 +5,37 @@ import config
 from data import data, midi
 
 
-def import_data(c, dirname='../datasets/examples/', n=2):
+def import_mididata(c, dirname='../datasets/examples/', n=2, r=False):
     # c :: data.Context
     if not dirname[-1] == '/': dirname += '/'
-    files = os.listdir(dirname)
-    filenames = [f for f in files if not f == '.DS_Store'][:n]
-    # filenames = os.listdir(dirname)[:n]
-
+    filenames = search(dirname, n, is_midifile, r)
     midis = []
     for fn in filenames:
-        midis.append(import_midifile(dirname + fn))
+        midis.append(import_midifile(fn))
     return midis, filenames
+
+
+def search(dirname, max_n, add_cond, r=False):
+    if r:
+        return walk_and_search(dirname, add_cond, max_n)
+
+    files = os.listdir(dirname)
+    return [dirname + fn for fn in files if add_cond(fn)][:max_n]
+
+
+def walk_and_search(dirname, add_cond, max_n=100):
+    # return a list of filenames that are present (recursively) in 'dirname' and
+    # satisfy 'add_cond'
+    n = 0
+    result = []
+    for path, dirs, filenames in os.walk(dirname):
+        for fn in filenames:
+            if add_cond(fn):
+                result.append(path + '/' + fn)
+                n += 1
+        if n >= max_n:
+            return result[:max_n]
+    return result
 
 
 def import_midifile(filename='../mary.mid'):
@@ -29,6 +49,10 @@ def export_midifile(mid, filename='../song_export.mid'):
     if not filename[-4:] == '.mid':
         filename += '.mid'
     mid.save(filename)
+
+
+def is_midifile(fn: str) -> bool:
+    return fn[-4:] == '.mid'
 
 
 ###
