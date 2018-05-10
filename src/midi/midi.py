@@ -1,4 +1,6 @@
-""" Functions that have to do with midi files
+# -*- coding: utf-8 -*-
+""" Midi Datastructures
+Functions that have to do with midi files
 Midi is represented either as mido.midi or np.array
 
 The encoding is not lossless: the data is quantized and meta-data is discarded
@@ -18,13 +20,19 @@ note = [0] | [1]
 notes = [i] for i in range(n_notes)
 
 """
+from __future__ import absolute_import
+from __future__ import division
 
-import numpy as np, collections
+import numpy as np
+import collections
 import mido
 from typing import List, Dict
 
-import config, errors
-from utils import utils
+from .. import config
+from .. import errors
+from ..utils import utils
+from ..midi import encode
+from ..midi import decode
 
 SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
 LOWEST_NOTE = 50
@@ -95,12 +103,6 @@ class MultiTrack(np.ndarray):
         return self.shape[0] * self.dt
 
 
-def solo():
-    # TODO
-    # extract a single track from a mido.MidiFile
-    pass
-
-
 def multiTrack_to_list_of_Track(matrix: MultiTrack):
     # def split_tracks(matrix: MultiTrack):
     # :: MultiTrack -> list NoteList
@@ -122,7 +124,7 @@ import config, errors
 from utils import utils
 
 
-def encode_msg_in_matrix(c, msg: mido.Message, i_, matrix, velocity=None):
+def encode_msg_in_multiTrack(c, msg: mido.Message, i_, matrix, velocity=None):
     # :velocity = None | float in range(0,1)
     if msg.is_meta:
         # config.info('to_vector: msg is meta')
@@ -133,7 +135,7 @@ def encode_msg_in_matrix(c, msg: mido.Message, i_, matrix, velocity=None):
 
     for i in range(i_, i_ + PADDING):
         if i < c.n_instances:
-            vector = encode_single_msg(msg, velocity)
+            vector = encode.single_msg(msg, velocity)
             matrix[i, ] = combine_notes(matrix[i], vector)
             velocity *= VELOCITY_DECAY
     return matrix
@@ -200,3 +202,16 @@ def _normalize_bytes(arr):
 def _denormalize(arr):
     # arr :: np.array
     return arr * 256.
+
+
+# def reduce_multiTrack_dims(matrix):
+#     if reduce_dims:
+#         matrix = reduce_dims(matrix)
+#         indices = []
+#         for note_i in np.arange(matrix.shape[-1]):
+#             if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
+#                 indices.append(note_i)
+#         tracks = tracks[:, :, indices]
+#         config.info('reduced dims:', tracks.shape)
+
+# def reduce_matrix_list_dims(matrix):

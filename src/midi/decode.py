@@ -1,3 +1,18 @@
+from __future__ import absolute_import
+from __future__ import division
+
+import numpy as np
+import collections
+import mido
+from typing import List, Dict
+
+from .. import config
+from .. import errors
+from ..utils import utils
+from ..midi import midi
+from ..midi.midi import Note, Notes, Track, MultiTrack
+
+
 def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
     # c :: data.Context
     # matrix :: [ vector per instance ]
@@ -22,15 +37,16 @@ def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
     for i, vector in enumerate(matrix):
         # lookahead_matrix = the part of the matrix that occurred within
         # 'PADDING' cells before 'i'
-        lookahead_matrix = matrix[i - PADDING:i]
+        lookahead_matrix = matrix[i - midi.PADDING:i]
         # msgs :: mido.Message, with absolute t in seconds
-        msgs = decode_notes(c, Notes(vector), t, lookahead_matrix)
+        msgs = notes(c, Notes(vector), t, lookahead_matrix)
         track.extend(msgs)
         t += c.dt
 
     # convert absolute time in seconds to relative ticks
     track.sort(key=lambda msg: msg.time)
-    track = convert_time_to_relative_value(track, lambda t: second2tick(c, t))
+    track = midi.convert_time_to_relative_value(
+        track, lambda t: midi.second2tick(c, t))
 
     mid = mido.MidiFile()
     mid.ticks_per_beat = c.ticks_per_beat
@@ -47,19 +63,19 @@ def notes(c, notes: Notes, t, lookahead_matrix=None) -> List[mido.Message]:
     msgs = []
     for note_index, velocity in enumerate(notes):
         if lookahead_matrix is None or lookahead_matrix[:, note_index].max(
-        ) < MIDI_NOISE_FLOOR:
-            msgs.extend(decode_note(c, note_index, velocity, t))
+        ) < midi.MIDI_NOISE_FLOOR:
+            msgs.extend(note(c, note_index, velocity, t))
     return msgs
 
 
 def note(c, note_index, velocity, t):
     # return ::  [] | a list of midi messages (note on, note off)
-    if velocity < MIDI_NOISE_FLOOR:
+    if velocity < midi.MIDI_NOISE_FLOOR:
         return []
-    if note_index < SILENT_NOTES:
+    if note_index < midi.SILENT_NOTES:
         return []
     # Convert note_index in array to actual note-value
-    note = LOWEST_NOTE + note_index - SILENT_NOTES
-    if note > HIGHEST_NOTE:
+    note = midi.LOWEST_NOTE + note_index - midi.SILENT_NOTES
+    if note > midi.HIGHEST_NOTE:
         config.debug('decode_note: note index > highest note')
-    return gen_note_on_off(c, note_index, 127, t)
+    return midi.gen_note_on_off(c, note_index, 127, t)

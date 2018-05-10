@@ -1,9 +1,16 @@
-import numpy as np, collections
+from __future__ import absolute_import
+from __future__ import division
+
+import numpy as np
+import collections
 import mido
 from typing import List, Dict
 
-import config, errors
-from utils import utils
+from .. import config
+from .. import errors
+from ..utils import utils
+from ..midi import midi
+from ..midi.midi import Note, Notes, Track, MultiTrack
 
 
 def midiFiles(c,
@@ -18,8 +25,7 @@ def midiFiles(c,
     # TODO split long files in samples
 
     track_list = [
-        encode_midiFile(c, m, multiTrack=multiTrack, velocity=velocity)
-        for m in midis
+        midiFile(c, m, multiTrack=multiTrack, velocity=velocity) for m in midis
     ]
     if multiTrack:
         tracks = np.stack(track_list)
@@ -29,7 +35,7 @@ def midiFiles(c,
     if reduce_dims:
         indices = []
         for note_i in np.arange(tracks.shape[-1]):
-            if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
+            if tracks[:, :, note_i].max() > midi.MIDI_NOISE_FLOOR:
                 indices.append(note_i)
         tracks = tracks[:, :, indices]
         config.info('reduced dims:', tracks.shape)
@@ -78,12 +84,15 @@ def midiFile(c, midi, multiTrack=True, velocity=None, reduce_dims=True):
         if not i < c.n_instances:
             # config.info('to_array: msg.time > max_t; t, n', t, c.n_instances)
             # max t reached: return matrix
+
+            #TODO matrix = midi.reduce_multiTrack_dims(matrix)
             if multiTrack:
                 return matrix
-            return multiTrack_to_list_of_Track(matrix)
+            return midi.multiTrack_to_list_of_Track(matrix)
 
-        matrix = encode_msg_in_matrix(c, msg, i, matrix, velocity)
+        matrix = midi.encode_msg_in_multiTrack(c, msg, i, matrix, velocity)
 
+    #TODO matrix = midi.reduce_multiTrack_dims(matrix)
     # if reduce_dims:
     #     matrix = reduce_dims(matrix)
     #     indices = []
@@ -95,10 +104,10 @@ def midiFile(c, midi, multiTrack=True, velocity=None, reduce_dims=True):
 
     if multiTrack:
         return matrix
-    return multiTrack_to_list_of_Track(matrix)
+    return midi.multiTrack_to_list_of_Track(matrix)
 
 
-def encode_single_msg(msg: mido.Message, velocity=None) -> Notes:
+def single_msg(msg: mido.Message, velocity=None) -> Notes:
     # encoder mido.Message to vector
     # midi :: mido midi msg
     # TODO
@@ -112,11 +121,11 @@ def encode_single_msg(msg: mido.Message, velocity=None) -> Notes:
         # config.info('to_vector: msg is meta')
         return notes
     # ignore note_off TODO
-    if msg.type == NOTE_ON:
+    if msg.type == midi.NOTE_ON:
         if velocity is None:
             velocity = default_note
-        highest_note_i = HIGHEST_NOTE - 1
-        normalized_note = max(min(msg.note, highest_note_i), LOWEST_NOTE)
-        note_index = SILENT_NOTES + normalized_note - LOWEST_NOTE
+        highest_note_i = midi.HIGHEST_NOTE - 1
+        normalized_note = max(min(msg.note, highest_note_i), midi.LOWEST_NOTE)
+        note_index = midi.SILENT_NOTES + normalized_note - midi.LOWEST_NOTE
         notes[note_index] = velocity
     return notes
