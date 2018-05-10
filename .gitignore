@@ -4,6 +4,7 @@
 *.webloc
 *.asd
 
+makeenv
 envs/*
 
 # Byte-compiled / optimized / DLL files
