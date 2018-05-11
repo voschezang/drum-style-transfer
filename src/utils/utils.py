@@ -1,6 +1,8 @@
 """ A collection of generic functions that do not have their own modules
 """
 
+# Math
+
 
 def round_(value):
     # return an int, regardless of the input type
@@ -17,6 +19,9 @@ def max_f(dt):
 def min_f(max_t):
     # return the lowest frequency that a sampler with sample rate (1/dt) can record
     return 1.0 / max_t
+
+
+# Logic
 
 
 def composition(ls, result=lambda x: x, verbose=False):

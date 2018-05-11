@@ -2,12 +2,18 @@ import os, re, time, datetime, pandas, numpy as np, collections
 import mido
 
 import config
+from utils import string
 
 
-def import_mididata(c, dirname='../datasets/examples/', n=2, r=False):
+def import_mididata(c,
+                    dirname='../datasets/examples/',
+                    n=2,
+                    cond=string.is_midifile,
+                    r=False):
     # c :: data.Context
-    if not dirname[-1] == '/': dirname += '/'
-    filenames = search(dirname, n, is_midifile, r)
+    if not dirname[-1] == '/':
+        dirname += '/'
+    filenames = search(dirname, n, cond, r)
     midis = []
     for fn in filenames:
         midis.append(import_midifile(fn))
@@ -23,8 +29,8 @@ def search(dirname, max_n, add_cond, r=False):
 
 
 def walk_and_search(dirname, add_cond, max_n=100):
-    # return a list of filenames that are present (recursively) in 'dirname' and
-    # satisfy 'add_cond'
+    # return a list of filenames that are present (recursively) in 'dirname'
+    # and satisfy 'add_cond'
     n = 0
     result = []
     for path, dirs, filenames in os.walk(dirname):
@@ -48,10 +54,6 @@ def export_midifile(mid, filename='../song_export.mid'):
     if not filename[-4:] == '.mid':
         filename += '.mid'
     mid.save(filename)
-
-
-def is_midifile(fn: str) -> bool:
-    return fn[-4:] == '.mid'
 
 
 ###

@@ -28,7 +28,8 @@ if __name__ == "__main__":
 
     # dn = config.dataset_dir
     # io.export_midifile(mid, dn + 'cycle.mid')
-    plot.single(x_train[0, :30, :, 0])
+    print(labels[0])
+    plot.single(x_train[0, :80, :, 0])
 
     print('\n\n\n', '-MIDI-')
     f = 5
