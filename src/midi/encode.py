@@ -47,18 +47,13 @@ def midiFiles(c,
             tracks.append(track)
 
     tracks_ = []
-    print(n_notes, 'notes')
     for track in tracks:
-        print(' track shape pre', track.shape[-1])
         track = track.fit_dimensions(c.n_timesteps, n_notes)
-        print(' track shape', track.shape[-1])
         tracks_.append(track)
 
     tracks = np.array(tracks_)
     if reduce_dims == midi.ReduceDimsOptions.GLOBAL:
-        print(' track global', track.shape[-1])
         tracks = midi.reduce_MultiTrack_list_dims(tracks)
-        print('  global', track.shape[-1])
 
     if dim4:
         return tracks.reshape(list(tracks.shape) + [1])

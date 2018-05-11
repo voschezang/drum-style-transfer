@@ -65,8 +65,8 @@ def init():
 def import_data(context,
                 n=2,
                 multiTrack=True,
+                reduce_dims=midi.ReduceDimsOptions.GLOBAL,
                 dim4=True,
-                reduce_dims='global',
                 dirname='examples',
                 r=False,
                 velocity=1.):
@@ -77,10 +77,10 @@ def import_data(context,
 
     print('\nEncoding midi-data\n', len(midis))
 
-    print('> -> multi-track =', multiTrack)
+    print('> -> multi-track =', multiTrack, reduce_dims)
     matrices = midi.encode.midiFiles(context, midis, multiTrack, reduce_dims,
                                      velocity, dim4)
-    return context, matrices, labels
+    return matrices, labels
 
 
 # TODO omit channel info?

@@ -118,14 +118,11 @@ class MultiTrack(np.ndarray):
         # return :: MultiTrack
         # discard note order
         # TODO parallelize
-        print(self.shape)
-        indices = []
+        used_indices = []
         for note_i in range(self.shape[1]):
             if self[:, note_i].max() > MIDI_NOISE_FLOOR:
-                indices.append(note_i)
-        tracks = self[:, indices]
-        config.info('reduced mt dims:', tracks.shape)
-        return tracks  # return tracks[:, indices]
+                used_indices.append(note_i)
+        return self[:, used_indices]
 
     def fit_dimensions(self, n_timesteps, n_notes):
         # increase dimensions to (n_timesteps, n_notes)

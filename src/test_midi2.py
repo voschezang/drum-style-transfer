@@ -13,13 +13,15 @@ from midi import generators as g
 from utils import utils, io, plot
 
 if __name__ == "__main__":
-    n = 1
+    context = setup.init()
+    n = 10
     multiTrack = True
     reduce_dims = midi.ReduceDimsOptions.GLOBAL
-    # reduce_dims = midi.ReduceDimsOptions.MIDIFILE
+    reduce_dims = midi.ReduceDimsOptions.MIDIFILE
+    dim4 = True
     dirname = 'drum_midi'
-    context, x_train, labels = setup.import_data(
-        setup.init(), n, multiTrack, reduce_dims, dirname, r=True)
+    x_train, labels = setup.import_data(
+        context, n, multiTrack, reduce_dims, dim4, dirname, r=True)
     config.info('x_train', x_train.shape)
     # context, x_train, labels = data.import_data(data.init(), n, multiTrack=True)
     # config.info('arrays2', x_train.shape)

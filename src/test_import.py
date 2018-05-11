@@ -11,9 +11,11 @@ from midi import generators as g
 from utils import utils, io, plot
 
 if __name__ == "__main__":
+    context = setup.init()
     n = 10
     multiTrack = True
-    context, x_train, labels = setup.import_data(
+    x_train, labels = setup.import_data(
+        context,
         setup.init(),
         n,
         multiTrack=multiTrack,

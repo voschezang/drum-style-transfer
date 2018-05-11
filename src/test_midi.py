@@ -17,8 +17,9 @@ import setup
 ###
 
 if not __name__ == "__main__":
-    n: int = 2
-    context, x_train, labels = setup.import_data(setup.init(), n)
+    context = setup.init()
+    n = 2
+    x_train, labels = setup.import_data(setup.init(), n)
     print(x_train.shape)
 
     dn = config.dataset_dir
