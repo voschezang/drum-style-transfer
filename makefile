@@ -3,6 +3,8 @@ LOG_DIR := /tmp/pattern-recognition_ml_models
 # SHELL=/bin/bash
 # SOURCE=$(shell bash -c ./setenv.sh)
 
+RUN_PYTHON := (cd src && exec | pythonw .py)
+
 .PHONY: logs test
 
 
@@ -22,8 +24,13 @@ deps:
 	conda install anaconda-project
 
 test:
-	pythonw src/test_import.py
+	make run-python script=test_midi2.py
+# 	make run-python script=test_import.py
 # pythonw src/test_midi2.py
+
+run-python:
+	(cd src && exec | pythonw $(script))
+
 
 archive:
 	anaconda-project archive $(PROJECT).zip

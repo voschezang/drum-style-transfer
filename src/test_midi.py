@@ -1,13 +1,13 @@
 import os, numpy as np, pandas
 if __name__ == "__main__":
     np.random.seed(333)
-    os.chdir('src')
 import mido
 
 # local libs
 import config
 from data import data, midi
 from utils import io
+import setup
 
 # mid = mido.MidiFile()
 # track = mido.MidiTrack()
@@ -16,9 +16,9 @@ from utils import io
 
 ###
 
-if __name__ == "__main__":
+if not __name__ == "__main__":
     n: int = 2
-    context, x_train, labels = data.import_data(data.init(), n)
+    context, x_train, labels = setup.import_data(setup.init(), n)
     print(x_train.shape)
 
     dn = config.dataset_dir
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # for x in mid: print(x)
     print(mid.filename)
-    io.export_midifile(m, dn + 'song_export_copy.mid')
+    # io.export_midifile(m, dn + 'song_export_copy.mid')
 
     print(m, m.tracks[0])
     print(encoded.shape)

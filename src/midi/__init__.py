@@ -1,3 +1,6 @@
+# The modules midi.encode, midi.decode depend on the following functions,
+# therefore this module cannot import them
+
 # -*- coding: utf-8 -*-
 """ Midi Datastructures
 Functions that have to do with midi files
@@ -28,11 +31,11 @@ import collections
 import mido
 from typing import List, Dict
 
-from .. import config
-from .. import errors
-from ..utils import utils
-from ..midi import encode
-from ..midi import decode
+import config
+import errors
+from utils import utils
+# from . import encode
+# from . import decode
 
 SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
 LOWEST_NOTE = 50
@@ -49,16 +52,7 @@ DTYPE = 'float32'
 
 # 0.5 to be compatible with binary crossentropy
 
-
-class Note(np.ndarray):
-    # array :: [0] | [1]
-    # array with a single float in range [0,1]
-    # to be used as a note-on message at an instance
-    # note: function default args are evaluated once, before runtime
-    def __new__(cls, array=None):
-        if array is None:
-            array = np.zeros(1, dtype=DTYPE)
-        return array.astype(DTYPE).view(cls)
+# TODO - Note c Notes, Track c MultiTrack
 
 
 class Notes(np.ndarray):
@@ -73,17 +67,15 @@ class Notes(np.ndarray):
         return array.astype(DTYPE).view(cls)
 
 
-class Track(np.ndarray):
-    # array :: (timesteps, Note)
-    def __new__(cls, array):
-        if len(array.shape) == 1:
-            # transform a list of float to a list of Note
-            return np.expand_dims(array, axis=1).view(cls)
+class Note(np.ndarray):
+    # array :: [0] | [1]
+    # array with a single float in range [0,1]
+    # to be used as a note-on message at an instance
+    # note: function default args are evaluated once, before runtime
+    def __new__(cls, array=None):
+        if array is None:
+            array = np.zeros(1, dtype=DTYPE)
         return array.astype(DTYPE).view(cls)
-
-    def length_in_seconds(self):
-        # n instances * dt, in seconds
-        return self.shape[0] * self.dt
 
 
 class MultiTrack(np.ndarray):
@@ -97,6 +89,19 @@ class MultiTrack(np.ndarray):
 
     def __init__(self, length=100, dt=0.01):
         self.dt = dt  # seconds
+
+    def length_in_seconds(self):
+        # n instances * dt, in seconds
+        return self.shape[0] * self.dt
+
+
+class Track(np.ndarray):
+    # array :: (timesteps, Note)
+    def __new__(cls, array):
+        if len(array.shape) == 1:
+            # transform a list of float to a list of Note
+            return np.expand_dims(array, axis=1).view(cls)
+        return array.astype(DTYPE).view(cls)
 
     def length_in_seconds(self):
         # n instances * dt, in seconds
@@ -122,23 +127,6 @@ from typing import List, Dict
 
 import config, errors
 from utils import utils
-
-
-def encode_msg_in_multiTrack(c, msg: mido.Message, i_, matrix, velocity=None):
-    # :velocity = None | float in range(0,1)
-    if msg.is_meta:
-        # config.info('to_vector: msg is meta')
-        return matrix
-
-    if velocity is None:
-        velocity = min(msg.velocity, VELOCITY_RANGE) / float(VELOCITY_RANGE)
-
-    for i in range(i_, i_ + PADDING):
-        if i < c.n_instances:
-            vector = encode.single_msg(msg, velocity)
-            matrix[i, ] = combine_notes(matrix[i], vector)
-            velocity *= VELOCITY_DECAY
-    return matrix
 
 
 def gen_note_on_off(c, note, velocity, t):

@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import numpy as np
 
-from data import midi
+# from . import midi
+import midi
 
 
 def single(m: midi.MultiTrack):

@@ -6,11 +6,19 @@ import collections
 import mido
 from typing import List, Dict
 
-from .. import config
-from .. import errors
-from ..utils import utils
-from ..midi import midi
-from ..midi.midi import Note, Notes, Track, MultiTrack
+import config
+import errors
+import midi
+from utils import utils
+# import midi
+# from .. import config
+# from .. import errors
+# from ..utils import utils
+# from .. import midi
+from midi import Note, Notes, Track, MultiTrack
+
+# from ..midi import midi
+# from ..midi.midi import Note, Notes, Track, MultiTrack
 
 
 def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:

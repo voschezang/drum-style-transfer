@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+# from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
@@ -6,11 +6,18 @@ import collections
 import mido
 from typing import List, Dict
 
-from .. import config
-from .. import errors
-from ..utils import utils
-from ..midi import midi
-from ..midi.midi import Note, Notes, Track, MultiTrack
+import config
+import errors
+import midi
+from midi import Note, Notes, Track, MultiTrack
+
+from utils import utils
+# from . import midi
+# import midi.Note
+import os
+print(os.getcwd(), "---")
+
+# from midi import Note, Notes, Track, MultiTrack
 
 
 def midiFiles(c,
@@ -90,7 +97,7 @@ def midiFile(c, midi, multiTrack=True, velocity=None, reduce_dims=True):
                 return matrix
             return midi.multiTrack_to_list_of_Track(matrix)
 
-        matrix = midi.encode_msg_in_multiTrack(c, msg, i, matrix, velocity)
+        matrix = msg_in_multiTrack(c, msg, i, matrix, velocity)
 
     #TODO matrix = midi.reduce_multiTrack_dims(matrix)
     # if reduce_dims:
@@ -107,12 +114,34 @@ def midiFile(c, midi, multiTrack=True, velocity=None, reduce_dims=True):
     return midi.multiTrack_to_list_of_Track(matrix)
 
 
-def single_msg(msg: mido.Message, velocity=None) -> Notes:
+def msg_in_multiTrack(c,
+                      msg: mido.Message,
+                      i: int,
+                      matrix: midi.MultiTrack,
+                      velocity=None) -> midi.MultiTrack:
+    # :velocity = None | float in range(0,1)
+    if msg.is_meta:
+        # config.info('to_vector: msg is meta')
+        return matrix
+
+    if velocity is None:
+        velocity = min(msg.velocity, midi.VELOCITY_RANGE) / float(
+            midi.VELOCITY_RANGE)
+
+    for i_ in range(i, i + midi.PADDING):
+        if i_ < c.n_instances:
+            vector = single_msg(msg, velocity)
+            matrix[i_, ] = midi.combine_notes(matrix[i_], vector)
+            velocity *= midi.VELOCITY_DECAY
+    return matrix
+
+
+def single_msg(msg: mido.Message, velocity=None) -> midi.Notes:
     # encoder mido.Message to vector
     # midi :: mido midi msg
     # TODO
     # ignore msg.velocity for now
-    notes = Notes()
+    notes = midi.Notes()
     default_note = 1.
     # TODO
     # for each instance

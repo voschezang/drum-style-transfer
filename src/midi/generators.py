@@ -5,7 +5,8 @@ import numpy as np
 import mido
 
 import config
-from data import midi
+import midi
+from midi import encode
 from utils import utils
 
 LOWEST_F = 0.01  # 1/f = T: 1/0.01 = 100 s
@@ -28,7 +29,7 @@ def example(c):
     track = midi.convert_time_to_relative_value(
         track, lambda t: midi.second2tick(c, t))
     mid.tracks.append(track)
-    return midi.encode_midiFiles(c, [mid])
+    return midi.encode.midiFiles(c, [mid])
 
 
 def gen_data(c, n=100, fs=None, max_f=None, min_f=None) -> np.ndarray:
@@ -43,7 +44,7 @@ def gen_data(c, n=100, fs=None, max_f=None, min_f=None) -> np.ndarray:
     if fs is None:
         fs = np.random.random(n) * (max_f - min_f) + min_f
     midis = [render_midi(c, f, phase=np.random.random()) for f in fs]
-    return midi.encode_midiFiles(c, midis)
+    return midi.encode.midiFiles(c, midis)
 
 
 def gen_data_complex(c,
@@ -77,7 +78,7 @@ def gen_data_complex(c,
         max_f - min_f) + min_f
     params[np.where(params < LOWEST_F)] = 0.
     midis = [render_midi_poly(c, ffs, d_phase=d_phase) for ffs in params]
-    matrices = midi.encode_midiFiles(c, midis, multiTrack, dim4=dim4)
+    matrices = midi.encode.midiFiles(c, midis, multiTrack, dim4=dim4)
 
     if return_params:
 

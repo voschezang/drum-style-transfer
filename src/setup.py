@@ -7,14 +7,16 @@ Context contains (global) values that are relevant for all midi and other data
 """
 from __future__ import division
 
-import os, pandas, numpy as np, collections
+import numpy as np
+import collections
 import mido
 
 import config
-
-from utils import utils, io
-from data import midi
-# from utils import utils
+import midi
+# from midi import encode
+# from midi import decode
+from utils import utils
+from utils import io
 
 Context = collections.namedtuple('Context', [
     'max_t',
@@ -39,6 +41,7 @@ print(""" Context :: namedtuple(
 
 
 def init():
+    # return Context
     print('Setting up params\n')
     max_t = 2.
     dt = 0.02  # T, sampling interval. quantized time, must be > 0
@@ -73,7 +76,7 @@ def import_data(context,
     print('> -> multi-track =', multiTrack)
     reduce_dims = True  # rm unused midi-notes
     velocity = 1.
-    matrices = midi.encode_midiFiles(
+    matrices = midi.encode.midiFiles(
         context, midis, multiTrack, reduce_dims, velocity, dim4=dim4)
     return context, matrices, labels
 
