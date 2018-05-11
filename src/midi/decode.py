@@ -14,8 +14,8 @@ from utils import utils
 # from .. import config
 # from .. import errors
 # from ..utils import utils
-# from .. import midi
-from midi import Note, Notes, Track, MultiTrack
+from midi import generators as g
+from midi import NoteVector, MultiTrack, Track
 
 # from ..midi import midi
 # from ..midi.midi import Note, Notes, Track, MultiTrack
@@ -47,7 +47,7 @@ def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
         # 'PADDING' cells before 'i'
         lookahead_matrix = matrix[i - midi.PADDING:i]
         # msgs :: mido.Message, with absolute t in seconds
-        msgs = notes(c, Notes(vector), t, lookahead_matrix)
+        msgs = notes(c, NoteVector(vector), t, lookahead_matrix)
         track.extend(msgs)
         t += c.dt
 
@@ -63,10 +63,11 @@ def decode_track(c, matrix: MultiTrack) -> mido.MidiTrack:
     return mid
 
 
-def notes(c, notes: Notes, t, lookahead_matrix=None) -> List[mido.Message]:
+def notes(c, notes: NoteVector, t,
+          lookahead_matrix=None) -> List[mido.Message]:
     # :t :: seconds
     # msg.time = absolute, in seconds
-    if not isinstance(notes, Notes):  # np.generic
+    if not isinstance(notes, NoteVector):  # np.generic
         errors.typeError('numpy.ndarray', notes)
     msgs = []
     for note_index, velocity in enumerate(notes):
@@ -86,4 +87,4 @@ def note(c, note_index, velocity, t):
     note = midi.LOWEST_NOTE + note_index - midi.SILENT_NOTES
     if note > midi.HIGHEST_NOTE:
         config.debug('decode_note: note index > highest note')
-    return midi.gen_note_on_off(c, note_index, 127, t)
+    return g.note_on_off(c, note_index, 127, t)

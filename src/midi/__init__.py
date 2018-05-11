@@ -23,7 +23,6 @@ note = [0] | [1]
 notes = [i] for i in range(n_notes)
 
 """
-from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
@@ -55,88 +54,101 @@ DTYPE = 'float32'
 # TODO - Note c Notes, Track c MultiTrack
 
 
-class Notes(np.ndarray):
-    # array :: (notes)
-    # array with floats in range [0,1] for every (midi) note
-    # to be used as note-on messages at an instance
+class ReduceDimsOptions:
+    GLOBAL = 'global'
+    MIDIFILE = 'MidiFile'
+    NONE = 'none'
+
+
+class NoteVector(np.ndarray):
+    """ Array with floats in range [0,1] for every (midi) note
+    to be used as note-on messages at an instance
+    """
+
     # def __new__(cls, array=np.zeros(N_NOTES)):
     # note: function default args are evaluated once, before runtime
-    def __new__(cls, array=None):
+
+    def __new__(cls, array=None, n_notes=None):
+        # array :: [ notes ] | None
         if array is None:
+            if n_notes is None:
+                n_notes = N_NOTES
             array = np.zeros(N_NOTES)
         return array.astype(DTYPE).view(cls)
 
 
-class Note(np.ndarray):
-    # array :: [0] | [1]
-    # array with a single float in range [0,1]
-    # to be used as a note-on message at an instance
-    # note: function default args are evaluated once, before runtime
-    def __new__(cls, array=None):
-        if array is None:
-            array = np.zeros(1, dtype=DTYPE)
-        return array.astype(DTYPE).view(cls)
-
-
 class MultiTrack(np.ndarray):
-    # array :: (timesteps, Notes)
-    # array of Notes, with length 'track-length'
-    def __new__(cls, length, dt):
-        arr = np.stack([Notes() for _ in range(length)])
+    """ np.ndarray :: (timesteps, NoteVector),
+    with length 'track-length'
+
+    """
+
+    def __new__(cls, n_timesteps, n_notes=None):
+        if n_notes is None:
+            n_notes = N_NOTES
+        arr = np.zeros([n_timesteps, n_notes])
         # at every timestep, fill notes with index in range 0:SILENT_NOTES with 1
         arr[:, :SILENT_NOTES] = 1.
         return arr.astype(DTYPE).view(cls)
 
-    def __init__(self, length=100, dt=0.01):
-        self.dt = dt  # seconds
-
     def length_in_seconds(self):
         # n instances * dt, in seconds
-        return self.shape[0] * self.dt
+        return self.n_timesteps * self.dt
+
+    def n_timesteps(self):
+        return self.shape[0]
+
+    def n_notes(self):
+        return self.shape[1]
+
+    def multiTrack_to_list_of_Track(self):
+        # return :: [ Track ]
+        # matrix = array (timesteps, notes)
+        tracks = []
+        note_indices = self.shape[1]
+
+        for i in range(note_indices):
+            # ignore notes indices that are not present
+            if self[:, i].max() > MIDI_NOISE_FLOOR:
+                tracks.append(Track(self[:, i]))
+
+        return np.stack(tracks)
+
+    def reduce_dims(self):
+        # return :: MultiTrack
+        # discard note order
+        # TODO parallelize
+        print(self.shape)
+        indices = []
+        for note_i in range(self.shape[1]):
+            if self[:, note_i].max() > MIDI_NOISE_FLOOR:
+                indices.append(note_i)
+        tracks = self[:, indices]
+        config.info('reduced mt dims:', tracks.shape)
+        return tracks  # return tracks[:, indices]
+
+    def fit_dimensions(self, n_timesteps, n_notes):
+        # increase dimensions to (n_timesteps, n_notes)
+        if self.n_timesteps() < n_timesteps or self.n_notes() < n_notes:
+            track = MultiTrack(n_timesteps, n_notes)
+            track[:self.n_timesteps(), :self.n_notes()] = self
+            return track
+        return self
 
 
-class Track(np.ndarray):
-    # array :: (timesteps, Note)
+class Track(MultiTrack):
+    """ A MultiTrack where NoteVector.length of 1
+    """
+
     def __new__(cls, array):
+        return MultiTrack.__new__(array.shape[0], n_notes=1)
+
+    def __init__(self, array):
+        # MultiTrack.__init__(array.shape[0], n_notes=1)
         if len(array.shape) == 1:
-            # transform a list of float to a list of Note
-            return np.expand_dims(array, axis=1).view(cls)
-        return array.astype(DTYPE).view(cls)
-
-    def length_in_seconds(self):
-        # n instances * dt, in seconds
-        return self.shape[0] * self.dt
-
-
-def multiTrack_to_list_of_Track(matrix: MultiTrack):
-    # def split_tracks(matrix: MultiTrack):
-    # :: MultiTrack -> list NoteList
-    # matrix = array (timesteps, notes)
-    tracks = []
-    note_indices = matrix.shape[1]
-    for i in range(note_indices):
-        # ignore notes indices that are not present
-        if matrix[:, i].max() > MIDI_NOISE_FLOOR:
-            tracks.append(Track(matrix[:, i]))
-    return np.stack(tracks)
-
-
-import numpy as np, collections
-import mido
-from typing import List, Dict
-
-import config, errors
-from utils import utils
-
-
-def gen_note_on_off(c, note, velocity, t):
-    # :t :: seconds
-    # return ::  [] | a list of midi messages (note on, note off)
-    # velocity *= RANGE
-    msg1 = mido.Message(NOTE_ON, note=note, velocity=127, time=t)
-    msg2 = mido.Message(
-        NOTE_OFF, note=note, velocity=velocity, time=t + c.note_length)
-    return [msg1, msg2]
+            # transform [0, 1, ..] => [[0], [1], ..]
+            array = np.expand_dims(array, axis=1)
+        self[:, 0] = array[:, 0]
 
 
 def second2tick(c, t):
@@ -176,30 +188,12 @@ def convert_time_to_relative_value(ls, convert_time):
     return ls
 
 
-def to_midi(arr):
-    # arr :: np.array
-    pass
-
-
-def _normalize_bytes(arr):
-    # arr :: np.array
-    # TODO check max mido midi value
-    return arr / 256.
-
-
-def _denormalize(arr):
-    # arr :: np.array
-    return arr * 256.
-
-
-# def reduce_multiTrack_dims(matrix):
-#     if reduce_dims:
-#         matrix = reduce_dims(matrix)
-#         indices = []
-#         for note_i in np.arange(matrix.shape[-1]):
-#             if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
-#                 indices.append(note_i)
-#         tracks = tracks[:, :, indices]
-#         config.info('reduced dims:', tracks.shape)
-
-# def reduce_matrix_list_dims(matrix):
+def reduce_MultiTrack_list_dims(tracks):
+    # [ MultiTrack ] -> [ MultiTrack ]
+    used_indices = []
+    for note_i in range(tracks.shape[-1]):
+        if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
+            used_indices.append(note_i)
+    tracks = tracks[:, :, used_indices]
+    config.info('reduced mt list dims:', tracks.shape)
+    return tracks  # return tracks[:, :, indices]

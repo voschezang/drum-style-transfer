@@ -3,8 +3,6 @@ import mido
 
 import config
 
-# from data import midi
-
 
 def import_mididata(c, dirname='../datasets/examples/', n=2, r=False):
     # c :: data.Context

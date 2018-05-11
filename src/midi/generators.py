@@ -54,7 +54,6 @@ def gen_data_complex(c,
                      n_polyrythms=2,
                      n_channels=2,
                      d_phase=True,
-                     return_params=False,
                      dim4=False,
                      multiTrack=True):
     """
@@ -63,6 +62,7 @@ def gen_data_complex(c,
     :n_channels = n different note indices (e.g. 60,62,64)
 
     set d_phase to False to let every pattern start at t=0
+
     """
     f_margin = 0.10  # 10%
     if max_f is None:
@@ -78,12 +78,8 @@ def gen_data_complex(c,
         max_f - min_f) + min_f
     params[np.where(params < LOWEST_F)] = 0.
     midis = [render_midi_poly(c, ffs, d_phase=d_phase) for ffs in params]
-    matrices = midi.encode.midiFiles(c, midis, multiTrack, dim4=dim4)
-
-    if return_params:
-
-        return matrices, params
-    return matrices
+    tracks = midi.encode.midiFiles(c, midis, multiTrack, dim4=dim4)
+    return tracks, params
 
 
 def render_midi(c, f=1, max_t=10, phase=0, polyphonic=False):
@@ -148,11 +144,21 @@ def gen_square_wave(c,
     t = start_t  # absolute t in seconds
     while t < max_t:
         for note in notes:
-            track.extend(midi.gen_note_on_off(c, note, 127, t))
+            track.extend(note_on_off(c, note, 127, t))
 
         t += dt
 
     return track
+
+
+def note_on_off(c, note, velocity, t):
+    # :t :: seconds
+    # return ::  [] | a list of midi messages (note on, note off)
+    # velocity *= RANGE
+    msg1 = mido.Message(midi.NOTE_ON, note=note, velocity=127, time=t)
+    msg2 = mido.Message(
+        midi.NOTE_OFF, note=note, velocity=velocity, time=t + c.note_length)
+    return [msg1, msg2]
 
 
 def gen_note_values(polyphonic=False, note=None):

@@ -1,8 +1,7 @@
-import os, re, time, datetime, pandas, numpy as np, collections
+import numpy as np
 from keras.models import model_from_json
 
 import config
-from data import data, midi
 
 
 def save_model(model, model_name='model'):

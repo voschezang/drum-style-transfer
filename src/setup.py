@@ -21,7 +21,7 @@ from utils import io
 Context = collections.namedtuple('Context', [
     'max_t',
     'dt',
-    'n_instances',
+    'n_timesteps',
     'note_length',
     'bpm',
     'tempo',
@@ -31,7 +31,7 @@ Context = collections.namedtuple('Context', [
 print(""" Context :: namedtuple(
 [ max_t = float
 , dt = float
-, n_instances = int
+, n_timestesp = int
 , note_length = int
 , bpm = float
 , tempo = float
@@ -43,15 +43,17 @@ print(""" Context :: namedtuple(
 def init():
     # return Context
     print('Setting up params\n')
-    max_t = 2.
-    dt = 0.02  # T, sampling interval. quantized time, must be > 0
-    n_instances = round(max_t / dt)  # vector length
-    note_length = 0.03  # seconds
     bpm = 120.  # default bpm
+    max_t = 2.
+    max_bars = 2
+    max_t = 60 / bpm * 2 * max_bars
+    dt = 0.02  # T, sampling interval. quantized time, must be > 0
+    n_timesteps = round(max_t / dt)  # vector length
+    note_length = 0.03  # seconds
     tempo = mido.bpm2tempo(bpm)
     # ticks_per_beat: 96 | 220 | 480 # midi resolution
     ticks_per_beat = mido.MidiFile().ticks_per_beat
-    context = Context(max_t, dt, n_instances, note_length, bpm, tempo,
+    context = Context(max_t, dt, n_timesteps, note_length, bpm, tempo,
                       ticks_per_beat)
     print('max min f', utils.max_f(dt), utils.min_f(max_t))
     print(' >>', context)
@@ -63,10 +65,12 @@ def init():
 def import_data(context,
                 n=2,
                 multiTrack=True,
-                dim4=False,
+                dim4=True,
+                reduce_dims='global',
                 dirname='examples',
-                r=False):
-    # multiTrack = flag to enable matrices with multiple notes (defined in data.midi)
+                r=False,
+                velocity=1.):
+    # multiTrack = flag to enable matrices with multiple notes (defined in midi.init)
     print('\nImporting midi-data')
     dirname = config.dataset_dir + dirname + '/'
     midis, labels = io.import_mididata(context, dirname, n, r)
@@ -74,10 +78,8 @@ def import_data(context,
     print('\nEncoding midi-data\n', len(midis))
 
     print('> -> multi-track =', multiTrack)
-    reduce_dims = True  # rm unused midi-notes
-    velocity = 1.
-    matrices = midi.encode.midiFiles(
-        context, midis, multiTrack, reduce_dims, velocity, dim4=dim4)
+    matrices = midi.encode.midiFiles(context, midis, multiTrack, reduce_dims,
+                                     velocity, dim4)
     return context, matrices, labels
 
 

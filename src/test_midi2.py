@@ -1,8 +1,8 @@
-import os, numpy as np, pandas
+import os, numpy as np
 if __name__ == "__main__":
     np.random.seed(333)
-    # os.chdir('src')
     print(os.getcwd())
+
 import mido  # , rtmidi, rtmidi_
 import matplotlib.pyplot as plt
 
@@ -13,24 +13,26 @@ from midi import generators as g
 from utils import utils, io, plot
 
 if __name__ == "__main__":
-    n = 10
+    n = 1
     multiTrack = True
+    reduce_dims = midi.ReduceDimsOptions.GLOBAL
+    # reduce_dims = midi.ReduceDimsOptions.MIDIFILE
+    dirname = 'drum_midi'
     context, x_train, labels = setup.import_data(
-        setup.init(), n, multiTrack=multiTrack)
-    config.info('arrays2', x_train.shape)
+        setup.init(), n, multiTrack, reduce_dims, dirname, r=True)
+    config.info('x_train', x_train.shape)
     # context, x_train, labels = data.import_data(data.init(), n, multiTrack=True)
     # config.info('arrays2', x_train.shape)
 
-    dn = config.dataset_dir
-
+    # dn = config.dataset_dir
     # io.export_midifile(mid, dn + 'cycle.mid')
-    # plot.multi(x_train[8, :30])
+    plot.single(x_train[0, :30, :, 0])
 
     print('\n\n\n', '-MIDI-')
     f = 5
     # result = g.example(context)
     # result = g.gen_data(context, 2, min_f=f, max_f=f)
-    result = g.gen_data_complex(
+    result, params = g.gen_data_complex(
         context,
         1,
         min_f=f,
@@ -39,13 +41,13 @@ if __name__ == "__main__":
         n_channels=3,
         d_phase=False,
         multiTrack=True)
-    config.info('arrays2', result.shape)
+    config.info('result', result.shape)
     # print(' 000 ', result.shape, result[:10, :])
     print(type(result))
     print('result', result.shape)
     # print(result[0, :5])
 
-    plot.multi(result[0, :30])
+    # plot.single(result[0, :30])
 
 # fn = dn + '4-floor-120bpm.mid'
 # mid = io.import_midifile(fn)

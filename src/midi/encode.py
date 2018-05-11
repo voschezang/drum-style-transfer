@@ -1,4 +1,3 @@
-# from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
@@ -9,112 +8,128 @@ from typing import List, Dict
 import config
 import errors
 import midi
-from midi import Note, Notes, Track, MultiTrack
-
+# from midi import NoteVector, MultiTrack, Track
 from utils import utils
-# from . import midi
-# import midi.Note
-import os
-print(os.getcwd(), "---")
-
-# from midi import Note, Notes, Track, MultiTrack
 
 
 def midiFiles(c,
               midis,
               multiTrack=True,
-              reduce_dims=True,
+              reduce_dims=midi.ReduceDimsOptions.GLOBAL,
               velocity=None,
-              dim4=False):
-    # reduce dims filters out unused dimensions
-    # dim4 adds a dimension, so that the output will fit a keras ImageDataGenerator
+              dim4=False,
+              split_files=False):
+    """ Encode a list of mido.MidiFile
+    reduce dims filters out unused dimensions
+     'global' -> filter after all midiFiles have been encoded (keep note-structure)
+     'midiFile' -> filter per midiFile, discard note structure
+
+    dim4 adds a dimension to the output, so that the output will fit keras'
+    ImageDataGenerator, with (samples, timesteps, notes, 1)
+    """
 
     # TODO split long files in samples
 
-    track_list = [
-        midiFile(c, m, multiTrack=multiTrack, velocity=velocity) for m in midis
-    ]
-    if multiTrack:
-        tracks = np.stack(track_list)
-    else:
-        tracks = np.concatenate(track_list)
+    # tracks_list = [
+    #     midiFile(c, mid, multiTrack, velocity, reduce_dims, split_files)
+    #     for mid in midis
+    # ]
 
-    if reduce_dims:
-        indices = []
-        for note_i in np.arange(tracks.shape[-1]):
-            if tracks[:, :, note_i].max() > midi.MIDI_NOISE_FLOOR:
-                indices.append(note_i)
-        tracks = tracks[:, :, indices]
-        config.info('reduced dims:', tracks.shape)
+    config.info(multiTrack)
+    n_notes = 1
+    tracks = []
+    for mid in midis:
+        encoded_tracks = midiFile(c, mid, multiTrack, velocity, reduce_dims,
+                                  split_files)
+        for track in encoded_tracks:
+            if track.n_notes() > n_notes:
+                n_notes = track.n_notes()
+            tracks.append(track)
+
+    tracks_ = []
+    print(n_notes, 'notes')
+    for track in tracks:
+        print(' track shape pre', track.shape[-1])
+        track = track.fit_dimensions(c.n_timesteps, n_notes)
+        print(' track shape', track.shape[-1])
+        tracks_.append(track)
+
+    tracks = np.array(tracks_)
+    if reduce_dims == midi.ReduceDimsOptions.GLOBAL:
+        print(' track global', track.shape[-1])
+        tracks = midi.reduce_MultiTrack_list_dims(tracks)
+        print('  global', track.shape[-1])
 
     if dim4:
         return tracks.reshape(list(tracks.shape) + [1])
     return tracks
 
 
-def midiFile(c, midi, multiTrack=True, velocity=None, reduce_dims=True):
-    if not isinstance(midi, mido.MidiFile):
-        errors.typeError('mido.MidiFile', midi)
-    # c :: data.Context
+def midiFile(c,
+             mid: mido.MidiFile,
+             multiTrack=True,
+             velocity=None,
+             reduce_dims=True,
+             split_files=False):
+    """
+    c :: setup.Context
+    return :: [ MultiTrack ] | [ Track ]
+    """
+    # TODO split files
+    if not isinstance(mid, mido.MidiFile):
+        errors.typeError('mido.MidiFile', mid)
     # TODO # if bpm is given: 'normalize' t ?
 
-    # matrix :: [ [notes] per instance ]
+    # matrix :: [ NoteVector per instance ]
     # all midinotes will be grouped into 1 MultiTrack per midichannel
-    matrix = MultiTrack(c.n_instances, c.dt)
+    matrix = midi.MultiTrack(c.n_timesteps)
     t = 0
+    # length = mid.length # in seconds
+    mid.ticks_per_beat  # e.g. 96 PPQ pulses per quarter note (beat)
 
-    # length = midi.length # in seconds
-    midi.ticks_per_beat  # e.g. 96 PPQ pulses per quarter note (beat)
-    # default tempo: 500000 microseconds per beat (120 bpm)
-    #   use set_tempo to change tempo during a song
-    # mido.bpm2tempo(bpm)
-
-    # TODO? a midifile that consists of multiple tracks is interpreted
+    # TODO a midifile that consists of multiple tracks is interpreted
     # as multiple independent files
-    if midi.type == 2:
+    if mid.type == 2:
         # type = async
         errors.typeError('mido.MidiFile.type 0 | 1', 2)
-    # elif midi.type == 1:
+    # elif mid.type == 1:
     # TODO are multiple midichannels concatenated?
     # config.debug('WARNING', 'type not == 0')
-    #     midis = midi.tracks
-    # elif midi.type == 0:
-    #     midis = [midi]
+    #     midis = mid.tracks
+    # elif mid.type == 0:
+    #     midis = [mid]
 
-    # this auto-converts midi msgs.time to seconds
-    # alternative: use
-    #  for i, track in midi.tracks
-    #    msg = track[index]
-    for msg in midi:
-        t += msg.time  # seconds for type 1,2
-        i = utils.round_(t / c.dt)  # instance index (time-step)
-        if not i < c.n_instances:
-            # config.info('to_array: msg.time > max_t; t, n', t, c.n_instances)
-            # max t reached: return matrix
-
-            #TODO matrix = midi.reduce_multiTrack_dims(matrix)
-            if multiTrack:
-                return matrix
-            return midi.multiTrack_to_list_of_Track(matrix)
-
-        matrix = msg_in_multiTrack(c, msg, i, matrix, velocity)
-
-    #TODO matrix = midi.reduce_multiTrack_dims(matrix)
-    # if reduce_dims:
-    #     matrix = reduce_dims(matrix)
-    #     indices = []
-    #     for note_i in np.arange(matrix.shape[-1]):
-    #         if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
-    #             indices.append(note_i)
-    #     tracks = tracks[:, :, indices]
-    #     config.info('reduced dims:', tracks.shape)
+    matrix = _extend_MultiTrack(c, matrix, mid, t, velocity)
+    if reduce_dims == midi.ReduceDimsOptions.MIDIFILE:
+        matrix = matrix.reduce_dims()
 
     if multiTrack:
-        return matrix
+        return [matrix]
     return midi.multiTrack_to_list_of_Track(matrix)
 
 
-def msg_in_multiTrack(c,
+def _extend_MultiTrack(c, matrix: midi.MultiTrack, mid, t,
+                       velocity) -> midi.MultiTrack:
+    """ ...
+    """
+
+    # this auto-converts mid msgs.time to seconds
+    # alternative: use
+    #  for i, track in mid.tracks
+    #    msg = track[index]
+    for msg in mid:
+        t += msg.time  # seconds for type 1,2
+        i = utils.round_(t / c.dt)  # instance index (time-step)
+        if not i < c.n_timesteps:
+            # max t reached: return matrix
+            return matrix
+
+        matrix = msg_in_MultiTrack(c, msg, i, matrix, velocity)
+
+    return matrix
+
+
+def msg_in_MultiTrack(c,
                       msg: mido.Message,
                       i: int,
                       matrix: midi.MultiTrack,
@@ -129,19 +144,19 @@ def msg_in_multiTrack(c,
             midi.VELOCITY_RANGE)
 
     for i_ in range(i, i + midi.PADDING):
-        if i_ < c.n_instances:
+        if i_ < c.n_timesteps:
             vector = single_msg(msg, velocity)
             matrix[i_, ] = midi.combine_notes(matrix[i_], vector)
             velocity *= midi.VELOCITY_DECAY
     return matrix
 
 
-def single_msg(msg: mido.Message, velocity=None) -> midi.Notes:
+def single_msg(msg: mido.Message, velocity=None) -> midi.NoteVector:
     # encoder mido.Message to vector
     # midi :: mido midi msg
     # TODO
     # ignore msg.velocity for now
-    notes = midi.Notes()
+    notes = midi.NoteVector()
     default_note = 1.
     # TODO
     # for each instance
