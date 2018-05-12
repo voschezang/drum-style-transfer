@@ -7,11 +7,9 @@ from sklearn.decomposition import PCA
 import keras
 from keras.utils import to_categorical
 from keras import optimizers, backend as K
-from keras.layers import Input, Dense, Activation, Conv2D, Dropout, Flatten
-from keras.layers import Conv2DTranspose, Reshape, MaxPooling2D, UpSampling2D
-from keras.layers import Conv1D, MaxPooling1D, UpSampling1D
-from keras.layers import LocallyConnected1D, LocallyConnected2D
+from keras.layers import *
 from keras.models import Model
+from keras.preprocessing.image import ImageDataGenerator
 
 ########################################################################
 ### Functions
@@ -71,24 +69,41 @@ class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
         return int(np.floor(self.x.shape[0] / self.batch_size))
 
     def shuffle_3rd_dim(self, x_batch):
-        # Generate a new batch using the superclass
-        # x_batch :: (samples, timesteps, 3rd_dim, channels)
+        """ Shuffle the 3rd matrix dim with a bias for soft mutations
+        :x_batch :: (samples, timesteps, 3rd_dim, channels)
+        """
         z_batch = np.empty_like(x_batch)
         for batch_i in range(x_batch.shape[0]):
-            indices = np.arange(x_batch.shape[-2])
+            indices = np.arange(x_batch.shape[2])
             np.random.shuffle(indices)
             for i, j in enumerate(indices):
                 z_batch[batch_i, :, i] = x_batch[batch_i, :, j]
 
         return z_batch
 
-    def shuffle_3rd_dim_soft(self, x_batch):
-        # Generate a new batch using the superclass
-        # x_batch :: (samples, timesteps, 3rd_dim, channels)
+    def shuffle_3rd_dim_soft(self,
+                             x_batch,
+                             mutation_rate=0.5,
+                             scale=0.5,
+                             verbose=0):
+        """ Shuffle the 3rd matrix dim with a bias for soft mutations
+        :x_batch :: (samples, timesteps, 3rd_dim, channels)
+        :scale - used in
+          standard_deviation = scale * len(3rd_dim)
+        :iterations = amount of iterations that the shuffle algorithm runs
+        """
         z_batch = np.empty_like(x_batch)
         for batch_i in range(x_batch.shape[0]):
-            indices = np.arange(x_batch.shape[-2])
-            np.random.shuffle(indices)
+            length = x_batch.shape[2]
+            indices = np.arange(length)
+            std = scale * length
+            n_iterations = int(mutation_rate * length)
+            for _ in range(n_iterations):
+                i1 = np.random.choice(indices)
+                i2 = int((i1 + np.random.normal(0, std)) % length)
+                if verbose > 0: print(i1, i2)
+                indices[i1], indices[i2] = indices[i2], indices[i1]
+
             for i, j in enumerate(indices):
                 z_batch[batch_i, :, i] = x_batch[batch_i, :, j]
 

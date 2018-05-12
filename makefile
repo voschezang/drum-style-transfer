@@ -24,7 +24,7 @@ deps:
 	conda install anaconda-project
 
 test:
-	make run-python script=test_midi2.py
+	make run-python script=test_import.py
 # 	make run-python script=test_import.py
 # pythonw src/test_midi2.py
 

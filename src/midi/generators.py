@@ -136,7 +136,7 @@ def gen_square_wave(c,
     if f < LOWEST_F:
         # Return a single note
         for note in notes:
-            track.extend(midi.gen_note_on_off(c, note, 127, t=0))
+            track.extend(note_on_off(c, note, 127, t=0))
         return track
 
     dt = 1. / f
