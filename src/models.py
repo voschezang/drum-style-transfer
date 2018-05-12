@@ -82,6 +82,18 @@ class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
 
         return z_batch
 
+    def shuffle_3rd_dim_soft(self, x_batch):
+        # Generate a new batch using the superclass
+        # x_batch :: (samples, timesteps, 3rd_dim, channels)
+        z_batch = np.empty_like(x_batch)
+        for batch_i in range(x_batch.shape[0]):
+            indices = np.arange(x_batch.shape[-2])
+            np.random.shuffle(indices)
+            for i, j in enumerate(indices):
+                z_batch[batch_i, :, i] = x_batch[batch_i, :, j]
+
+        return z_batch
+
 
 # class DataGenerator2(keras.utils.Sequence):
 #     def __init__(self, x, y=None, batch_size=32, shuffle=True, return_y=False):

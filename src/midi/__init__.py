@@ -45,7 +45,7 @@ NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
 MIDI_NOISE_FLOOR = 0.5  # real values below this number will be ignored by midi decoders
 PADDING = 3  # n array cells after an instance of a note-on msg (should be > 0)
-VELOCITY_DECAY = 0.4  # velocity decay for every padded-cell
+VELOCITY_DECAY = 0.3  # velocity decay for every padded-cell
 
 DTYPE = 'float32'
 
@@ -86,7 +86,7 @@ class MultiTrack(np.ndarray):
     def __new__(cls, n_timesteps, n_notes=None):
         if n_notes is None:
             n_notes = N_NOTES
-        arr = np.zeros([n_timesteps, n_notes])
+        arr = np.zeros([n_timesteps, n_notes], dtype=DTYPE)
         # at every timestep, fill notes with index in range 0:SILENT_NOTES with 1
         arr[:, :SILENT_NOTES] = 1.
         return arr.astype(DTYPE).view(cls)
