@@ -46,14 +46,19 @@ def sample(args, z_mean, z_log_var, latent_dim, epsilon_std):
 
 
 class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
-    def __init__(self, x, batch_size=32, phase_mod=0.2, whitening=False):
+    def __init__(self,
+                 x,
+                 batch_size=32,
+                 phase_mod=0.2,
+                 whitening=False,
+                 zca_epsilon=1e-6):
         keras.preprocessing.image.ImageDataGenerator.__init__(
             self,
             featurewise_center=False,  # set input mean to 0 over the dataset
             samplewise_center=False,  # set each sample mean to 0
             featurewise_std_normalization=False,  # divide inputs by dataset std
             samplewise_std_normalization=False,  # divide each input by its std
-            # zca_epsilon=10,
+            zca_epsilon=zca_epsilon,
             zca_whitening=whitening,
             rotation_range=0,  # randomly rotate images in 0 to 180 degrees
             width_shift_range=0.,  # note-channel mod, but not shuffled
