@@ -1,5 +1,7 @@
 """ NN models
 """
+from __future__ import division
+
 import config  # incl. random seed
 import numpy as np
 # import nn libs
@@ -83,26 +85,31 @@ class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
 
     def shuffle_3rd_dim_soft(self,
                              x_batch,
-                             mutation_rate=0.5,
+                             rate=1,
+                             intensity=0.5,
                              scale=0.5,
                              verbose=0):
         """ Shuffle the 3rd matrix dim with a bias for soft mutations
         :x_batch :: (samples, timesteps, 3rd_dim, channels)
-        :scale - used in
+        :rate = amount (%) of samples that are mutated
+        :intensity = amount of mutations in a sample, relative to len(3rd_dim)
+          in range [0, ..]
+        :scale = intensity of mutations, relative to len(3rd_dim)
           standard_deviation = scale * len(3rd_dim)
-        :iterations = amount of iterations that the shuffle algorithm runs
         """
-        z_batch = np.empty_like(x_batch)
+        # z_batch = np.empty_like(x_batch)
+        z_batch = x_batch.copy()
         for batch_i in range(x_batch.shape[0]):
-            length = x_batch.shape[2]
-            indices = np.arange(length)
-            std = scale * length
-            n_iterations = int(mutation_rate * length)
-            for _ in range(n_iterations):
-                i1 = np.random.choice(indices)
-                i2 = int((i1 + np.random.normal(0, std)) % length)
-                if verbose > 0: print(i1, i2)
-                indices[i1], indices[i2] = indices[i2], indices[i1]
+            if np.random.random() < rate:
+                length = x_batch.shape[2]
+                indices = np.arange(length)
+                std = scale * length
+                n_iterations = length * np.random.random()**(1 / intensity)
+                for _ in range(n_iterations):
+                    i1 = np.random.choice(indices)
+                    i2 = int((i1 + np.random.normal(0, std)) % length)
+                    if verbose > 0: print(i1, i2)
+                    indices[i1], indices[i2] = indices[i2], indices[i1]
 
             for i, j in enumerate(indices):
                 z_batch[batch_i, :, i] = x_batch[batch_i, :, j]
