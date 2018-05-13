@@ -99,22 +99,27 @@ class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
         """
         # z_batch = np.empty_like(x_batch)
         z_batch = x_batch.copy()
+        length = x_batch.shape[2]
+        indices = np.arange(length)
+        std = scale * length
         for batch_i in range(x_batch.shape[0]):
             if np.random.random() < rate:
-                length = x_batch.shape[2]
-                indices = np.arange(length)
-                std = scale * length
-                n_iterations = length * np.random.random()**(1 / intensity)
-                for _ in range(n_iterations):
-                    i1 = np.random.choice(indices)
-                    i2 = int((i1 + np.random.normal(0, std)) % length)
-                    if verbose > 0: print(i1, i2)
-                    indices[i1], indices[i2] = indices[i2], indices[i1]
-
-            for i, j in enumerate(indices):
-                z_batch[batch_i, :, i] = x_batch[batch_i, :, j]
+                for i, j in enumerate(
+                        self._shuffle_indices(indices, std, verbose)):
+                    z_batch[batch_i, :, i] = x_batch[batch_i, :, j]
 
         return z_batch
+
+    def _shuffle_indices(self, indices, intensity, std=1, verbose=0):
+        indices = indices.copy()
+        length = indices.shape[0]
+        n_iterations = int(round(length * np.random.random()**(1 / intensity)))
+        for _ in range(n_iterations):
+            i1 = np.random.choice(indices)
+            i2 = int((i1 + np.random.normal(0, std)) % length)
+            if verbose > 0: print(i1, i2)
+            indices[i1], indices[i2] = indices[i2], indices[i1]
+        return indices
 
 
 # class DataGenerator2(keras.utils.Sequence):
