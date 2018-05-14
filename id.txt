@@ -1,11 +1,13 @@
 
-As midi is a compressed format of musical data, it lack a significant amount of information compared to audio files []. Especially for drums, the differences between modern pop songs are not most prominent in the patterns itself, but rather in the dynamics and voicings of the musician, which results in differences in timbre (frequency, spectrum).
+As midi is a compressed format of musical data, it lack a significant amount of information compared to audio files []. Especially for drums, the differences between modern pop songs are not most prominent in the patterns itself, but rather in the dynamics and voicings of the musician, which results in differences in timbre (frequency, spectrum). There are much more differences in the rythms itself between different genres (e.g. pop, jazz, metal, world). Therefore this is chosen.
 - drum-midi collection: 800.000 midifiles (loops)
 
 
+So far
+	encoders midi <-> matrices
+  data-augmentation generator, can shuffle notes
+  VAE with 'real' drumloops, can predict 25 samples after small minutes of training
 
-lacks a significant amount of in forma
-different genres
 
 
 
@@ -14,24 +16,11 @@ input normalizen (whitening) bij VAE?
 - reduce training time: batch normalization (https://arxiv.org/abs/1502.03167)
 
 
-So far
-	encoders midi <-> matrices
-	unsupervised, autoencoder, normal (static) + lstms (variable input)
-    generators for training data (poly patterns of x Hz)
-       - try to make an AE that can return the input data
-		few drumloops as input
-
-    real data: accuracy stuck at .99
-    generated data: accurcy stuck at 0.7, 0.8
-              (perhaps due to lack of training epochs)
-
-    lstm usually lower loss scores (0.5, 0.25)
-
-
 problems
   definitions of note-indices change between sources - note-64 can be a snare/tom/hh 
    - relative note values are meaningless
      (stil, often bassdrum is the lowest note)
+     - TODO choose data from 1 source or randomize everything
 
   keras sparse layer?      accept sparse input, but is there a difference in processing?
 
@@ -41,61 +30,21 @@ problems
 
 
 
-todo
-  use both lstm + static model?
-
-  train first AE on a single track
-   - then use second AE to encode relations between tracks
-   - beware: holism, perhaps the musical structure cannot be fully learned by deconstruction the parts individually
-  cascades / recursive search
-    functions that compute frequencies
-      encoder can encode more important information
-      decoder can use these layers in parallel, and then use maxpooling to combine layers
 
 	(optional) sparse matrices (scipy/tensorflow)
 		batch generator to convert the current batch to a dense matrix
 		e.g. sparse column matrix
-
-  compress data: convolution layers to reduce the dimensionality (actually, speed up the tempo)
-    then an AE trained on 2Hz data, can also predict 1Hz data
-
-id:
-  simulate recorders with multiple sample rates,
-  by using LSTM networks with different input windows
-  - just like with recording
-  - so that multiple patterns with different frequences can be analysed
-  	e.g. HH of 2 Hz, BD of 0.25 Hz
-  	e.g. 3 over 2
-
-
-alt encoding
-    list of length(max notes per some t)
-        [(A1, 0.3),(B1, 0.4)]
-          note = vector127
 
 
 
 
 
 Database
-
 database van drumloops - genoeg keuze, maar geen structuur in labels etc (veel overlappende labels)
-
-noten corresponderen niet met instrumenten
- - no inherent difference between HH, OH
-
-
-
-variational ae
-change encoder:
-       [ [ occurences per instance ] per note ]
-       then use conv layers to decrease the amount of nodes
-       (notes are considered to be independent instruments)
-       combine the nodes post, with some sparse layers (conv removes too much info)
 
 
 large amount (10k) of inputs
- - hierarchical softmax, negative sampling
+ - hierarchical softmax (keras example)
 
 
 
@@ -128,8 +77,6 @@ verschillende onderwerpen
 	- analyseer tempo/ritme
 	- genereer variaties
 
-
-polyphony?
 
 
 
