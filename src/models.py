@@ -109,6 +109,7 @@ class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
         std = scale * length
         for batch_i in range(x_batch.shape[0]):
             if np.random.random() < rate:
+                if verbose > 1: print('batch_i: %i' % batch_i)
                 for i, j in enumerate(
                         self._shuffle_indices(indices, std, verbose)):
                     z_batch[batch_i, :, i] = x_batch[batch_i, :, j]

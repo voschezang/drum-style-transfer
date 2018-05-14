@@ -31,7 +31,20 @@ problems
 
 
 
-	(optional) sparse matrices (scipy/tensorflow)
+	(optional) sparse matrices (sc        keras.preprocessing.image.ImageDataGenerator.__init__(
+            self,
+            featurewise_center=False,  # set input mean to 0 over the dataset
+            samplewise_center=False,  # set each sample mean to 0
+            featurewise_std_normalization=False,  # divide inputs by dataset std
+            samplewise_std_normalization=False,  # divide each input by its std
+            # zca_epsilon=10,
+            zca_whitening=whitening,
+            rotation_range=0,  # randomly rotate images in 0 to 180 degrees
+            width_shift_range=0.,  # note-channel mod, but not shuffled
+            height_shift_range=phase_mod,  # start_t, phase
+            horizontal_flip=False,  # reverse
+            vertical_flip=False)
+ipy/tensorflow)
 		batch generator to convert the current batch to a dense matrix
 		e.g. sparse column matrix
 
