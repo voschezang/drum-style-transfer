@@ -8,12 +8,11 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import numpy as np
 
-import midi
 
-
-def single(m: midi.MultiTrack):
-    # m :: MultiTrack | Track
+def single(m):
     print('m', m.shape)
+    if len(m.shape) > 2:
+        m = m.reshape(m.shape[:-1])
     m = m.transpose()
     # fig, ax = plt.subplots()
     plt.imshow(m, interpolation='nearest', cmap='gray_r')
