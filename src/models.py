@@ -18,7 +18,7 @@ from keras.preprocessing.image import ImageDataGenerator
 ########################################################################
 
 
-def sample(args, z_mean, z_log_var, latent_dim, epsilon_std):
+def sample(args, z_mean, z_log_var, latent_dim=2, epsilon_std=1.):
     z_mean, z_log_var = args
     epsilon = K.random_normal(
         shape=(K.shape(z_mean)[0], latent_dim), mean=0., stddev=epsilon_std)
