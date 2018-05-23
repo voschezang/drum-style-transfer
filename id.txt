@@ -1,12 +1,21 @@
 
 As midi is a compressed format of musical data, it lack a significant amount of information compared to audio files []. Especially for drums, the differences between modern pop songs are not most prominent in the patterns itself, but rather in the dynamics and voicings of the musician, which results in differences in timbre (frequency, spectrum). There are much more differences in the rythms itself between different genres (e.g. pop, jazz, metal, world). Therefore this is chosen.
-- drum-midi collection: 800.000 midifiles (loops)
+- drum-midi collection: 800.000 midifiles (loops + songs), different sources + styles
+
+MusicVAE
+ - quantized (16th notes), this causes the output to always be in time
+  - no triplets
+  - no swing/shuffle/laid-back
+ for e.g. the closed hihat, the model can always predict a value of 1.0 and the output can still be musical
+ alt: higher samplerate, less quantization, more sparse matrices
 
 
-So far
-	encoders midi <-> matrices
-  data-augmentation generator, can shuffle notes
-  VAE with 'real' drumloops, can predict 25 samples after small minutes of training
+subjects
+ - melodies
+ - sparse matrices ~ swing, shuffle (drums)
+ - rdf, semantic ...
+ - perception: conv. based network vs capsule based 
+  - vector graphics
 
 
 
