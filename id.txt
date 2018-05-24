@@ -1,7 +1,7 @@
 google cloud
 JMVAE
 batch size lager
-spotify api - validation
+spotify api - validation?
  - classificatie op genre
 
 As midi is a compressed format of musical data, it lack a significant amount of information compared to audio files []. Especially for drums, the differences between modern pop songs are not most prominent in the patterns itself, but rather in the dynamics and voicings of the musician, which results in differences in timbre (frequency, spectrum). There are much more differences in the rythms itself between different genres (e.g. pop, jazz, metal, world). Therefore this is chosen.
