@@ -1,3 +1,8 @@
+google cloud
+JMVAE
+batch size lager
+spotify api - validation
+ - classificatie op genre
 
 As midi is a compressed format of musical data, it lack a significant amount of information compared to audio files []. Especially for drums, the differences between modern pop songs are not most prominent in the patterns itself, but rather in the dynamics and voicings of the musician, which results in differences in timbre (frequency, spectrum). There are much more differences in the rythms itself between different genres (e.g. pop, jazz, metal, world). Therefore this is chosen.
 - drum-midi collection: 800.000 midifiles (loops + songs), different sources + styles
@@ -15,9 +20,40 @@ latent space
   - maar met hierarchical model hoeft dat niet
 
 
+evaluatie ~ analytisch
+ - spotify
+ - cons jos
+
+
+softmax ouptut for poly data?
+
+sparse matrices?
+ - musicVAE was quantized to 16ths
+
+normalize
+
+
+
+
+Hypothesis testing
+ - experimental
+ - analytical (+ part experimental)
+
+
+How much quantization can be used while maintaining musical qualities 
+What effect has quantization on ..
+e.g. dilla analysis
+
+
+data
+ - limit variance: e.g. 2 'pure' genres (e.g. typical rock beat)
+   - instead of class probabilities, latent variabels become scalars for musical features that are present in one or more genres (e.g. hh density)
+ - then interpolations becomes more meaningfull
+
+
 Subjects ~ style transfer
  - melodies
- - sparse matrices ~ swing, shuffle (drums)
+ - sparse matrices ~ swing, shuffle
  - rdf, semantic ...
  - psychology/perception: conv. based network vs capsule based
   - independent identification and property detection
@@ -28,86 +64,9 @@ Subjects ~ style transfer
 Beoordelen
  cross-entropy, accuracy
  hits/misses, sensitivity
-
+ experimental study
  manually:
-  
-
-
-
-
-problems
-  definitions of note-indices change between sources - note-64 can be a snare/tom/hh 
-   - relative note values are meaningless
-     (stil, often bassdrum is the lowest note)
-     - TODO choose data from 1 source or randomize everything
-
-  keras sparse layer?      accept sparse input, but is there a difference in processing?
-
-  high accuracy for 'real' data
-       e.g. a note that occurs once
-
-
-
-
-
-	(optional) sparse matrices (sc        keras.preprocessing.image.ImageDataGenerator.__init__(
-            self,
-            featurewise_center=False,  # set input mean to 0 over the dataset
-            samplewise_center=False,  # set each sample mean to 0
-            featurewise_std_normalization=False,  # divide inputs by dataset std
-            samplewise_std_normalization=False,  # divide each input by its std
-            # zca_epsilon=10,
-            zca_whitening=whitening,
-            rotation_range=0,  # randomly rotate images in 0 to 180 degrees
-            width_shift_range=0.,  # note-channel mod, but not shuffled
-            height_shift_range=phase_mod,  # start_t, phase
-            horizontal_flip=False,  # reverse
-            vertical_flip=False)
-ipy/tensorflow)
-		batch generator to convert the current batch to a dense matrix
-		e.g. sparse column matrix
-
-
-
-
-
-Database
-database van drumloops - genoeg keuze, maar geen structuur in labels etc (veel overlappende labels)
-
-
-large amount (10k) of inputs
- - hierarchical softmax (keras example)
-
-
-
-
-
-
-
-doel project
- - onderzoek midi in ml
- 	- toetsen van generatieve modellen?
-
----
-
-Haalbaarheid
-
-verschillende onderwerpen
-- (poly) ritme herkenning 		
-	- maatherkenning
-	- deconstructie van partijen 		e.g. 3 over 2
-
-- generatieve modellen
-	- variatie
-	- variatie naar stijlen/genres  	(variatie over 1 component)
-		- analyse van kwaliteit van componenten (overeenkomst met stijl)
-
-- herkennen van stijl
-
-- web-applicatie
-	- input midi file (loop)
-	- analyseer tempo/ritme
-	- genereer variaties
+  for x in true hits: dt with pred x
 
 
 
