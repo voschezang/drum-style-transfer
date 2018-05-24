@@ -10,19 +10,22 @@ MusicVAE
  alt: higher samplerate, less quantization, more sparse matrices
 
 
-subjects
+latent space
+ - normaal veel samples nodig (variatie)
+  - maar met hierarchical model hoeft dat niet
+
+
+Subjects
  - melodies
  - sparse matrices ~ swing, shuffle (drums)
  - rdf, semantic ...
- - perception: conv. based network vs capsule based 
+ - psychology/perception: conv. based network vs capsule based
+  - independent identification and property detection
   - vector graphics
+ - practical application?
 
 
 
-
-input normalizen (whitening) bij VAE?
-      midi data between genres is by nature not normally distributed
-- reduce training time: batch normalization (https://arxiv.org/abs/1502.03167)
 
 
 problems
