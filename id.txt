@@ -15,7 +15,7 @@ latent space
   - maar met hierarchical model hoeft dat niet
 
 
-Subjects
+Subjects ~ style transfer
  - melodies
  - sparse matrices ~ swing, shuffle (drums)
  - rdf, semantic ...
@@ -24,6 +24,13 @@ Subjects
   - vector graphics
  - practical application?
 
+
+Beoordelen
+ cross-entropy, accuracy
+ hits/misses, sensitivity
+
+ manually:
+  
 
 
 
