@@ -8,6 +8,7 @@ from typing import List, Dict
 import config
 import errors
 import midi
+from midi import pitches
 # from midi import NoteVector, MultiTrack, Track
 from utils import utils
 
@@ -130,8 +131,7 @@ def msg_in_MultiTrack(c,
                       matrix: midi.MultiTrack,
                       velocity=None) -> midi.MultiTrack:
     # :velocity = None | float in range(0,1)
-    if msg.is_meta or not msg.type == 'note_on':
-        # config.info('to_vector: msg is meta')
+    if not midi.is_note_on(msg):
         return matrix
 
     if velocity is None:
@@ -156,15 +156,37 @@ def single_msg(msg: mido.Message, velocity=None) -> midi.NoteVector:
     # TODO
     # for each instance
     #   for each channel: [note], [velocity]
-    if msg.is_meta:
+    if not midi.is_note_on(msg):
         # config.info('to_vector: msg is meta')
         return notes
-    # ignore note_off TODO
-    if msg.type == midi.NOTE_ON:
-        if velocity is None:
-            velocity = default_note
-        highest_note_i = midi.HIGHEST_NOTE - 1
-        normalized_note = max(min(msg.note, highest_note_i), midi.LOWEST_NOTE)
-        note_index = midi.SILENT_NOTES + normalized_note - midi.LOWEST_NOTE
-        notes[note_index] = velocity
+
+    print('SINGLE MSG')
+    note_index = note(msg.note)
+    if note_index is None:
+        config.info('midi note value is unkown')
+        return notes
+
+    if velocity is None:
+        velocity = default_note
+    # highest_note_i = midi.HIGHEST_NOTE - 1
+    # normalized_note = max(min(msg.note, highest_note_i), midi.LOWEST_NOTE)
+    # note_index = midi.SILENT_NOTES + normalized_note - midi.LOWEST_NOTE
+    notes[note_index] = velocity
     return notes
+
+
+def note(value=1):
+    # return note value (1-127) or None
+    print(' note value 1')
+    for i, note_list in enumerate(midi.USED_PITCHES):
+        if value in note_list:
+            print(value, i)
+            return midi.SILENT_NOTES + i
+    #         instrument_i = i * KIT_SIZE
+    #         used_notes = note_list[:KIT_SIZE]
+    #         if value in used_notes:
+    #             note_i = used_notes.index(value)
+    #         else:
+    #             note_i = KIT_SIZE - 1
+    #         return midi.SILENT_NOTES + instrument_i + note_i
+    return None

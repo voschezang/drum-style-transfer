@@ -9,6 +9,7 @@ from typing import List, Dict
 import config
 import errors
 import midi
+from midi import pitches
 from utils import utils
 # import midi
 # from .. import config
@@ -84,7 +85,17 @@ def note(c, note_index, velocity, t):
     if note_index < midi.SILENT_NOTES:
         return []
     # Convert note_index in array to actual note-value
-    note = midi.LOWEST_NOTE + note_index - midi.SILENT_NOTES
+    # note = midi.LOWEST_NOTE + note_index - midi.SILENT_NOTES
+    note = _note(note_index)
     if note > midi.HIGHEST_NOTE:
         config.debug('decode_note: note index > highest note')
     return g.note_on_off(c, note_index, 127, t)
+
+
+def _note(note_index):
+    i = note_index - midi.SILENT_NOTES
+    return pitches.USED_PITCHES[i][0]
+    # note = pitches.USED_DRUMS
+    # for i, note_list in enumerate(pitches.DRUMS):
+    #     if value in note_list:
+    #         return midi.SILENT_NOTES + i

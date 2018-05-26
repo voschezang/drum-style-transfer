@@ -33,66 +33,33 @@ from typing import List, Dict
 import config
 import errors
 from utils import utils
-# from . import encode
-# from . import decode
+from midi import pitches
+
+KIT_SIZE = 1  # 1 of each instrument
+USED_DRUMS = [note_list[:KIT_SIZE]
+              for note_list in pitches.DRUMS]  # = [BD, SN, HH]
+# USED_PITCHES = np.concatenate(USED_DRUMS)
+# USED_PITCHES = [[BD],[SN1], [SN2,SN3]]
+# the index of a value corresponds to the pitch
+USED_PITCHES = [[[note_list[i]]
+                 for i in range(KIT_SIZE - 1)] + [note_list[KIT_SIZE:]]
+                for note_list in pitches.DRUMS]
 
 SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
-LOWEST_NOTE = 35
-HIGHEST_NOTE = 82
-N_NOTES = HIGHEST_NOTE - LOWEST_NOTE + SILENT_NOTES
+UNKNOWN_NOTES = 1
+# LOWEST_NOTE = min(USED_PITCHES)
+# HIGHEST_NOTE = max(
+#     USED_PITCHES) + 1  # the highest note indicates unknown pitches
+# N_NOTES = HIGHEST_NOTE - LOWEST_NOTE + SILENT_NOTES
+N_NOTES = SILENT_NOTES + len(USED_PITCHES) + UNKNOWN_NOTES
 VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
-MIDI_NOISE_FLOOR = 0.5  # real values below this number will be ignored by midi decoders
+MIDI_NOISE_FLOOR = 0.3  # values below this number will be ignored by midi decoders
 PADDING = 3  # n array cells after an instance of a note-on msg (should be > 0)
 VELOCITY_DECAY = 0.2  # velocity decay for every padded-cell
 
 DTYPE = 'float32'
-
-### from magenta.music.drums_encoder_decoder.py
-# Default list of 9 drum types, where each type is represented by a list of
-# MIDI pitches for drum sounds belonging to that type. This default list
-# attempts to map all GM1 and GM2 drums onto a much smaller standard drum kit
-# based on drum sound and function.
-BD = [36, 35]
-SN = [38, 27, 28, 31, 32, 33, 34, 37, 39, 40, 56, 65, 66, 75, 85]
-HH = [42, 44, 54, 68, 69, 70, 71, 73, 78, 80]
-OH = [46, 67, 72, 74, 79, 81]
-T3 = [45, 29, 41, 61, 64, 84]
-T2 = [48, 47, 60, 63, 77, 86, 87]
-T1 = [50, 30, 43, 62, 76, 83]
-CC = [49, 55, 57, 58]
-RD = [51, 52, 53, 59, 82]
-DRUMS = [BD, SN, HH, OH, T3, T2, T1, CC, RD]
-
-# DEFAULT_DRUM_TYPE_PITCHES = [
-#     # bass drum
-#     [36, 35],
-
-#     # snare drum
-#     [38, 27, 28, 31, 32, 33, 34, 37, 39, 40, 56, 65, 66, 75, 85],
-
-#     # closed hi-hat
-#     [42, 44, 54, 68, 69, 70, 71, 73, 78, 80],
-
-#     # open hi-hat
-#     [46, 67, 72, 74, 79, 81],
-
-#     # low tom
-#     [45, 29, 41, 61, 64, 84],
-
-#     # mid tom
-#     [48, 47, 60, 63, 77, 86, 87],
-
-#     # high tom
-#     [50, 30, 43, 62, 76, 83],
-
-#     # crash cymbal
-#     [49, 55, 57, 58],
-
-#     # ride cymbal
-#     [51, 52, 53, 59, 82]
-# ]
 
 
 class ReduceDimsOptions:
@@ -235,3 +202,8 @@ def reduce_MultiTrack_list_dims(tracks):
     tracks = tracks[:, :, used_indices]
     config.info('reduced mt list dims:', tracks.shape)
     return tracks  # return tracks[:, :, indices]
+
+
+def is_note_on(msg: mido.Message):
+    return not msg.is_meta and msg.type == NOTE_ON
+    # config.info('to_vector: msg is meta')
