@@ -35,18 +35,19 @@ import errors
 from utils import utils
 from midi import pitches
 
-KIT_SIZE = 1  # 1 of each instrument
+KIT_SIZE = 1  # 1 or more of each instrument
 USED_DRUMS = [note_list[:KIT_SIZE]
               for note_list in pitches.DRUMS]  # = [BD, SN, HH]
 # USED_PITCHES = np.concatenate(USED_DRUMS)
 # USED_PITCHES = [[BD],[SN1], [SN2,SN3]]
 # the index of a value corresponds to the pitch
-USED_PITCHES = [[[note_list[i]]
-                 for i in range(KIT_SIZE - 1)] + [note_list[KIT_SIZE:]]
-                for note_list in pitches.DRUMS]
+# USED_PITCHES = [[[note_list[i]]
+#                  for i in range(KIT_SIZE - 1)] + [note_list[KIT_SIZE:]]
+#                 for note_list in pitches.DRUMS]
+USED_PITCHES = pitches.used_note_list(pitches.DRUMS, KIT_SIZE)
 
 SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
-UNKNOWN_NOTES = 1
+UNKNOWN_NOTES = 1  # must be 1
 # LOWEST_NOTE = min(USED_PITCHES)
 # HIGHEST_NOTE = max(
 #     USED_PITCHES) + 1  # the highest note indicates unknown pitches

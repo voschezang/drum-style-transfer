@@ -42,3 +42,16 @@ DRUMS = [BD, SN, HH, OH, T3, T2, T1, CC, RD]
 #     # ride cymbal
 #     [51, 52, 53, 59, 82]
 # ]
+
+
+def used_note_list(drums, kit_size):
+    result = []
+    for note_list in drums:
+        if kit_size == 1:
+            result.append(note_list)
+        else:
+            for i in range(kit_size - 1):
+                result.append([note_list[i]])
+            result.append(note_list[i + 1:])
+
+    return result

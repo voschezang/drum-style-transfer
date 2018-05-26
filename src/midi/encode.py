@@ -160,12 +160,7 @@ def single_msg(msg: mido.Message, velocity=None) -> midi.NoteVector:
         # config.info('to_vector: msg is meta')
         return notes
 
-    print('SINGLE MSG')
     note_index = note(msg.note)
-    if note_index is None:
-        config.info('midi note value is unkown')
-        return notes
-
     if velocity is None:
         velocity = default_note
     # highest_note_i = midi.HIGHEST_NOTE - 1
@@ -177,16 +172,8 @@ def single_msg(msg: mido.Message, velocity=None) -> midi.NoteVector:
 
 def note(value=1):
     # return note value (1-127) or None
-    print(' note value 1')
+    print(value)
     for i, note_list in enumerate(midi.USED_PITCHES):
         if value in note_list:
-            print(value, i)
             return midi.SILENT_NOTES + i
-    #         instrument_i = i * KIT_SIZE
-    #         used_notes = note_list[:KIT_SIZE]
-    #         if value in used_notes:
-    #             note_i = used_notes.index(value)
-    #         else:
-    #             note_i = KIT_SIZE - 1
-    #         return midi.SILENT_NOTES + instrument_i + note_i
-    return None
+    return i + 1
