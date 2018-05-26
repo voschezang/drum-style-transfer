@@ -48,6 +48,9 @@ USED_PITCHES = pitches.used_note_list(pitches.DRUMS, KIT_SIZE)
 
 SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
 UNKNOWN_NOTES = 1  # must be 1
+LOWEST_NOTE = min(min(ls) for ls in USED_PITCHES)
+HIGHEST_NOTE = max(max(ls) for ls in USED_PITCHES)
+
 # LOWEST_NOTE = min(USED_PITCHES)
 # HIGHEST_NOTE = max(
 #     USED_PITCHES) + 1  # the highest note indicates unknown pitches
@@ -99,6 +102,16 @@ class MultiTrack(np.ndarray):
         # at every timestep, fill notes with index in range 0:SILENT_NOTES with 1
         arr[:, :SILENT_NOTES] = 1.
         return arr.astype(DTYPE).view(cls)
+
+    def from_array(arr):
+        m = MultiTrack(arr.shape[0], arr.shape[1])
+        if len(arr.shape) == 2:
+            m[:, :] = arr[:, :]
+        elif len(arr.shape) == 3:
+            m[:, :] = arr[:, :, 0]
+        else:
+            raise TypeError('array should have shape (timesteps, notes, )')
+        return m
 
     def length_in_seconds(self):
         # n instances * dt, in seconds

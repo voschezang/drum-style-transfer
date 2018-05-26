@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import config
 import setup
 import midi
+import midi.decode
 from midi import generators as g
 from utils import utils, io, plot
 
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     print(labels[0])
     plot.single(x_train[0, :80, :, 0])
 
-    print('\n\n\n', '-MIDI-')
+    print('\n\n\n-MIDI-\n')
     f = 5
     # result = g.example(context)
     # result = g.gen_data(context, 2, min_f=f, max_f=f)
@@ -50,6 +51,10 @@ if __name__ == "__main__":
     print('result', result.shape)
     # print(result[0, :5])
 
+    a = midi.MultiTrack.from_array(result[0])
+    print(type(a))
+
+    # midi.decode.track(context, result[0])
     # plot.single(result[0, :30])
 
 # fn = dn + '4-floor-120bpm.mid'

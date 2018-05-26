@@ -172,7 +172,6 @@ def single_msg(msg: mido.Message, velocity=None) -> midi.NoteVector:
 
 def note(value=1):
     # return note value (1-127) or None
-    print(value)
     for i, note_list in enumerate(midi.USED_PITCHES):
         if value in note_list:
             return midi.SILENT_NOTES + i

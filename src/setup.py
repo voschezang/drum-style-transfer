@@ -11,8 +11,6 @@ import mido
 
 import config
 import midi
-# from midi import encode
-# from midi import decode
 from utils import utils
 from utils import io
 from utils import string
