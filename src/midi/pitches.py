@@ -3,7 +3,10 @@
 # MIDI pitches for drum sounds belonging to that type. This default list
 # attempts to map all GM1 and GM2 drums onto a much smaller standard drum kit
 # based on drum sound and function.
-BD = [36, 35]
+
+# Maschine/Ableton: BD = 24, SN/HH = 24, HH/SN = 25, OH = 26
+
+BD = [36, 35]  # 24? == C1
 SN = [38, 27, 28, 31, 32, 33, 34, 37, 39, 40, 56, 65, 66, 75, 85]
 HH = [42, 44, 54, 68, 69, 70, 71, 73, 78, 80]
 OH = [46, 67, 72, 74, 79, 81]
