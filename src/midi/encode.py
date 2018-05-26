@@ -130,7 +130,7 @@ def msg_in_MultiTrack(c,
                       matrix: midi.MultiTrack,
                       velocity=None) -> midi.MultiTrack:
     # :velocity = None | float in range(0,1)
-    if msg.is_meta:
+    if msg.is_meta or not msg.type == 'note_on':
         # config.info('to_vector: msg is meta')
         return matrix
 

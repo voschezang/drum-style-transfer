@@ -68,7 +68,7 @@ def import_data(context,
                 dim4=True,
                 dirname='examples',
                 r=False,
-                velocity=1.):
+                velocity=None):
     # multiTrack = flag to enable matrices with multiple notes (defined in midi.init)
     print('\nImporting midi-data')
     dirname = config.dataset_dir + dirname + '/'
