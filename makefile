@@ -8,6 +8,8 @@ RUN_PYTHON := (cd src && exec | pythonw .py)
 .PHONY: logs test
 
 
+#	  source activate envs/default
+
 start:
 	jupyter notebook src/
 
@@ -25,7 +27,7 @@ deps:
 
 test:
 	make run-python script=test_import.py
-# 	make run-python script=test_import.py
+	# make run-python script=test_midi2.py
 # pythonw src/test_midi2.py
 
 run-python:
