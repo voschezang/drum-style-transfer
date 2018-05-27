@@ -3,10 +3,12 @@
 *.png
 *.webloc
 *.asd
+*.wav
 
 makeenv
 envs/*
 site/*
+midis/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
