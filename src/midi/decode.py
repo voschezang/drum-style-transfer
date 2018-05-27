@@ -14,7 +14,7 @@ from midi import NoteVector, MultiTrack, Track
 from utils import utils
 
 
-def track(c, matrix: MultiTrack, transpose=12) -> mido.MidiTrack:
+def track(c, matrix: MultiTrack, transpose=0) -> mido.MidiTrack:
     # c :: data.Context
     # matrix :: [ vector per instance ]
     # vector :: [ notes ]
