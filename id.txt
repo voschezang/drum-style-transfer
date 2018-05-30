@@ -1,3 +1,22 @@
+todo check tempo information per song (min, max of dataset) 
+
+Computational music analysis
+Chapter 13
+Analysing Music with Point-Set Compression Algorithms
+- maximal translatable patterns (MTPs) in this input and the translational equivalence classes (TECs)
+
+
+
+
+
+
+
+
+
+
+
+
+
 google cloud
 JMVAE
 batch size lager
