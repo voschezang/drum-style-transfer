@@ -26,6 +26,10 @@ commands:
   notebook:
     unix: jupyter notebook src/
     env_spec: default
+
+# add deps:
+#   anaconda-project add-packages package1 package2
+
 env_specs:
   pattern_recognition:
     packages: []
@@ -50,5 +54,5 @@ env_specs:
       - pyknon==1.2
     channels: []
 packages: [numpy, mido, pygpu, theano, Keras, tensorflow, pandas, matplotlib, jupyter,
-  Cython, mypy, python.app, scikit-learn]
+  Cython, mypy, python.app, scikit-learn, h5py]
 channels: [roebel, anaconda]
