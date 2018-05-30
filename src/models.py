@@ -14,7 +14,32 @@ from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
 
 ########################################################################
-### Functions
+### Model applications
+########################################################################
+
+
+def transfer_style(encoder, decoder, stylesA, stylesB, samples=[], amt=1.):
+    # stylesA, stylesB, samples = lists of samples that can be encoded by `encoder`
+    # encoder output must be a np array
+    tranformation = extract_transformation(encoder, decoder, stylesA, styleB)
+    return apply_transformation(samples, transformation)
+
+
+def extract_transformation(encoder, decoder, stylesA=[],
+                           stylesB=[]) -> np.array:
+    # extract the linear latent transformation that corresponds with A -> B
+    latent_vectors_A = encoder.predict(stylesA)
+    latent_vectors_B = encoder.predict(stylesB)
+    return latent_vectors_B.mean(axis=0) - latent_vectors_A.mean(axis=0)
+
+
+def apply_transformation(samples: np.array, transformation: np.array):
+    # np automatically maps the transformation to every instance with (+)
+    return encoder.predict(samples) + transformation * amt
+
+
+########################################################################
+### Model construction
 ########################################################################
 
 

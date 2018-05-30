@@ -42,7 +42,7 @@ def init(max_bars=2):
     print('Setting up params\n')
     bpm = 120.  # default bpm
     max_t = 60 / bpm * 2 * max_bars
-    dt = 0.05  # T, sampling interval. quantized time, must be > 0
+    dt = 0.025  # T, sampling interval. quantized time, must be > 0
     n_timesteps = round(max_t / dt)  # vector length
     note_length = 0.03  # seconds
     tempo = mido.bpm2tempo(bpm)
