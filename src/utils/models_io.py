@@ -9,9 +9,13 @@ def save_model(model, model_name='model'):
     model_json = model.to_json()
     with open(model_name + '.json', "w") as json_file:
         json_file.write(model_json)
+    save_weights(model, model_name)
+    config.info("Saved model to disk")
+
+
+def save_weights(model, model_name='vae_model'):
     # serialize weights to HDF5
     model.save_weights(model_name + '.h5', "w")
-    config.info("Saved model to disk")
 
 
 def load_model(filename):
