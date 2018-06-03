@@ -1,3 +1,18 @@
+model
+ - good trainig performance, but bad validation
+   - likely caused by lack of trainging/data/model-size
+   - no problem for style transfer?
+     - risk: all generated samples may be in the training dataset
+
+evaluation
+- experimental:
+  - ask musicians whether they recognize generated samples as bellonging to genre x
+  - ask if there are distinct properties that are shown or lacking
+- analytical
+  - compression: f(a) + f(b) vs f(a+b)
+
+
+
 betere data: from 3 genres
 experimental study:
 - research questions

@@ -59,10 +59,19 @@ def import_midifile(fn='../mary.mid', convert=True):
     return data
 
 
-def export_midifile(mid, filename='../song_export.mid'):
-    if not filename[-4:] == '.mid':
-        filename += '.mid'
-    mid.save(filename)
+def export_midifile(mid, fn='../song_export.mid'):
+    if not fn[-4:] == '.mid':
+        fn += '.mid'
+    mid.save(fn)
+    return fn
+
+
+def export_MultiTrack(data, fn='track'):
+    # TODO numpy.savez
+    if not fn[-4:] == '.csv':
+        fn += '.csv'
+    np.savetxt(fn, data, delimiter=',', fmt='%.3f')  #, fmt='%.4e'
+    return fn
 
 
 ###
