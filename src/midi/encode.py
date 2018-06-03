@@ -80,8 +80,10 @@ def midiFile(c,
     # all midinotes will be grouped into 1 MultiTrack per midichannel
     matrix = midi.MultiTrack(c.n_timesteps)
     t = 0
-    # length = mid.length # in seconds
-    mid.ticks_per_beat  # e.g. 96 PPQ pulses per quarter note (beat)
+    if not mid.ticks_per_beat == 96:
+        # e.g. 96 PPQ  # pulses per quarter note (beat)
+        # TODO recompute ppq
+        config.debug('PPQ is not 96 but [%i]' % mid.ticks_per_beat)
 
     # TODO a midifile that consists of multiple tracks is interpreted
     # as multiple independent files
