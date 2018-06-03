@@ -21,26 +21,53 @@ from keras.preprocessing.image import ImageDataGenerator
 def transfer_style(encoder, decoder, stylesA, stylesB, samples=[], amt=1.):
     # stylesA, stylesB, samples = lists of samples that can be encoded by `encoder`
     # encoder output must be a np array
-    tranformation = extract_transformation(encoder, decoder, stylesA, styleB)
-    return apply_transformation(samples, transformation)
+    transformation = extract_transformation(encoder, stylesA, stylesB)
+    latent_vectors = encoder.predict(samples)
+    latent_vectors_ = apply_transformation(latent_vectors, transformation, amt)
+    return decoder.predict(latent_vectors_)
 
 
-def extract_transformation(encoder, decoder, stylesA=[],
-                           stylesB=[]) -> np.array:
+def extract_transformation(encoder, stylesA, stylesB) -> np.array:
+    # stylesA, stylesB = lists of samples that can be encoded by `encoder`
     # extract the linear latent transformation that corresponds with A -> B
     latent_vectors_A = encoder.predict(stylesA)
     latent_vectors_B = encoder.predict(stylesB)
     return latent_vectors_B.mean(axis=0) - latent_vectors_A.mean(axis=0)
 
 
-def apply_transformation(samples: np.array, transformation: np.array):
+def apply_transformation(vectors: np.array, transformation: np.array,
+                         amt=1.) -> np.array:
     # np automatically maps the transformation to every instance with (+)
-    return encoder.predict(samples) + transformation * amt
+    return vectors + transformation * amt
 
 
 ########################################################################
 ### Model construction
 ########################################################################
+"""
+# For example
+
+encoder_model, encoder_input, z_mean, z_log_var = encoder(input_shape)
+encoder_model.summary()
+sample_ = lambda args: models.sample(args, z_mean, z_log_var, latent_dim,
+                                                             epsilon_std)
+z_input = encoder_model(encoder_input)
+z_output = Lambda(sample_)(z_input)
+decoders = list_decoders(input_shape)
+# VAE model
+vae_input = encoder_input
+vae_output = decoded
+vae = Model(vae_input, vae_output)
+vae_loss = vae_loss(beta=0.5)
+vae.add_loss(vae_loss)
+vae.compile(optimizer='adam')
+# Encoder
+encoder = Model(encoder_input, z_mean)
+# Generator (decoder without sampling)
+generator_input = Input((latent_dim,))
+generator_layers_ = utils.composition(decoders, generator_input)
+generator = Model(generator_input, generator_layers_)
+"""
 
 
 def sample(args, z_mean, z_log_var, latent_dim=2, epsilon_std=1.):
@@ -50,24 +77,94 @@ def sample(args, z_mean, z_log_var, latent_dim=2, epsilon_std=1.):
     return z_mean + K.exp(z_log_var) * epsilon
 
 
-# def init(x_train, y_train):
-#     n_samples = x_train[0]
-#     input_shape = x_train.shape[1:]  # shape of a single sample
-#     output_length = y_train.shape[1]  # length of an individual label
+def encoder(input_shape, dropout=0.1):
+    encoder_input = Input(shape=input_shape)
+    nodes = np.prod(input_shape)
+    timesteps, notes, channels = input_shape
 
-#     dropout = 0.
-#     model, summary = model1(input_shape, output_length, dropout)
+    # Convolution
+    h = encoder_input
+    k = (2, 1)
+    s = (2, 1)
 
-#     learning_rate = 0.01
-#     # sgd = Keras.optimizers.SGD(lr=0.01, clipnorm=1.)
-#     optimizer = optimizers.Adam(lr=learning_rate)
-#     # top_k_categorical_accuracy(y_true, y_pred, k=5)
-#     # https://keras.io/metrics/
-#     metrics = ['accuracy']  # , 'mean_squared_error']
-#     model.compile(
-#         optimizer=optimizer, loss='categorical_crossentropy', metrics=metrics)
+    h = Reshape((timesteps, notes))(h)
+    h = Conv1D(
+        64, kernel_size=2, strides=1, activation='relu', padding='valid')(h)
 
-#     return model, summary
+    h = Bidirectional(LSTM(128))(h)
+
+    # Z Mean, Variance
+    z_mean = Dense(latent_dim, name='z_mean')(h)  # no activation='relu'
+    z_log_var = Dense(latent_dim, name='z_log_var')(h)  # no activation='relu'
+
+    encoder_output = [z_mean, z_log_var]
+    encoder_model = Model(encoder_input, encoder_output, name='encoder_model-')
+    return encoder_model, encoder_input, z_mean, z_log_var
+
+
+def list_decoders(output_shape):
+    # decoder_input = z_output
+    # h = decoder_input
+    # :output_shape = (timesteps, channels, channels) || (batches, filters, timesteps, channels)
+    # keras offers just Conv2DTranspose and not Conv1DTranspose
+    # - use 2D images during upsampling :: (timesteps, notes, channels) => (timesteps, notes, filters)
+    # - use 1D images to optimize reconstruction :: (timesteps, filters) => (timesteps, notes)
+
+    # image_data_format = 'channels_last'
+    # goal shape: (timesteps, notes, channels)
+    # start with the 'reverse': lots of small imgs => few large img
+
+    timesteps, notes, channels = output_shape
+
+    # keras.examples.variational_autoencoder_deconv.py
+    decoders = []
+    decoders += [Dense(256)]
+    decoders += [LeakyReLU(alpha=0.3)]
+
+    # add a bypass layer
+    w = 256
+    decoders += [Dense(w, activation='relu')]
+    extra_decoders = []
+    for _ in range(3):
+        extra_decoders += [
+            Dense(w, activation='elu', bias_initializer='zeros')
+        ]
+
+    extra_d = Lambda(lambda layer: utils.composition(extra_decoders, layer))
+    decoders += [Lambda(lambda layer: Add()([layer, extra_d(layer)]))]
+
+    decoders += [BatchNormalization(momentum=0.9)]
+    n = 10  # 5
+
+    decoders += [RepeatVector(n)]
+    decoders += [Bidirectional(LSTM(128, return_sequences=True))]
+
+    # Embedding decoder
+
+    embedding_len = int(timesteps / n)
+    filters = 250
+    decoders += [TimeDistributed(Dense(filters, activation='relu'))]
+    decoders += [
+        TimeDistributed(Dense(notes * embedding_len, activation='sigmoid'))
+    ]
+    decoders += [Reshape((timesteps, notes, 1))]
+
+    return decoders
+
+
+def vae_loss(beta=1.):
+    #     beta = ((1.0 - tf.pow(hparams.beta_rate, tf.to_float(self.global_step)))
+    #             * hparams.max_beta)
+    #     self.loss = tf.reduce_mean(r_loss) + beta * tf.reduce_mean(kl_cost)
+    # y_true, y_pred, z_mean, z_log_var, timesteps=150, notes=3, beta=1.
+    xent_loss = timesteps * notes * keras.metrics.binary_crossentropy(
+        K.flatten(vae_input), K.flatten(vae_output))
+    kl_loss = -0.5 * K.sum(
+        1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
+    # kl_loss = max(kl_loss, free_bits)
+    mse = K.mean(keras.losses.mean_absolute_error(vae_input, vae_output))
+    vae_loss = K.mean(xent_loss + beta * kl_loss + 0.2 * mse)
+    return vae_loss
 
 
 class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
@@ -203,164 +300,3 @@ class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
 #         batch_indices = np.arange(i * self.batch_size,
 #                                   (i + 1) * self.batch_size) - 1
 #         return self.__data_generation(batch_indices)
-
-########################################################################
-### Models
-########################################################################
-
-# functional syntax: lambda x: lambda y: z
-
-
-def resolution_reducer(input_shape, amt=2):
-    input_layer = Input(shape=input_shape)
-    x = input_layer
-    x = MaxPooling1D(pool_size=amt, strides=amt)(x)
-    model = Model(inputs=input_layer, outputs=x)
-    return model
-
-
-def model1(input_shape, output_length, dropout=0.10):
-    input_layer = Input(shape=input_shape)
-    x = input_layer
-    x = Flatten()(x)
-    #     b = Dense(100, activation='relu')(b)
-    #     a = Conv2D(3, kernel_size=(1, 1), activation='relu', input_shape=input_shape)
-    x = Dense(100, activation='relu')(x)
-    x = Dense(100, activation='relu')(x)
-    x = Dense(output_length, activation='softmax')(x)
-    model = Model(inputs=input_layer, outputs=x)
-    #     model.add(Dropout(dropout))
-    return model, model.summary
-
-
-def encoder(input_shape, output_length, dropout=0.10):
-    input_layer = Input(shape=input_shape)
-    x = input_layer
-    x = Flatten()(x)
-    #     x = Dense(10, activation='relu')(x)
-    x = Dense(output_length, activation='sigmoid')(x)  # softmax
-    model = Model(inputs=input_layer, outputs=x)
-    #     model.add(Dropout(dropout))
-    return model, model.summary
-
-
-def decoder(input_length, output_shape, dropout=0.10):
-    input_layer = Input(shape=(input_length, ))
-    x = input_layer
-    shape = (10, 100)  # 1 additional dimension
-    x = Dense(np.prod(shape), activation='relu')(x)  # 4*4*8 = 128
-    x = Reshape(shape)(x)
-    x = UpSampling1D(10)(x)
-    x = Conv1D(100, 2, strides=2, activation='relu')(x)  # 50,100
-    x = UpSampling1D(output_shape[0] / 50)(x)
-    x = Dense(output_shape[1], activation='relu')(x)
-    x = Dense(output_shape[1], activation='relu')(x)
-    x = Dense(output_shape[1], activation='relu')(x)
-    #     x = LocallyConnected1D(output_shape[1], kernel_size=1, activation='relu')(x)
-    # x = Dense(output_length, activation='softmax')(x)
-    model = Model(inputs=input_layer, outputs=x)
-    #     model.add(Dropout(dropout))
-    return model, model.summary
-
-
-def autoencoder(input_shape,
-                output_shape,
-                hidden_layer_length=10,
-                dropout=0.10,
-                verbose=False):
-    encode, summary = encoder(input_shape, hidden_layer_length, dropout)
-    if verbose:
-        summary()
-    decode, summary = decoder(hidden_layer_length, output_shape, dropout)
-    if verbose:
-        summary()
-    input_ = Input(shape=input_shape)
-    model = Model(input_, decode(encode(input_)))
-    return encode, decode, model, model.summary
-
-
-def resolution_reducer(input_shape, amt=2):
-    input_layer = Input(shape=input_shape)
-    x = input_layer
-    x = MaxPooling1D(pool_size=amt, strides=amt)(x)
-    model = Model(inputs=input_layer, outputs=x)
-    return model
-
-
-"""
-# Define an input sequence and process it.
-encoder_inputs = Input(shape=(None, num_encoder_tokens))
-encoder = LSTM(latent_dim, return_state=True)
-_, state_h, state_c = encoder(encoder_inputs)
-# We discard `encoder_outputs` and only keep the states.
-encoder_states = [state_h, state_c]
-
-# Set up the decoder, using `encoder_states` as initial state.
-decoder_inputs = Input(shape=(None, num_decoder_tokens))
-# We set up our decoder to return full output sequences,
-# and to return internal states as well. We don't use the
-# return states in the training model, but we will use them in inference.
-decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True)
-decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
-decoder_dense = Dense(num_decoder_tokens, activation='sigmoid')
-decoder_outputs = decoder_dense(decoder_outputs)
-
-# Define the model that will turn
-# `encoder_input_data` & `decoder_input_data` into `decoder_target_data`
-model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
-model.summary()
-"""
-"""
-encoder_model = Model(encoder_inputs, encoder_states)
-
-decoder_state_input_h = Input(shape=(latent_dim,))
-decoder_state_input_c = Input(shape=(latent_dim,))
-decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
-decoder_outputs, state_h, state_c = decoder_lstm(decoder_inputs, initial_state=decoder_states_inputs)
-decoder_states = [state_h, state_c]
-decoder_outputs = decoder_dense(decoder_outputs)
-decoder_model = Model(
-    [decoder_inputs] + decoder_states_inputs,
-    [decoder_outputs] + decoder_states)
-"""
-"""
-def decode_sequence(input_seq, encoder_model, decoder_model):
-    max_decoder_seq_length = 500
-    
-    # Encode the input as state vectors.
-    states_value = encoder_model.predict(input_seq)
-
-    # Generate empty target sequence of length 1.
-    target_seq = np.zeros((1, 1, num_decoder_tokens))
-
-    # Sampling loop for a batch of sequences
-    # (to simplify, here we assume a batch of size 1).
-    stop_condition = False
-    decoded_sentence = []
-    while not stop_condition:
-        output_tokens, h, c = decoder_model.predict([target_seq] + states_value)
-        print(output_tokens.shape)
-
-        output_ = output_tokens[0, -1, :] # identity in case of 1 batch?
-        # Sample a token
-        sampled_token_index = np.argmax(output_tokens[0, -1, :])
-        # sampled_char = sampled_token_index # reverse_target_char_index[sampled_token_index]
-        decoded_sentence.append(output_)
-
-        # Exit condition: either hit max length
-        # or find stop character.
-        if len(decoded_sentence) >= max_decoder_seq_length:
-            stop_condition = True
-
-        # Update the target sequence (of length 1).
-        target_seq = np.zeros((1, 1, num_decoder_tokens))
-        # target_seq[0, 0, :] = output_
-        target_seq[0, 0, :] = output_
-
-
-        # Update states
-        states_value = [h, c]
-
-    return np.stack(decoded_sentence)
-
-"""

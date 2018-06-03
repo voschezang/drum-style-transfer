@@ -24,7 +24,7 @@ def min_f(max_t):
 # Logic
 
 
-def composition(ls, result=lambda x: x, verbose=False):
+def composition(ls=[], result=lambda x: x, verbose=False):
     # ls = list of functions (pipeline)
     # return :: function composition of ls
     # e.g.

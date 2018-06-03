@@ -7,15 +7,19 @@ import config
 def save_model(model, model_name='model'):
     # serialize model to JSON
     model_json = model.to_json()
-    with open(model_name + '.json', "w") as json_file:
+    fn1 = save_weights(model, model_name)
+    fn2 = model_name + '.json'
+    with open(fn2, "w") as json_file:
         json_file.write(model_json)
-    save_weights(model, model_name)
     config.info("Saved model to disk")
+    return fn1, fn2
 
 
-def save_weights(model, model_name='vae_model'):
+def save_weights(model, model_name='vae'):
     # serialize weights to HDF5
-    model.save_weights(model_name + '.h5', "w")
+    fn = model_name + '.h5'
+    model.save_weights(fn, "w")
+    return fn
 
 
 def load_model(filename):

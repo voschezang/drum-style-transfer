@@ -8,9 +8,9 @@ project_name = 'pattern-recognition'
 
 tmp_log_dir = '/tmp/' + project_name + '_ml_models'  # !important: see makefile/LOG_DIR
 dataset_dir = '../datasets/'
-model_dir = dataset_dir + 'models/'
+model_dir = '../models/'
 export_dir = '../midis/'
-plots_dir = 'results/'
+plots_dir = '../results/'
 tmp_dir = '../tmp/'
 
 seed = 377
