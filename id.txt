@@ -11,19 +11,14 @@ evaluation
 - analytical
   - compression: f(a) + f(b) vs f(a+b)
     - with bz2, zip
-    - with COSIATEC, SIATECCompress etc.
+    - Point-Set Compression Algorithms
+        - COSIATEC, SIATECCompress etc.
 
 
 betere data: train with many genres, then do experiment with 3 genres
 
 
 
-
-
-todo check tempo information per song (min, max of dataset)
-
-
-compressie
 
 
 ai c - november - conferentie
