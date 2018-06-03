@@ -14,7 +14,8 @@ from midi import NoteVector, MultiTrack, Track
 from utils import utils
 
 
-def track(c, matrix: MultiTrack, transpose=0) -> mido.MidiTrack:
+def track(c, matrix: MultiTrack, transpose=0,
+          name='track_01') -> mido.MidiTrack:
     # c :: data.Context
     # matrix :: [ vector per instance ]
     # vector :: [ notes ]
@@ -24,7 +25,7 @@ def track(c, matrix: MultiTrack, transpose=0) -> mido.MidiTrack:
                          'Assuming MultiTrack')
 
     # decode notes for each instance
-    track = mido.MidiTrack()
+    track = mido.MidiTrack(name=name)
     # msgs = []
     t = 0
     for i, vector in enumerate(matrix):
