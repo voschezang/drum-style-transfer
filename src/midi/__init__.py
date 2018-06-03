@@ -174,6 +174,10 @@ def second2tick(c, t):
     return round(mido.second2tick(t, c.ticks_per_beat, c.tempo))
 
 
+def concatenate(multiTracks: List[MultiTrack]) -> MultiTrack:
+    return np.concatenate(multiTracks, axis=0)
+
+
 def combine_notes(v1, v2):
     # v = Notes((v1 + v2).clip(0, 1))
     v = np.maximum(v1, v2)

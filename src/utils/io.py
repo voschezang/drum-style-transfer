@@ -5,6 +5,12 @@ import config
 from utils import string
 
 
+def reset_tmp_dir():
+    os.system('rm -r ' + config.tmp_dir)
+    os.system('mkdir ' + config.tmp_dir)
+    return True
+
+
 def import_mididata(c,
                     dirname='../datasets/examples/',
                     n=2,
@@ -43,11 +49,14 @@ def walk_and_search(dirname, add_cond, max_n=100):
     return result
 
 
-def import_midifile(filename='../mary.mid'):
-    if not filename[-4:] == '.mid':
-        filename += '.mid'
-    # config.info('reading file: %s' % filename)
-    return mido.MidiFile(filename)
+def import_midifile(fn='../mary.mid', convert=True):
+    if not fn[-4:] == '.mid':
+        fn += '.mid'
+    if convert:
+        return mido.MidiFile(fn)
+    with open(fn, encoding='latin-1') as mid:
+        data = mid.read().encode('utf-8')
+    return data
 
 
 def export_midifile(mid, filename='../song_export.mid'):
