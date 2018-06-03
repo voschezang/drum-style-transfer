@@ -10,36 +10,29 @@ evaluation
   - ask if there are distinct properties that are shown or lacking
 - analytical
   - compression: f(a) + f(b) vs f(a+b)
+    - with bz2, zip
+    - with COSIATEC, SIATECCompress etc.
+
+
+betere data: train with many genres, then do experiment with 3 genres
 
 
 
-betere data: from 3 genres
-experimental study:
-- research questions
-  - quality of generated music
-- participants
-  - amt
-  - required pre-knowledge (e.g. musicians)
-anaylitical analysis
-- cross-entropy, mse
-- musical compression algos
 
 
 todo check tempo information per song (min, max of dataset)
 
 
 compressie
-- d1 + d1 ~ d1, d2
 
 
 ai c - november - conferentie
 
-
-model - leren van resultaten
- e.g.
-  nieuwe patronen/technieken leren
+significance
+ - theory - leren van resultaten, muziek/stijl-kenmerken beter begrijpen
+ - theory - nieuwe patronen/technieken leren
     - net als leren van schaak/go computer
-  creatief - helpen
+ - creativity - helpen
    - variaties van zelf ingespeelde muziek
 
 
