@@ -25,7 +25,8 @@ def track(c, matrix: MultiTrack, transpose=0,
                          'Assuming MultiTrack')
 
     # decode notes for each instance
-    track = mido.MidiTrack(name=name)
+    track = mido.MidiTrack()
+    track.append(mido.MetaMessage('track_name', name=name))
     # msgs = []
     t = 0
     for i, vector in enumerate(matrix):

@@ -79,11 +79,10 @@ def midiFile(c,
     # matrix :: [ NoteVector per instance ]
     # all midinotes will be grouped into 1 MultiTrack per midichannel
     matrix = midi.MultiTrack(c.n_timesteps)
-    t = 0
     if not mid.ticks_per_beat == 96:
         # e.g. 96 PPQ  # pulses per quarter note (beat)
-        # TODO recompute ppq
-        config.debug('PPQ is not 96 but [%i]' % mid.ticks_per_beat)
+        # TODO prevent usage of msg.time in ticks_per_beat
+        config.info('PPQ is not 96 but [%i]' % mid.ticks_per_beat)
 
     # TODO a midifile that consists of multiple tracks is interpreted
     # as multiple independent files
@@ -97,6 +96,7 @@ def midiFile(c,
     # elif mid.type == 0:
     #     midis = [mid]
 
+    t = 0
     matrix = _extend_MultiTrack(c, matrix, mid, t, velocity)
     if reduce_dims == midi.ReduceDimsOptions.MIDIFILE:
         matrix = matrix.reduce_dims()

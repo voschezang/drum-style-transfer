@@ -31,9 +31,8 @@ def replace_special_chars(string, replacement=''):
 
 
 def tokenize(string='01 Song'):
-    string = string.lower()
-    separators = [' ', '_', '-', '.']
-    tokens = [string]
+    separators = [' ', '_', '-', '.', ':'] + [str(i) for i in range(10)]
+    tokens = [string.lower()]
     for s in separators:
         ls = [token.split(s) for token in tokens]
         tokens = []
