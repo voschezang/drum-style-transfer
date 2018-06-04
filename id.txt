@@ -1,3 +1,12 @@
+timidity - midi to audio python
+tsni - pca, analysis many-D to 2D
+
+
+e.g. 4/4 3/4
+
+compresson distance papaer
+
+
 model
  - good trainig performance, but bad validation
    - likely caused by lack of trainging/data/model-size
@@ -13,6 +22,20 @@ evaluation
     - with bz2, zip
     - Point-Set Compression Algorithms
         - COSIATEC, SIATECCompress etc.
+    - alt. representations, midi, GUIDO music notation
+     - rdf
+
+    hypothesis, for samples a, b from genres a,b
+     f(a1) + f(a2) == 2 * f(a1+a2)
+     f(a) + f(b) == f(a+b)
+
+
+
+
+relevance for music-research
+- which features are present in genre x and not in other genres
+- model biased on training data, but not in the same way humans are biased
+  - can these kind of models circumvent this bias and open doors to new insights?
 
 
 betere data: train with many genres, then do experiment with 3 genres
@@ -58,7 +81,10 @@ code
 google cloud
 JMVAE
 batch size lager
-spotify api - validation?
+spotif
+
+todo check tempo information per song (min, max of dataset)
+y api - validation?
  - classificatie op genre
 
 As midi is a compressed format of musical data, it lack a significant amount of information compared to audio files []. Especially for drums, the differences between modern pop songs are not most prominent in the patterns itself, but rather in the dynamics and voicings of the musician, which results in differences in timbre (frequency, spectrum). There are much more differences in the rythms itself between different genres (e.g. pop, jazz, metal, world). Therefore this is chosen.
