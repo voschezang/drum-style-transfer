@@ -3,8 +3,8 @@
 from __future__ import division
 
 import config  # incl. random seed
+
 import numpy as np
-# import nn libs
 from sklearn.decomposition import PCA
 import keras
 from keras.utils import to_categorical
@@ -12,6 +12,8 @@ from keras import optimizers, backend as K
 from keras.layers import *
 from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
+
+from utils import utils
 
 ########################################################################
 ### Model applications
@@ -77,7 +79,7 @@ def sample(args, z_mean, z_log_var, latent_dim=2, epsilon_std=1.):
     return z_mean + K.exp(z_log_var) * epsilon
 
 
-def encoder(input_shape, dropout=0.1):
+def encoder(input_shape, latent_dim=2):
     encoder_input = Input(shape=input_shape)
     nodes = np.prod(input_shape)
     timesteps, notes, channels = input_shape
