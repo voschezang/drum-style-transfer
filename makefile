@@ -9,6 +9,7 @@ RUN_PYTHON := (cd src && exec | pythonw .py)
 
 
 #	  source activate envs/default
+# conda install -c conda-forge ggplot
 
 start:
 	jupyter notebook src/
