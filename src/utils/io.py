@@ -74,20 +74,22 @@ def export_MultiTrack(data, fn='track'):
     return fn
 
 
-###
-###
-###
-
-
-def save_to_csv(dirname, name, data):
+def save_dict(dn, name, data={'k': ['v']}):
     # panda df requires data to be NOT of type {key: scalar}
     # but rather: {'name':['value']}
-    filename = dirname + "/" + name + ".csv"
+    if len(dn) > 0 and not dn[-1] == '/':
+        dn += '/'
+    if not name[-4:] == '.csv':
+        name += '.csv'
+    fn = dn + name
     df = pandas.DataFrame(data=data)
-    df.to_csv(filename, sep=',', index=False)
-    # mkdir filename
-    # for k in d.keys(): gen png
-    return filename
+    df.to_csv(fn, sep=',', index=False)
+    return fn
+
+
+###
+###
+###
 
 
 def print_dict(dirname="", d={}, name="text"):
