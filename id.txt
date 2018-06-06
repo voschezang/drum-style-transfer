@@ -1,3 +1,12 @@
+herkenning van maatsoort/patronen
+  speech to song illusion - na repetitie
+
+verschillen personen/culturen - herkennig ..
+
+
+muzikanten - logic etc
+
+
 timidity - midi to audio python
 tsni - pca, analysis many-D to 2D
 
