@@ -154,18 +154,37 @@ def list_decoders(output_shape):
     return decoders
 
 
-def vae_loss(beta=1.):
+def vae_loss(vae_input,
+             vae_output,
+             z_mean,
+             z_log_var,
+             timesteps=40,
+             notes=9,
+             beta=1.,
+             extra_loss_f=keras.losses.mean_absolute_error,
+             gamma=0.5):
+    """
+    vae_input, vae_output == x == y :: np.ndarray
+    z_mean, z_log_var :: np.ndarray
+    beta = disentanglement amount
+    gamma = multiplier for extra loss function
+    """
+    vae_input_ = K.flatten(vae_input)
+    vae_output_ = K.flatten(vae_output)
+    xent_loss = timesteps * notes * keras.metrics.binary_crossentropy(
+        vae_input_, vae_output_)
+    kl_loss = -1. * K.sum(
+        1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
+    # (optional) kl_loss = max(kl_loss, free_bits)
+    extra_loss = timesteps * notes * extra_loss_f(vae_input_, vae_output_)
+
+    # change beta
     #     beta = ((1.0 - tf.pow(hparams.beta_rate, tf.to_float(self.global_step)))
     #             * hparams.max_beta)
     #     self.loss = tf.reduce_mean(r_loss) + beta * tf.reduce_mean(kl_cost)
     # y_true, y_pred, z_mean, z_log_var, timesteps=150, notes=3, beta=1.
-    xent_loss = timesteps * notes * keras.metrics.binary_crossentropy(
-        K.flatten(vae_input), K.flatten(vae_output))
-    kl_loss = -0.5 * K.sum(
-        1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
-    # kl_loss = max(kl_loss, free_bits)
-    mse = K.mean(keras.losses.mean_absolute_error(vae_input, vae_output))
-    vae_loss = K.mean(xent_loss + beta * kl_loss + 0.2 * mse)
+
+    vae_loss = K.mean(xent_loss + beta * kl_loss + gamma * extra_loss)
     return vae_loss
 
 
