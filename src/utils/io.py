@@ -4,6 +4,14 @@ import mido
 import config
 from utils import string
 
+IGNORE_DIRS = [
+    'Analogue Drums', 'Asia', 'Drumatic Beats', 'Electronic Dance', 'Ending',
+    'Europe', 'Fills Unlimited', 'GM - AC Percussion', 'GM - World Beats SSD',
+    'GM - World Beats Superior', 'Cowbell', 'Hi-Hat & Noise Loops',
+    'L.A.Riot.Drum.Loops', 'Cinematic - 4 Bars', 'Cinematic - 8 Bars',
+    'DrumaticBeats_MIDIDrumLoops', 'Midi.Styles.Percussion'
+]  # (case sensitive)
+
 
 def reset_tmp_dir():
     os.system('rm -r ' + config.tmp_dir)
@@ -22,7 +30,9 @@ def import_mididata(c,
     filenames = search(dirname, n, cond, r)
     midis = []
     for fn in filenames:
-        midis.append(import_midifile(fn))
+        mid = import_midifile(fn)
+        if mid.tracks[0]:
+            midis.append(mid)
     return midis, filenames
 
 
@@ -40,12 +50,13 @@ def walk_and_search(dirname, add_cond, max_n=100):
     n = 0
     result = []
     for path, dirs, filenames in os.walk(dirname):
-        for fn in filenames:
-            if add_cond(fn):
-                result.append(path + '/' + fn)
-                n += 1
-        if n >= max_n:
-            return result[:max_n]
+        if not ignore_path(path):
+            for fn in filenames:
+                if add_cond(fn):
+                    result.append(path + '/' + fn)
+                    n += 1
+            if n >= max_n:
+                return result[:max_n]
     return result
 
 
@@ -145,3 +156,10 @@ def unique_dir(name, post=''):
     dirname = make_dir('results-' + name, timestamp=True, post=post)
     img_dir = make_subdir(dirname, 'img')
     return dirname, img_dir
+
+
+def ignore_path(path='foo/bar'):
+    for name in IGNORE_DIRS:
+        if name in path.split('/'):
+            return False
+    return True
