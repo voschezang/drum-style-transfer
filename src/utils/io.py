@@ -5,11 +5,25 @@ import config
 from utils import string
 
 IGNORE_DIRS = [
-    'Analogue Drums', 'Asia', 'Drumatic Beats', 'Electronic Dance', 'Ending',
-    'Europe', 'Fills Unlimited', 'GM - AC Percussion', 'GM - World Beats SSD',
-    'GM - World Beats Superior', 'Cowbell', 'Hi-Hat & Noise Loops',
-    'L.A.Riot.Drum.Loops', 'Cinematic - 4 Bars', 'Cinematic - 8 Bars',
-    'DrumaticBeats_MIDIDrumLoops', 'Midi.Styles.Percussion'
+    'Analogue Drums',
+    'Asia',
+    'Cha cha',
+    'Drum Patterns',
+    'Drumatic Beats',
+    'Electronic Dance',
+    'Ending',
+    'Europe',
+    'Fills Unlimited',
+    'GM - AC Percussion',
+    'GM - World Beats SSD',
+    'GM - World Beats Superior',
+    'Cowbell',
+    'Midi.Styles.Percussion'
+    'Hi-Hat & Noise Loops',
+    'L.A.Riot.Drum.Loops',
+    'Cinematic - 4 Bars',
+    'Cinematic - 8 Bars',
+    'DrumaticBeats_MIDIDrumLoops',
 ]  # (case sensitive)
 
 
@@ -49,14 +63,17 @@ def walk_and_search(dirname, add_cond, max_n=100):
     # and satisfy 'add_cond'
     n = 0
     result = []
-    for path, dirs, filenames in os.walk(dirname):
+    for path, _dirs, filenames in os.walk(dirname):
         if not ignore_path(path):
             for fn in filenames:
                 if add_cond(fn):
                     result.append(path + '/' + fn)
+                    print('path', path)
                     n += 1
             if n >= max_n:
                 return result[:max_n]
+        else:
+            print('path ignored: %s \n' % path)
     return result
 
 
@@ -161,5 +178,6 @@ def unique_dir(name, post=''):
 def ignore_path(path='foo/bar'):
     for name in IGNORE_DIRS:
         if name in path.split('/'):
-            return False
-    return True
+            config.info('path ignored: name `%s` in IGNORE_DIRS' % name)
+            return True
+    return False
