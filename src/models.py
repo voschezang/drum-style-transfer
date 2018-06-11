@@ -128,9 +128,7 @@ def list_decoders(output_shape):
     decoders += [Dense(w, activation='relu')]
     extra_decoders = []
     for _ in range(3):
-        extra_decoders += [
-            Dense(w, activation='elu', bias_initializer='zeros')
-        ]
+        extra_decoders += [Dense(w, activation='elu')]
 
     extra_d = Lambda(lambda layer: utils.composition(extra_decoders, layer))
     decoders += [Lambda(lambda layer: Add()([layer, extra_d(layer)]))]
