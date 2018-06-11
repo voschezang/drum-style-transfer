@@ -16,7 +16,6 @@ __pycache__/
 *.pyc
 *.mypy_cache/
 
-results/*
 datasets/*
 .idea/
 .ipynb_checkpoints/
