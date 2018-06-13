@@ -18,7 +18,7 @@ IGNORE_DIRS = [
     'GM - World Beats SSD',
     'GM - World Beats Superior',
     'Cowbell',
-    'Midi.Styles.Percussion'
+    'Midi.Styles.Percussion',
     'Hi-Hat & Noise Loops',
     'L.A.Riot.Drum.Loops',
     'Cinematic - 4 Bars',
