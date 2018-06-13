@@ -39,3 +39,11 @@ def tokenize(string='01 Song'):
         for items in ls:
             tokens.extend(items)
     return tokens
+
+
+def extract_labels_from_filename(fn='class/subclass/filename'):
+    # return list of (genre, subgenre)
+    items = fn.split('/')
+    if len(items) > 1:
+        return items[:-1]
+    return items

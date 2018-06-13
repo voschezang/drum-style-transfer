@@ -60,7 +60,7 @@ def init(max_bars=2):
 def import_data(context,
                 n=2,
                 multiTrack=True,
-                reduce_dims=midi.ReduceDimsOptions.GLOBAL,
+                reduce_dims=midi.ReduceDimsOptions.NONE,
                 dim4=True,
                 dirname='examples',
                 r=False,

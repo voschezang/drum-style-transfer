@@ -1,5 +1,22 @@
 bnai  belg nl ai conf.
 
+TODO
+- classname extraction (dirname) ~ 10 samples per class
+  count n classes, samples per class
+- PCA to extract the best latent vector for every class
+  - of classes with 10+ samples
+- NCD of incrementally transformed samples (with PCA)
+- NCD of incrementally transformed samples (without PCA)
+- find clear examples of tranformations (e.g. increase in note density)
+
+
+- experimental study
+
+
+TODO secondary
+- Decision Tree Classifier to test encoder output
+- NCD alternatives
+
 
 herkenning van maatsoort/patronen
   speech to song illusion - na repetitie
