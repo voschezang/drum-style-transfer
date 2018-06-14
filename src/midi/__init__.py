@@ -25,8 +25,7 @@ notes = [i] for i in range(n_notes)
 """
 from __future__ import division
 
-import numpy as np
-import collections
+import numpy as np, bz2, collections
 import mido
 from typing import List, Dict
 
