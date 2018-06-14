@@ -15,19 +15,20 @@ from typing import List, Dict
 import config
 import errors
 import midi
-from utils import utils, io
+from utils import utils
 
 
-def K(x: np.array):
+def K(x):
     # approximate the Kolmogorov complexity of x
-    return len(bz2.compress(to_string(x).encode('utf-8')))
+    if isinstance(x, str):
+        return len(bz2.compress(x.encode('utf-8')))
+    return K(to_string(x))
 
 
 def K_conditional(x, y):
     # K(x|y) = K(xy) - K(x)
     # according to the `symmetry of information` theorem by Li and Vitanyi (1997)
-    xy = midi.concatenate([x, y])
-    return K(xy) - K(x)
+    return K(x + y) - K(x)
 
 
 def NCD(x, y, v=0):
@@ -39,9 +40,17 @@ def NCD(x, y, v=0):
     return max(K_conditional(x, y), K_conditional(y, x)) / max(K(x), K(y))
 
 
-def NCD_multiple(xs, ys, v=0):
-    x = midi.concatenate(xs)
-    y = midi.concatenate(ys)
+def NCD_multiple(xs, ys, pre_concatenation=False, separator='.', v=0):
+    if pre_concatenation:
+        # concatenate midi matrices
+        x = to_string(midi.concatenate(xs))
+        y = to_string(midi.concatenate(ys))
+    else:
+        x, y = '', ''
+        for x_ in xs:
+            x += separator + to_string(x_)
+        for y_ in ys:
+            y += separator + to_string(y_)
     return NCD(x, y, v)
 
 
