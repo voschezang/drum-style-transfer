@@ -1,24 +1,25 @@
+# Custom
 *.pdf
 *.png
 *.webloc
 *.asd
 *.wav
 
-makeenv
-envs/*
 site/*
-midis/*
+datasets/*
 tmp/*
+
+.idea/
+.ipynb_checkpoints/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *$py.class
 *.pyc
+*.pkl
 *.mypy_cache/
 
-datasets/*
-.idea/
-.ipynb_checkpoints/
 
 # Packages #
 ############

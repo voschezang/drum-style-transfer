@@ -33,6 +33,20 @@ def reset_tmp_dir():
     return True
 
 
+def save(obj, fn):
+    if not fn[:-4] == '.pkl':
+        fn += '.pkl'
+    with open(fn, 'wb') as f:
+        pickle.dump(transformations, f)
+    return fn
+
+
+def load(obj, fn='obj.pkl'):
+    with open(fn, 'rb') as file:
+        x = pickle.load(file)
+    return x
+
+
 def save_dict(dn, name, data={'k': ['v']}):
     # panda df requires data to be NOT of type {key: scalar}
     # but rather: {'name':['value']}
@@ -54,15 +68,43 @@ def read_dict(fn):
 
 def read_dict_dir(dn='dir/'):
     """e.g.
-    dir1/
+    dir/
       file1.csv
+      file2.csv
 
     result = {'dir1': {'file1': []}}
     """
     result = {}
     for fn in os.listdir(dn):
-        key = fn[:-4]  # rm extension .csv
-        result[key] = read_dict(dn + fn)
+        # ignore non-csv files
+        if fn[-4:] == '.csv':
+            key = fn[:-4]  # rm extension .csv
+            result[key] = read_dict(dn + fn)
+    return result
+
+
+def read_categorical_dict_dir(dn='dir/'):
+    """e.g.
+    dir/
+      class1/
+        subclass1.csv
+      class2/
+        subclass2.csv
+
+    result = {'class/sub_class': {}}
+    """
+    result = {}
+    print(os.listdir(dn))
+    for sub_dir in os.listdir(dn):
+        sub_dir += '/'
+        if os.path.isdir(dn + sub_dir):
+            print('sd', sub_dir)
+            for fn in os.listdir(dn + sub_dir):
+                # ignore non-csv files
+                if fn[-4:] == '.csv':
+                    print('csv', fn)
+                    key = fn[:-4]  # rm extension .csv
+                    result[sub_dir + key] = read_dict(dn + sub_dir + fn)
     return result
 
 
@@ -94,14 +136,16 @@ def search(dirname, max_n, add_cond, r=False):
 def walk_and_search(dirname, add_cond, max_n=100):
     # return a list of filenames that are present (recursively) in 'dirname'
     # and satisfy 'add_cond'
+    print('walk_and_search(%s)' % dirname)
     n = 0
     result = []
     for path, _dirs, filenames in os.walk(dirname):
+        print('path', path)
         if not ignore_path(path):
             for fn in filenames:
                 if add_cond(fn):
                     result.append(path + '/' + fn)
-                    print('path', path)
+                    print(' ', fn)
                     n += 1
             if n >= max_n:
                 return result[:max_n]

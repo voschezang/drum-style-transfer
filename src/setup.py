@@ -62,15 +62,15 @@ def import_data(context,
                 multiTrack=True,
                 reduce_dims=midi.ReduceDimsOptions.NONE,
                 dim4=True,
-                dirname='examples',
+                dirname='examples/',
                 r=False,
                 velocity=None):
     # multiTrack = flag to enable matrices with multiple notes (defined in midi.init)
     print('\nImporting midi-data')
-    dirname = config.dataset_dir + dirname + '/'
+    dn = config.dataset_dir + dirname
     cond = string.is_midifile
     cond = string.is_drumrythm
-    midis, labels = io.import_mididata(context, dirname, n, cond, r=r)
+    midis, labels = io.import_mididata(context, dn, n, cond, r=r)
 
     print('\nEncoding midi-data\n', len(midis))
 
@@ -78,3 +78,12 @@ def import_data(context,
     matrices = midi.encode.midiFiles(context, midis, multiTrack, reduce_dims,
                                      velocity, dim4)
     return matrices, labels
+
+
+def build_label_dict(labels):
+    # result :: {label: indices}
+    result = collections.defaultdict(list)
+    for i, genre in enumerate(labels):
+        key = genre[-2] + '/' + genre[-1]
+        result[key].append(i)
+    return result

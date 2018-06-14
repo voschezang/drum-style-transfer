@@ -40,7 +40,7 @@ def NCD(x, y, v=0):
     return max(K_conditional(x, y), K_conditional(y, x)) / max(K(x), K(y))
 
 
-def NCD_multiple(xs, ys, pre_concatenation=False, separator='.', v=0):
+def NCD_multiple(xs, ys, pre_concatenation=False, separator='/', v=0):
     if pre_concatenation:
         # concatenate midi matrices
         x = to_string(midi.concatenate(xs))
