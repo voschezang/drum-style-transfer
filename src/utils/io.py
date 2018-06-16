@@ -1,5 +1,5 @@
 import os, re, time, datetime, pandas, numpy as np, collections
-import mido, bz2
+import mido, bz2, pickle
 
 import config
 from utils import string
@@ -33,17 +33,17 @@ def reset_tmp_dir():
     return True
 
 
-def save(obj, fn):
+def save(obj, fn='obj.pkl'):
     if not fn[:-4] == '.pkl':
         fn += '.pkl'
     with open(fn, 'wb') as f:
-        pickle.dump(transformations, f)
+        pickle.dump(obj, f)
     return fn
 
 
-def load(obj, fn='obj.pkl'):
-    with open(fn, 'rb') as file:
-        x = pickle.load(file)
+def load(fn='obj.pkl'):
+    with open(fn, 'rb') as file_:
+        x = pickle.load(file_)
     return x
 
 

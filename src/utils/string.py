@@ -5,6 +5,18 @@ NON_RYTHMS = ['fill', 'break']
 # Filename conditions
 
 
+def to_dirname(dn='dir'):
+    if not dn[-1] == '/':
+        return dn + '/'
+    return dn
+
+
+def end_with(fn='file', suffix='.csv'):
+    if not name[-4:] == suffix:
+        return fn + '.csv'
+    return fn
+
+
 def is_drumrythm(fn: str) -> bool:
     tokens = tokenize(fn)
     for token in tokens:
