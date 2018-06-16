@@ -30,6 +30,12 @@ for i in range(len(TABLEAU20)):
     TABLEAU20[i] = (r / 255., g / 255., b / 255.)
 
 ### --------------------------------------------------------------------
+### Constants
+### --------------------------------------------------------------------
+
+plot_dict_x_axis = 'x_axis'
+
+### --------------------------------------------------------------------
 ### Plot functions
 ### --------------------------------------------------------------------
 
@@ -122,46 +128,76 @@ def line(matrix):
     plt.show()
 
 
-def plot_dict(d, title='', dn=None, log=False, relative=False, show=False):
-    """ plot.dict()
+def custom(d,
+           title='',
+           options={},
+           log=False,
+           min_y_scale=0.,
+           max_y_scale=1.,
+           y_scale_margin=0.1,
+           type_='line',
+           dn=None,
+           show=False,
+           **kwargs):
+    """
     d :: {label: [value]}
     if dn:
       save fig to `[dn]/dict_plot-[title]`
 
+    options.keys = { x_labels :: []
+        , x_ticks :: []
+        , y_labels :: []
+        , y_label :: ''
+        , legend :: bool
+    }
+    Maybe x :: None | x
+
     """
     name = title
-    index = 0
     labels = []
     for s in d.keys():
-        labels.append(s.title())
+        labels.append(s)
     n_labels = len(labels)
 
-    maxx = 1
-    minn = 0
+    if type_ == 'line':
+        plots = plot_dict(d)
+    elif type_ == 'bar':
+        plots = bar_plot(d)
+    else:
+        print('WARNING unkown arg value: `type_` was %s' % type_)
+
+    # set range of y axis
+    if min_y_scale:
+        minn = min_y_scale
+    else:
+        minn = list(d.values())[0][0]
+
+    if max_y_scale:
+        maxx = max_y_scale
+    else:
+        maxx = minn + y_scale_margin
+
     for k, v in d.items():
-        v = np.array(v)
-        # y axis limits
-        margin = 0.3
         if min(v) < minn:
-            minn = min(v) - margin
+            minn = min(v) - y_scale_margin
         if max(v) > maxx:
-            maxx = max(v) + margin
-        plt.plot(v, lw=2, color=TABLEAU20[index])
+            maxx = max(v) + y_scale_margin
 
-        index += 1
+    plt.ylim([minn, maxx])
 
-    if not relative:
-        plt.ylim([minn, maxx])
+    # logaritmic y axis
     if log:
         plt.yscale('symlog')
 
-    handles = [
-        mpatches.Patch(color=TABLEAU20[i], label=labels[i])
-        for i in range(0, n_labels)
-    ]
-    # legend inside subplot
+    # title, legend, labels
 
-    plt.legend(loc=4, handles=handles)
+    if 'legend' in options.keys():
+        handles = [
+            mpatches.Patch(color=TABLEAU20[i], label=labels[i])
+            for i in range(0, n_labels)
+        ]
+        # legend inside subplot
+        plt.legend(loc=4, handles=handles)
     # legend on top of subplot
     # plt.legend(
     #     handles=handles,
@@ -172,17 +208,16 @@ def plot_dict(d, title='', dn=None, log=False, relative=False, show=False):
     #     borderaxespad=0.)
 
     plt.title(name)
-    plt.xlabel('')
-    if not log:
-        plt.ylabel('')
-    else:
-        plt.ylabel('')
+    if 'y_label' in options.keys():
+        plt.ylabel(options['y_label'])
+
+    if 'x_labels' in options.keys():
+        x_labels = options['x_labels']
+        plt.xticks(range(len(x_labels)), x_labels)
 
     # plt.text(50, 12, "lorem ipsum", fontsize=17, ha="center")
     if log:
         name += '-log'
-    if relative:
-        name += '-rel'
     if dn:
         dn = string.to_dirname(dn)
         plt.savefig(dn + 'dict_plot-' + name + '.png')
@@ -190,3 +225,34 @@ def plot_dict(d, title='', dn=None, log=False, relative=False, show=False):
     if not show:
         plt.clf()
         plt.close()
+
+
+def bar_plot(d={}, v_std={}):
+    plots = []
+    for k, v in d.items():
+        ind = np.arange(len(v))
+        width = 0.35
+        if v_std:
+            p1 = plt.bar(ind, v, width, yerr=v_std[k])
+        else:
+            p1 = plt.bar(ind, v, width)
+        plots.append(p1)
+    return plots
+
+
+def plot_dict(d, minn=0, maxx=1):
+    """ plot.dict()
+    d :: {label: [value]}
+    if dn:
+      save fig to `[dn]/dict_plot-[title]`
+
+    options.keys = {x_labels, x_ticks, y_labels, y_label, legend}
+
+    """
+    plots = []
+    for i, (k, v) in enumerate(d.items()):
+        v = np.array(v)
+        # y axis limits
+        p1 = plt.plot(v, lw=2, color=TABLEAU20[i])
+        plots.append(p1)
+    return plots
