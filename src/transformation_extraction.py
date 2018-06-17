@@ -52,10 +52,13 @@ def between_genres(x, genre_dict, amt=None, v=0):
     best_dims = []
     importances = []
     if amt:
-        iter_ = list(genre_dict.items())[:amt]
+        iter_ = list(genre_dict.keys())
+        np.random.shuffle(iter_)
+        iter_ = iter_[:amt]
     else:
-        iter_ = genre_dict.items()
-    for genre, indices in iter_:
+        iter_ = genre_dict.keys()
+    for genre in iter_:
+        indices = genre_dict[genre]
         if v > 0:
             print('\n Genre A: %s' % genre)
         best_dims_, importances_, transformations_to, min_transformations_to = \
@@ -78,10 +81,13 @@ def transformations_from_genre(original_genre, genre_dict, x, amt=None, v=0):
     transformations_to = {}  # {'other genre': vector}
     min_transformations_to = {}  # {'other genre': minimal vector}
     if amt:
-        iter_ = list(genre_dict.items())[:amt]
+        iter_ = list(genre_dict.keys())
+        np.random.shuffle(iter_)
+        iter_ = iter_[:amt]
     else:
-        iter_ = genre_dict.items()
-    for target_genre, target_indices in iter_:
+        iter_ = genre_dict.keys()
+    for target_genre in iter_:
+        target_indices = genre_dict[target_genre]
         if not original_genre == target_genre:
             if max(target_indices) >= x.shape[0]:
                 print('target_indices >= x.shape', max(target_indices),

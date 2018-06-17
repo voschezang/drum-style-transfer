@@ -139,6 +139,8 @@ def walk_and_search(dirname, add_cond, max_n=100):
     n = 0
     result = []
     for path, _dirs, filenames in os.walk(dirname):
+        _dirs.sort()  # force walk order
+        filenames.sort()
         print('path', path)
         if not ignore_path(path):
             for fn in filenames:
