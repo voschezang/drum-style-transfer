@@ -2,9 +2,6 @@
 Approximations for the NCD
 
 This implementation does not scale well in terms of performance and precision
-
-TODO use post-concatenation
-
 """
 from __future__ import division
 
@@ -16,6 +13,10 @@ import config
 import errors
 import midi
 from utils import utils
+
+### --------------------------------------------------------------------
+### NCD computation
+### --------------------------------------------------------------------
 
 
 def K(x):

@@ -1,12 +1,7 @@
 """ Function that extract time-related features from arrays
-Used to shorten the nn's learning curve
 """
 
 import numpy as np, collections
-
-########################################################################
-### Functions
-########################################################################
 
 
 def extract_frequencies_matrix(matrix, floor=0, default=0):
@@ -19,10 +14,6 @@ def extract_frequencies_matrix(matrix, floor=0, default=0):
 def extract_max_frequencies_matrix(matrix, floor=0, default=0):
     return np.apply_along_axis(
         lambda a: extract_frequencies(a, floor=floor).max(), 1, matrix)
-
-
-# def extract_frequencies_matrix():
-#     pass
 
 
 def extract_frequencies(array, floor=0, default=0, increase_recall=False):
@@ -46,8 +37,8 @@ def extract_frequencies(array, floor=0, default=0, increase_recall=False):
                 count = 1  # restart counting, start with 1
     if increase_recall and count == 1:
         # round the last count
-        # this decreases the precision,
-        # but allows the algorithm to measure lower frequencies (with min. 1 occurence)
+        # this decreases the precision, but allows the algorithm to measure
+        # lower frequencies (with min. 1 occurence)
         frequencies.append(1.0 / count)
     return np.array(frequencies)
 

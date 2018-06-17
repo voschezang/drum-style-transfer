@@ -30,12 +30,6 @@ for i in range(len(TABLEAU20)):
     TABLEAU20[i] = (r / 255., g / 255., b / 255.)
 
 ### --------------------------------------------------------------------
-### Constants
-### --------------------------------------------------------------------
-
-plot_dict_x_axis = 'x_axis'
-
-### --------------------------------------------------------------------
 ### Plot functions
 ### --------------------------------------------------------------------
 
@@ -136,6 +130,7 @@ def custom(d,
            max_y_scale=1.,
            y_scale_margin=0.1,
            type_='line',
+           std={},
            dn=None,
            show=False,
            **kwargs):
@@ -149,6 +144,7 @@ def custom(d,
         , y_labels :: []
         , y_label :: ''
         , legend :: bool
+        , title :: bool
     }
     Maybe x :: None | x
 
@@ -162,7 +158,7 @@ def custom(d,
     if type_ == 'line':
         plots = plot_dict(d)
     elif type_ == 'bar':
-        plots = bar_plot(d)
+        plots = bar_plot(d, std)
     else:
         print('WARNING unkown arg value: `type_` was %s' % type_)
 
@@ -227,13 +223,17 @@ def custom(d,
         plt.close()
 
 
-def bar_plot(d={}, v_std={}):
+def bar_plot(d={}, std={}):
+    """e.g.
+    d = {'male': [], 'female':[]}
+    std = {'male': [], 'female':[]}
+    """
     plots = []
     for k, v in d.items():
         ind = np.arange(len(v))
         width = 0.35
         if v_std:
-            p1 = plt.bar(ind, v, width, yerr=v_std[k])
+            p1 = plt.bar(ind, v, width, yerr=std[k])
         else:
             p1 = plt.bar(ind, v, width)
         plots.append(p1)

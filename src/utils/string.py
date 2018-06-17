@@ -12,8 +12,8 @@ def to_dirname(dn='dir'):
 
 
 def end_with(fn='file', suffix='.csv'):
-    if not name[-4:] == suffix:
-        return fn + '.csv'
+    if not fn[-len(suffix):] == suffix:
+        return fn + suffix
     return fn
 
 
