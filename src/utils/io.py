@@ -34,7 +34,7 @@ def reset_tmp_dir():
 
 
 def save(obj, fn='obj.pkl'):
-    fn = string.end_with('.pkl')
+    fn = string.end_with(fn, '.pkl')
     with open(fn, 'wb') as f:
         pickle.dump(obj, f)
     return fn

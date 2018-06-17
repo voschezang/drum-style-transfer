@@ -29,6 +29,7 @@ from utils import io
 # def info():
 # return "dict/csv per subgenre A :: {'genre B/subgenre B': vector}"
 
+### Deprecated: use utils.io.save() to save as .pkl
 # def save_to_disk(transformations={}, dn='', v=0):
 #     with open(dn + 'info.txt', "w") as text_file:
 #         print(info(), file=text_file)
