@@ -1,6 +1,6 @@
 """ A collection of generic functions that do not have their own modules
 """
-import statistics, collections
+import numpy as np, collections
 import operator as op
 
 # Math
@@ -71,8 +71,8 @@ def summary_multi(data={}, mode=dict):
 
 def summary(v=[]):
     return {
-        'mean': statistics.mean(v),
-        'median': statistics.median(v),
+        'mean': np.mean(v),
+        'median': np.median(v),
         'min': min(v),
         'max': max(v)
     }
