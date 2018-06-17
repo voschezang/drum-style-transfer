@@ -29,7 +29,10 @@ def cross(z, genre_dict, transformations, generator, amt=None, v=0):
     grid = [0, 0.5, 1]  # [0, 0.25, 0.5, 0.75, 1, -1, -0.5]
     results = {}
     if amt:
-        iter_ = list(genre_dict.keys())[:amt]
+        # iter_ = list(genre_dict.keys())[:amt]
+        iter_ = list(genre_dict.keys())
+        np.random.shuffle(iter_)
+        iter_ = iter_[:amt]
     else:
         iter_ = genre_dict.keys()
 
@@ -38,7 +41,7 @@ def cross(z, genre_dict, transformations, generator, amt=None, v=0):
         # TODO non-global ncd-s?
         # for i in range(min(sample_size, len(indices))):
         result = for_every_genre(z, original_genre, genre_dict,
-                                 transformations, generator, grid, v)
+                                 transformations, generator, grid, amt, v)
         results[original_genre] = result
     return results
 
@@ -49,6 +52,7 @@ def for_every_genre(z,
                     transformations,
                     generator,
                     grid=[0, 1],
+                    amt=None,
                     v=0):
     """
     'grid search' of the NCD of original_genre to 'genre b' for all transformations
@@ -58,14 +62,32 @@ def for_every_genre(z,
     """
     result = {}
     z_original = z[genre_dict[original_genre]]
-    for genre_a in transformations.keys():
-        #     for genre_a, indices_a in genre_dict.items():
+    if amt:
+        # iter1 = list(genre_dict.keys())[:amt]
+        iter1 = list(transformations.keys())
+        np.random.shuffle(iter1)
+        iter1 = iter1[:amt]
+    else:
+        iter1 = transformations.keys()
+
+    for genre_a in iter1:
         if genre_a != original_genre:
             if v:
                 print(' genre_a `%s`' % genre_a)
             result_genre_a = {}
-            for genre_b, transformation in transformations[genre_a].items():
+            if amt:
+                iter2 = list(transformations[genre_a].keys())
+                np.random.shuffle(iter2)
+                iter2 = iter2[:amt]
+            else:
+                iter2 = transformations[genre_a].keys()
+
+            # for genre_b, transformation in transformations[genre_a].items():
+            for genre_b in iter2:
+                transformation = transformations[genre_a][genre_b]
                 if genre_b != original_genre:
+                    if v > 1:
+                        print(' - genre_b `%s`' % genre_b)
                     indices_b = genre_dict[genre_b]
                     x_b = generator.predict(z[indices_b])
                     result_genre_a[genre_b] = grid_search(
