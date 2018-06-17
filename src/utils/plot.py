@@ -166,7 +166,7 @@ def custom(d,
     if min_y_scale:
         minn = min_y_scale
     else:
-        minn = list(d.values())[0][0]
+        minn = list(d.values())[0][0] - y_scale_margin
 
     if max_y_scale:
         maxx = max_y_scale
@@ -232,7 +232,7 @@ def bar_plot(d={}, std={}):
     for k, v in d.items():
         ind = np.arange(len(v))
         width = 0.35
-        if v_std:
+        if std:
             p1 = plt.bar(ind, v, width, yerr=std[k])
         else:
             p1 = plt.bar(ind, v, width)

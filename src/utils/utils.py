@@ -1,6 +1,7 @@
 """ A collection of generic functions that do not have their own modules
 """
 import statistics, collections
+import operator as op
 
 # Math
 
@@ -40,6 +41,32 @@ def composition(ls=[], result=lambda x: x, verbose=False):
 ### ------------------------------------------------------
 ### Statistics
 ### ------------------------------------------------------
+
+
+def summary_multi(data={}, mode=dict):
+    """
+    data :: {'parameter': [ value ]}
+    mode :: dict | list
+    return :: {'statistic': {param: score} }
+    """
+    if mode is dict:
+        result = collections.defaultdict(dict)
+        iter_ = data.items()
+    elif mode is list:
+        result = collections.defaultdict(list)
+        iter_ = sorted(data.items())
+    else:
+        raise ('unkown arg `mode`', mode)
+
+    for param, values in iter_:
+        summary_result = summary(values)
+        for statistic, score in summary_result.items():
+            if mode is dict:
+                result[statistic][param] = score
+            elif mode is list:
+                result[statistic].append(score)
+
+    return result
 
 
 def summary(v=[]):

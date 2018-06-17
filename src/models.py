@@ -1,4 +1,7 @@
-""" NN models
+""" Keras models, using the functional interface
+
+build() creates a VAE, encoder and generator
+use vae.load_weights('myfile.h5') to load a pre-trained model
 """
 from __future__ import division
 
@@ -47,29 +50,48 @@ def apply_transformation(vectors: np.array, transformation: np.array,
 ### Model construction
 ########################################################################
 """
-# For example
-
-encoder_model, encoder_input, z_mean, z_log_var = encoder(input_shape)
-encoder_model.summary()
-sample_ = lambda args: models.sample(args, z_mean, z_log_var, latent_dim,
-                                                             epsilon_std)
-z_input = encoder_model(encoder_input)
-z_output = Lambda(sample_)(z_input)
-decoders = list_decoders(input_shape)
-# VAE model
-vae_input = encoder_input
-vae_output = decoded
-vae = Model(vae_input, vae_output)
-vae_loss = vae_loss(beta=0.5)
-vae.add_loss(vae_loss)
-vae.compile(optimizer='adam')
-# Encoder
-encoder = Model(encoder_input, z_mean)
-# Generator (decoder without sampling)
-generator_input = Input((latent_dim,))
-generator_layers_ = utils.composition(decoders, generator_input)
-generator = Model(generator_input, generator_layers_)
+If using a pre-trained model, make sure that the number of latent dims and the number of midi-notes are equal
 """
+
+
+def build(input_shape=(160, 10, 1), latent_dim=10, epsilon_std=1.):
+    timesteps, notes, _ = input_shape
+    encoder_model, encoder_input, z_mean, z_log_var = encoder(
+        input_shape, latent_dim)
+    sample_ = lambda args: sample(args, z_mean, z_log_var, latent_dim, epsilon_std)
+    z_input = encoder_model(encoder_input)
+    z_output = Lambda(sample_)(z_input)
+    decoders = list_decoders(input_shape)
+    decoded = utils.composition(decoders, z_output, verbose=False)
+
+    # VAE: Full model (to train)
+    vae_input = encoder_input
+    vae_output = decoded
+    vae = Model(vae_input, vae_output)
+    vae_loss_ = vae_loss(
+        vae_input,
+        vae_output,
+        z_mean,
+        z_log_var,
+        timesteps,
+        notes,
+        beta=0.75,
+        gamma=0.05)
+    vae.add_loss(vae_loss_)
+    vae.compile(optimizer='adam')
+
+    # Encoder (matrices -> latent vectors)
+    encoder_ = Model(encoder_input, z_mean)
+
+    # Generator (latent vectors -> matrices)
+    generator_input = Input((latent_dim, ))
+    generator_layers_ = utils.composition(decoders, generator_input)
+    generator = Model(generator_input, generator_layers_)
+
+    return vae, encoder_, generator
+
+
+# internal functions
 
 
 def sample(args, z_mean, z_log_var, latent_dim=2, epsilon_std=1.):
@@ -267,55 +289,3 @@ class ImageDataGenerator(keras.preprocessing.image.ImageDataGenerator):
             if verbose > 0: print(i1, i2)
             indices[i1], indices[i2] = indices[i2], indices[i1]
         return indices
-
-
-# class DataGenerator2(keras.utils.Sequence):
-#     def __init__(self, x, y=None, batch_size=32, shuffle=True, return_y=False):
-#         self.x = x
-#         self.y = y if y is not None else x
-#         self.return_y = return_y
-#         self.n = x.shape[0]
-#         self.batch_size = batch_size
-#         self.shuffle_samples = shuffle
-#         self.shuffle_notes = shuffle
-#         self.indices = []
-#         self.on_epoch_end()
-
-#     def on_epoch_end(self):
-#         self.indices = np.arange(self.n)
-#         if self.shuffle_samples:
-#             np.random.shuffle(self.indices)
-
-#     def __len__(self):
-#         # n batches / epoch = #samples / batch_size
-#         # floor() to prevent occurences of samples multiple times
-#         return int(np.floor(self.x.shape[0] / self.batch_size))
-
-#     def __data_generation(self, batch_indices):
-#         # x_batch :: (samples, timesteps, notes)
-#         if batch_indices[-1] > self.x.shape[0]:
-#             print('__data_generation - batch_indices too large',
-#                   batch_indices[-1], self.x.shape)
-#         if not self.shuffle_notes:
-#             x_batch = self.x[batch_indices]  # .copy() if mutating
-#         else:
-#             # gen batch placeholder
-#             x_batch = np.empty_like(self.x[batch_indices])
-#             for relative_batch_i, batch_i in enumerate(batch_indices):
-#                 note_indices = np.arange(self.x.shape[-1])
-#                 np.random.shuffle(note_indices)
-#                 for note_i, note_j in enumerate(note_indices):
-#                     x_batch[relative_batch_i, :, note_i] = self.x[batch_i, :,
-#                                                                   note_j]
-#         if self.return_y:
-#             return x_batch, x_batch
-#         return x_batch, None
-
-#     def __getitem__(self, i):
-#         # get batch
-#         if i >= self.__len__():
-#             print('i >= __len__, index should be smaller', i, self.__len__())
-#             i -= 1
-#         batch_indices = np.arange(i * self.batch_size,
-#                                   (i + 1) * self.batch_size) - 1
-#         return self.__data_generation(batch_indices)

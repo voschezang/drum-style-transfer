@@ -10,7 +10,8 @@ tmp_log_dir = '/tmp/' + project_name + '_ml_models'  # !important: see makefile/
 dataset_dir = '../datasets/'
 model_dir = '../models/'
 export_dir = '../midis/'
-plots_dir = '../results/'
+results_dir = '../results/'
+plots_dir = results_dir
 tmp_dir = '../tmp/'
 
 seed = 377
