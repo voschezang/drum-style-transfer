@@ -96,6 +96,8 @@ def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
 
     plt.figure(figsize=(10, 10))
     plt.imshow(figure, cmap='gray_r')
+    plt.xticks([])
+    plt.yticks([])
     plt.show()
 
 
