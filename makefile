@@ -14,6 +14,11 @@ RUN_PYTHON := (cd src && exec | pythonw .py)
 start:
 	jupyter notebook src/
 
+theano:
+  export KERAS_BACKEND=theano
+
+tensorflow:
+	export KERAS_BACKEND=tensorflow
 # run:
 # 	anaconda-project run
 

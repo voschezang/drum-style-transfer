@@ -111,6 +111,57 @@ def build(input_shape=(160, 10, 1), latent_dim=10, epsilon_std=1.):
     timesteps, notes, _ = input_shape
     encoder_model, encoder_input, z_mean, z_log_var = encoder(
         input_shape, latent_dim)
+    z_input = encoder_model(encoder_input)
+
+    # this function must be defined locally in order for the model to be serializable
+    # using the following inline lambda function will result in an error when .to_json() is called
+    #   lambda args: sample(args, z_mean, z_log_var, latent_dim, epsilon_std)
+    def sample(args):
+        z_mean, z_log_var = args
+        epsilon = K.random_normal(
+            shape=(K.shape(z_mean)[0], latent_dim),
+            mean=0.,
+            stddev=epsilon_std)
+        return z_mean + K.exp(z_log_var) * epsilon
+
+    z_output = Lambda(sample)(z_input)
+    decoder_model = decoder(z_output, latent_dim, input_shape)
+
+    # VAE
+    vae_input = Input(shape=(input_shape, ))
+    vae_input = encoder_input
+    vae_output = decoder_model(z_output)
+    # vae_output = decoder_model(z_mean)
+    vae = Model(vae_input, vae_output, name='vae-model-')
+
+    vae_loss_ = vae_loss(
+        vae_input,
+        vae_output,
+        z_mean,
+        z_log_var,
+        timesteps,
+        notes,
+        beta=0.75,
+        gamma=0.05)
+    vae.add_loss(vae_loss_)
+    vae.compile(optimizer='adam')
+
+    # Encoder (matrices -> latent vectors)
+    encoder_ = Model(encoder_input, z_mean)
+    # Generator (latent vectors -> matrices)
+    # generator_input = Input((latent_dim, ))
+    # generator_layers_ = utils.composition(decoders, generator_input)
+    # generator = Model(generator_input, generator_layers_)
+    return vae, encoder_, decoder_model
+
+
+def build_manual(input_shape=(160, 10, 1), latent_dim=10, epsilon_std=1.):
+    """
+    this model is not serializable due to the lambda layers
+    """
+    timesteps, notes, _ = input_shape
+    encoder_model, encoder_input, z_mean, z_log_var = encoder(
+        input_shape, latent_dim)
     sample_ = lambda args: sample(args, z_mean, z_log_var, latent_dim, epsilon_std)
     z_input = encoder_model(encoder_input)
     z_output = Lambda(sample_)(z_input)
@@ -225,6 +276,45 @@ def list_decoders(output_shape):
     decoders += [Reshape((timesteps, notes, 1))]
 
     return decoders
+
+
+def decoder(input_, latent_dim=10, output_shape=(40, 10, 1)):
+    """ decoder_input = z_output
+    decoder.predict :: z -> x
+    the decoder models p(x|z), with an assumption over p(z)
+    """
+    # image_data_format = 'channels_last'
+    timesteps, notes, channels = output_shape
+
+    decoder_input = Input(shape=(latent_dim, ))
+
+    h = decoder_input
+    h = Dense(256)(h)
+    h = LeakyReLU(alpha=0.3)(h)
+
+    # add a bypassed layer
+    w = 256
+    h_bypass = Dense(w, activation='relu')(h)
+    extra_decoders = []
+    for _ in range(3):
+        h_bypass = Dense(w, activation='elu')(h_bypass)
+
+    h = Add()([h, h_bypass])
+    h = BatchNormalization(momentum=0.9)(h)
+
+    n = 10  # 5
+    h = RepeatVector(n)(h)
+    h = Bidirectional(LSTM(128, return_sequences=True))(h)
+
+    # Embedding decoder
+
+    embedding_len = int(timesteps / n)
+    filters = 250
+    h = TimeDistributed(Dense(filters, activation='relu'))(h)
+    h = TimeDistributed(Dense(notes * embedding_len, activation='sigmoid'))(h)
+    h = Reshape((timesteps, notes, 1))(h)
+
+    return Model(decoder_input, h, name='decoder_model-')
 
 
 def vae_loss(vae_input,
