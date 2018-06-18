@@ -58,6 +58,7 @@ def between_genres(x, genre_dict, amt1=None, amt2=None, v=0):
         iter_ = np.array(list(genre_dict.keys()))
         i = 0
         while i < amt1:
+            if v: print('\n%i' % i)
             genre = np.random.choice(iter_)
             result = (transformations, min_transformations, best_dims,
                       importances)
@@ -80,7 +81,7 @@ def _between_genres(x, genre, genre_dict, result, amt2=None, v=0):
     # helper function
     transformations, min_transformations, best_dims, importances = result
     indices = genre_dict[genre]
-    if v > 0: print('\n Genre A: %s' % genre)
+    if v > 0: print('Genre A: %s' % genre)
     best_dims_, importances_, transformations_to, min_transformations_to = \
             transformations_from_genre(genre, genre_dict, x, amt2, v)
     best_dims += best_dims_

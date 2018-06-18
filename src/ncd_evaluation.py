@@ -27,17 +27,19 @@ def cross(z, genre_dict, transformations, generator, amt1=None, amt2=None,
     grid_result = {'scalar': ncd()}
     """
     sample_size = 1
-    grid = [0, 0.5, 1]  # [0, 0.25, 0.5, 0.75, 1, -1, -0.5]
+    grid = [0, 0.25, 0.5, 0.75, 1, -0.3,
+            -0.7]  # [0, 0.25, 0.5, 0.75, 1, -1, -0.5]
     results = {}
     if amt1:
         iter_ = np.array(list(genre_dict.keys()))
         i = 0
-        while i < amt:
+        while i < amt1:
+            if v: print('\n%i' % i)
             # iter_ = list(genre_dict.keys())[:amt1]
             # np.random.shuffle(iter_)
             # iter_ = iter_[:amt1]
             original_genre = np.random.choice(iter_)
-            if v: print('\noriginal genre: `%s`' % original_genre)
+            if v: print('original genre: `%s`' % original_genre)
             result = for_every_genre(z, original_genre, genre_dict,
                                      transformations, generator, grid, amt2, v)
             results[original_genre] = result

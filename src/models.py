@@ -8,7 +8,9 @@ from __future__ import division
 import config  # incl. random seed
 
 import numpy as np
+import collections
 from sklearn.decomposition import PCA
+from scipy.stats import norm
 import keras
 from keras.utils import to_categorical
 from keras import optimizers, backend as K
@@ -16,7 +18,7 @@ from keras.layers import *
 from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
 
-from utils import utils
+from utils import utils, plot
 
 ########################################################################
 ### Model applications
@@ -44,6 +46,57 @@ def apply_transformation(vectors: np.array, transformation: np.array,
                          amt=1.) -> np.array:
     # np automatically maps the transformation to every instance with (+)
     return vectors + transformation * amt
+
+
+def gen_latent(generator,
+               batch_size=2,
+               latent_dim=2,
+               x_encoded=0.,
+               latent_indices=(0, 1),
+               n=10,
+               m=4,
+               min_x=0.05,
+               max_x=0.95,
+               min_y=0.05,
+               max_y=0.95,
+               assume_gaussion=True,
+               plot_result=False,
+               v=0):
+    """ Original: keras.keras.examples.variational_autoencoder
+    :x_encoded :: float | [ float ]
+
+    to swap x,y set `latent_indices`` to (1,0)
+    """
+    if not isinstance(x_encoded, np.ndarray):
+        x_encoded = np.repeat(x_encoded, latent_dim)
+    if v: print(x_encoded.shape, x_encoded)
+    x_decoded = generator.predict(x_encoded.reshape([1, latent_dim]))
+
+    # Coordinate grid
+    grid_x = np.linspace(min_x, max_x, n)
+    grid_y = np.linspace(min_y, max_y, m)
+    # linearly spaced coordinates on the unit square were transformed through
+    # the inverse CDF (ppf) of the Gaussian to produce values of the latent
+    # variables z, since the prior of the latent space is Gaussian
+    if assume_gaussion:
+        grid_x = norm.ppf(grid_x)
+        grid_y = norm.ppf(grid_y)
+
+    # Generation
+    result = collections.defaultdict(dict)
+    for yi in grid_x:
+        for xi in grid_y:
+            z_sample = x_encoded.copy()
+            z_sample[np.array(latent_indices)] = (xi, yi)
+            # z_sample = np.array([[yi, xi]])
+            z_sample = np.tile(z_sample, batch_size).reshape(
+                batch_size, latent_dim)
+            x_decoded = generator.predict(z_sample, batch_size=batch_size)
+            result[yi][xi] = x_decoded
+
+    if plot_result:
+        plot.multi(result, v=v)
+    return result
 
 
 ########################################################################

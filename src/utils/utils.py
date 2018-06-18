@@ -2,6 +2,27 @@
 """
 import numpy as np, collections
 import operator as op
+import importlib
+
+
+def reload(package, *args):
+    for p in args:
+        importlib.reload(p)
+    importlib.reload(package)
+
+
+def get(d: dict, recursion_depth=0, i=-1):
+    # use recursion_depth = 1 for a double-dict
+    # i.e. {y: {x: ..}}
+    keys = []
+    if recursion_depth > 0:
+        k_, d = get(d, recursion_depth - 1)
+        keys.append(k_)
+    # pop an item without removal
+    k = list(d.keys())[i]
+    keys.append(k)
+    return keys, d[k]
+
 
 # Math
 
