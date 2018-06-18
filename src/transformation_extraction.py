@@ -44,31 +44,50 @@ from utils import io
 #         io.save_dict(dn + a1, a2, sub_dict)
 
 
-def between_genres(x, genre_dict, amt=None, v=0):
+def between_genres(x, genre_dict, amt1=None, amt2=None, v=0):
     # genre_dict :: {genre: indices}
     # transformations :: {'genre A': {'genre B': vector}}
     transformations = {}
     min_transformations = {}
     best_dims = []
     importances = []
-    if amt:
-        iter_ = list(genre_dict.keys())
-        np.random.shuffle(iter_)
-        iter_ = iter_[:amt]
+    if amt1:
+        # iter_ = list(genre_dict.keys())
+        # np.random.shuffle(iter_)
+        # iter_ = iter_[:amt1]
+        iter_ = np.array(list(genre_dict.keys()))
+        i = 0
+        while i < amt1:
+            genre = np.random.choice(iter_)
+            result = (transformations, min_transformations, best_dims,
+                      importances)
+            result_ = _between_genres(x, genre, genre_dict, result, amt2, v)
+            transformations, min_transformations, best_dims, importances = result_
+            i += 1
+
     else:
         iter_ = genre_dict.keys()
-    for genre in iter_:
-        indices = genre_dict[genre]
-        if v > 0:
-            print('\n Genre A: %s' % genre)
-        best_dims_, importances_, transformations_to, min_transformations_to = \
-            transformations_from_genre(genre, genre_dict, x, amt, v)
-        best_dims += best_dims_
-        importances += importances_
-        transformations[genre] = transformations_to
-        min_transformations[genre] = min_transformations_to
+        for genre in iter_:
+            result = (transformations, min_transformations, best_dims,
+                      importances)
+            result_ = _between_genres(x, genre, genre_dict, result, amt2, v)
+            transformations, min_transformations, best_dims, importances = result_
 
     return best_dims, importances, transformations, min_transformations
+
+
+def _between_genres(x, genre, genre_dict, result, amt2=None, v=0):
+    # helper function
+    transformations, min_transformations, best_dims, importances = result
+    indices = genre_dict[genre]
+    if v > 0: print('\n Genre A: %s' % genre)
+    best_dims_, importances_, transformations_to, min_transformations_to = \
+            transformations_from_genre(genre, genre_dict, x, amt2, v)
+    best_dims += best_dims_
+    importances += importances_
+    transformations[genre] = transformations_to
+    min_transformations[genre] = min_transformations_to
+    return transformations, min_transformations, best_dims, importances
 
 
 def transformations_from_genre(original_genre, genre_dict, x, amt=None, v=0):

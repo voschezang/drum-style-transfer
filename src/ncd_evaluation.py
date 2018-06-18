@@ -14,7 +14,8 @@ from utils import utils
 ### --------------------------------------------------------------------
 
 
-def cross(z, genre_dict, transformations, generator, amt=None, v=0):
+def cross(z, genre_dict, transformations, generator, amt1=None, amt2=None,
+          v=0):
     """
     transformations :: {genre a: {genre b: z}}
     genre_dict = {'genre': indices}
@@ -28,21 +29,30 @@ def cross(z, genre_dict, transformations, generator, amt=None, v=0):
     sample_size = 1
     grid = [0, 0.5, 1]  # [0, 0.25, 0.5, 0.75, 1, -1, -0.5]
     results = {}
-    if amt:
-        # iter_ = list(genre_dict.keys())[:amt]
-        iter_ = list(genre_dict.keys())
-        np.random.shuffle(iter_)
-        iter_ = iter_[:amt]
+    if amt1:
+        iter_ = np.array(list(genre_dict.keys()))
+        i = 0
+        while i < amt:
+            # iter_ = list(genre_dict.keys())[:amt1]
+            # np.random.shuffle(iter_)
+            # iter_ = iter_[:amt1]
+            original_genre = np.random.choice(iter_)
+            if v: print('\noriginal genre: `%s`' % original_genre)
+            result = for_every_genre(z, original_genre, genre_dict,
+                                     transformations, generator, grid, amt2, v)
+            results[original_genre] = result
+            i += 1
+
     else:
         iter_ = genre_dict.keys()
 
-    for original_genre in iter_:
-        if v: print('\noriginal genre: `%s`' % original_genre)
-        # TODO non-global ncd-s?
-        # for i in range(min(sample_size, len(indices))):
-        result = for_every_genre(z, original_genre, genre_dict,
-                                 transformations, generator, grid, amt, v)
-        results[original_genre] = result
+        for original_genre in iter_:
+            if v: print('\noriginal genre: `%s`' % original_genre)
+            # TODO non-global ncd-s?
+            # for i in range(min(sample_size, len(indices))):
+            result = for_every_genre(z, original_genre, genre_dict,
+                                     transformations, generator, grid, amt2, v)
+            results[original_genre] = result
     return results
 
 
