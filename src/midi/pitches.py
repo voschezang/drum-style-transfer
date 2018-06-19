@@ -17,6 +17,13 @@ CC = [49, 55, 57, 58]
 RD = [51, 52, 53, 59, 82]
 DRUMS = [BD, SN, HH, OH, T3, T2, T1, CC, RD]
 
+keys = ['BD', 'SN', 'HH', 'OH', 'T3', 'T2', ' T1', ' CC', 'RD']
+keys_full = [
+    'Bassdrum', 'Snaredrum', 'Closed hi-hat', 'Open hi-hat', 'Floortom',
+    'Low tom', 'High tom', ' Crash cymbal', 'Ride cymbal'
+]
+all_keys = keys_full + ['Unknown']
+
 # DEFAULT_DRUM_TYPE_PITCHES = [
 #     # bass drum
 #     [36, 35],

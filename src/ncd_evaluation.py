@@ -12,9 +12,20 @@ from utils import utils
 ### --------------------------------------------------------------------
 ### NCD-based evaluations
 ### --------------------------------------------------------------------
+"""
+Make sure that z, genre_dict and transformations are compatible
+all transformations.keys should be in genre_dict.keys
+all genre_dict.values should be in z
+"""
 
 
-def cross(z, genre_dict, transformations, generator, amt1=None, amt2=None,
+def cross(z,
+          genre_dict,
+          transformations,
+          generator,
+          grid=[0, 0.5, 1],
+          amt1=None,
+          amt2=None,
           v=0):
     """
     transformations :: {genre a: {genre b: z}}
@@ -27,8 +38,6 @@ def cross(z, genre_dict, transformations, generator, amt1=None, amt2=None,
     grid_result = {'scalar': ncd()}
     """
     sample_size = 1
-    grid = [0, 0.25, 0.5, 0.75, 1, -0.3,
-            -0.7]  # [0, 0.25, 0.5, 0.75, 1, -1, -0.5]
     results = {}
     if amt1:
         iter_ = np.array(list(genre_dict.keys()))

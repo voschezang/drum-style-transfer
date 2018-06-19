@@ -16,12 +16,13 @@ def get(d: dict, recursion_depth=0, i=-1):
     # i.e. {y: {x: ..}}
     keys = []
     if recursion_depth > 0:
-        k_, d = get(d, recursion_depth - 1)
-        keys.append(k_)
+        _k, new_keys, d = get(d, recursion_depth - 1, i=i)
+        keys.extend(new_keys)
+
     # pop an item without removal
     k = list(d.keys())[i]
     keys.append(k)
-    return keys, d[k]
+    return k, keys, d[k]
 
 
 # Math

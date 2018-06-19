@@ -5,6 +5,7 @@ White indicates a rest
 """
 import string
 from utils import utils
+from midi import pitches
 
 from scipy.stats import norm
 import numpy as np
@@ -35,18 +36,21 @@ for i in range(len(TABLEAU20)):
 ### --------------------------------------------------------------------
 
 
-def single(m):
-    print('m', m.shape)
+def single(m, ylabels=pitches.all_keys):
+    # set ylabels to [] to hide them
     if len(m.shape) > 2:
         m = m.reshape(m.shape[:-1])
-    m = m.transpose()
+    m = rotate_midi_matrix(m)
     # fig, ax = plt.subplots()
     plt.imshow(m, interpolation='nearest', cmap='gray_r')
     # fig.canvas.set_window_title(name + '...')
     # fig.set_title(name)
     # fig.set_xlabel('Time [iterations]')
     # fig.set_ylabel('Score')
+    plt.yticks(
+        np.arange(len(ylabels), 0, -1) - 1, ylabels, weight=1, size='x-small')
     plt.show()
+    return plt
 
 
 def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
@@ -61,11 +65,11 @@ def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
         x = x_
 
     n = len(x.keys())
-    m = len(utils.get(x)[1].keys())
+    m = len(utils.get(x)[-1].keys())
     vertical_borders = not m == 1
 
     # display a 2D manifold of output samples
-    _, x_sample = utils.get(x, 1)
+    x_sample = utils.get(x, 1)[-1]
     size1 = x_sample.shape[1]
     size2 = crop_size  # crop x_train.shape[1]
     margin_y, margin_x = n * margin_top * 3, m * margin_left * 3
@@ -74,8 +78,8 @@ def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
     for i, yi in enumerate(sorted(x.keys())):
         for j, xi in enumerate(sorted(x[yi].keys())):
             x_decoded = x[yi][xi]
-            sample = x_decoded[:size2].reshape((size2, size1)).transpose()
-            sample.reshape(size1, size2)
+            sample = x_decoded[:size2].reshape((size2, size1))
+            sample = rotate_midi_matrix(sample).reshape(size1, size2)
             # coordinates of the current sample
             a = i * size1 + i * margin_top * 3
             b = (i + 1) * size1 + i * margin_top * 3
@@ -240,3 +244,7 @@ def plot_dict(d, minn=0, maxx=1):
         p1 = plt.plot(v, lw=2, color=TABLEAU20[i])
         plots.append(p1)
     return plots
+
+
+def rotate_midi_matrix(m):
+    return np.flip(m.copy().transpose(), axis=0)

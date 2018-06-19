@@ -84,7 +84,7 @@ def note(c, note_index, velocity, t, transpose=0):
 
 
 def _note(note_index):
-    i = note_index - midi.SILENT_NOTES
+    i = note_index - midi.SILENT_NOTES - 1
     return midi.USED_PITCHES[i][0]
     # note = pitches.USED_DRUMS
     # for i, note_list in enumerate(pitches.DRUMS):
