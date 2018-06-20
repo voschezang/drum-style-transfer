@@ -48,7 +48,7 @@ def single(m, ylabels=pitches.all_keys):
     # fig.set_xlabel('Time [iterations]')
     # fig.set_ylabel('Score')
     plt.yticks(
-        np.arange(len(ylabels), 0, -1) - 1, ylabels, weight=1, size='x-small')
+        np.arange(len(ylabels), 0, -1) - 1, ylabels, weight=1, size='xx-small')
     plt.show()
     return plt
 
@@ -120,8 +120,7 @@ def custom(d,
            type_='line',
            std={},
            dn=None,
-           show=False,
-           **kwargs):
+           show=False):
     """
     d :: {label: [value]}
     if dn:
@@ -161,11 +160,17 @@ def custom(d,
     else:
         maxx = minn + y_scale_margin
 
+    std_min, std_max = 0, 0
     for k, v in d.items():
-        if min(v) < minn:
-            minn = min(v) - y_scale_margin
-        if max(v) > maxx:
-            maxx = max(v) + y_scale_margin
+        if std:
+            std_min = min(std[k])
+            std_max = max(std[k])
+
+        if min(v) - std_min < minn:
+            minn = min(v) - std_min - y_scale_margin
+
+        if max(v) + std_max > maxx:
+            maxx = max(v) + std_max + y_scale_margin
 
     plt.ylim([minn, maxx])
 
