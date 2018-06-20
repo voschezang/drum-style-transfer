@@ -150,24 +150,21 @@ def custom(d,
         print('WARNING unkown arg value: `type_` was %s' % type_)
 
     # set range of y axis
-    if min_y_scale:
-        minn = min_y_scale
-    else:
-        minn = list(d.values())[0][0] - y_scale_margin
-
-    if max_y_scale:
-        maxx = max_y_scale
-    else:
-        maxx = minn + y_scale_margin
-
+    minn = list(d.values())[0][0] - y_scale_margin
+    maxx = minn + y_scale_margin
     std_ = 0
     for k, v in d.items():
         if std:
             std_ = max(std[k])
-        if min(v) - std_ <= minn:
+        if min(v) - std_ <= minn + y_scale_margin:
             minn = min(v) - std_ - y_scale_margin
-        if max(v) + std_ >= maxx:
+        if max(v) + std_ >= maxx - y_scale_margin:
             maxx = max(v) + std_ + y_scale_margin
+
+    if max_y_scale:
+        maxx = max_y_scale
+    if min_y_scale:
+        minn = min_y_scale
 
     plt.ylim([minn, maxx])
 

@@ -13,11 +13,6 @@ from utils import utils
 ### --------------------------------------------------------------------
 ### NCD-based evaluations
 ### --------------------------------------------------------------------
-"""
-Make sure that z, genre_dict and transformations are compatible
-all transformations.keys should be in genre_dict.keys
-all genre_dict.values should be in z
-"""
 
 
 def cross(z,
@@ -35,6 +30,11 @@ def cross(z,
     x = images/midi-matrices
     z = latent vector
     generator has method generator.predict(z) -> x
+
+    Make sure that z, genre_dict and transformations are compatible
+    all transformations.keys should be in genre_dict.keys
+    all genre_dict.values should be in z
+
 
     results = {'original genre' : {genre a': {'genre b': grid_result}}}
     grid_result = {'scalar': ncd()}
@@ -96,7 +96,10 @@ def for_every_genre(z,
     if not different_genre_a:
         # iter1 = [ original_genre ]
         # genre_a = original_genre
-        iter1 = itertools.repeat(original_genre, amt)
+        if original_genre in transformations.keys():
+            iter1 = itertools.repeat(original_genre, amt)
+        else:
+            iter1 = []
     elif amt:
         iter1 = list(transformations.keys())
         np.random.shuffle(iter1)

@@ -92,7 +92,7 @@ def gen_latent(generator,
             z_sample = np.tile(z_sample, batch_size).reshape(
                 batch_size, latent_dim)
             x_decoded = generator.predict(z_sample, batch_size=batch_size)
-            result[yi][xi] = x_decoded
+            result[yi][xi] = x_decoded[0]
 
     if plot_result:
         plot.multi(result, v=v)
