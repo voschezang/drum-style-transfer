@@ -323,7 +323,7 @@ def vae_loss(vae_input,
              z_log_var,
              timesteps=40,
              notes=9,
-             beta=1.,
+             beta=0.5,
              extra_loss_f=keras.losses.mean_absolute_error,
              gamma=0.5):
     """
@@ -334,8 +334,10 @@ def vae_loss(vae_input,
     """
     vae_input_ = K.flatten(vae_input)
     vae_output_ = K.flatten(vae_output)
+    # bin. cross-entropy
     xent_loss = timesteps * notes * keras.metrics.binary_crossentropy(
         vae_input_, vae_output_)
+    # Kullback-Leibler divergence
     kl_loss = -1. * K.sum(
         1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
     # (optional) kl_loss = max(kl_loss, free_bits)
