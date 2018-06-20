@@ -52,10 +52,10 @@ def between_genres(x, genre_dict, amt1=None, amt2=None, v=0):
     best_dims = []
     importances = []
     if amt1:
-        # iter_ = list(genre_dict.keys())
-        # np.random.shuffle(iter_)
-        # iter_ = iter_[:amt1]
+        # loop over all data until amt is reached
+        # "sample with replacement"
         iter_ = np.array(list(genre_dict.keys()))
+        np.random.shuffle(iter_)
         i = 0
         while i < amt1:
             if v: print('\n%i' % i)

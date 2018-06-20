@@ -160,17 +160,14 @@ def custom(d,
     else:
         maxx = minn + y_scale_margin
 
-    std_min, std_max = 0, 0
+    std_ = 0
     for k, v in d.items():
         if std:
-            std_min = min(std[k])
-            std_max = max(std[k])
-
-        if min(v) - std_min < minn:
-            minn = min(v) - std_min - y_scale_margin
-
-        if max(v) + std_max > maxx:
-            maxx = max(v) + std_max + y_scale_margin
+            std_ = max(std[k])
+        if min(v) - std_ <= minn:
+            minn = min(v) - std_ - y_scale_margin
+        if max(v) + std_ >= maxx:
+            maxx = max(v) + std_ + y_scale_margin
 
     plt.ylim([minn, maxx])
 

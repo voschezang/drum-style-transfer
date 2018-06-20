@@ -25,6 +25,24 @@ def get(d: dict, recursion_depth=0, i=-1):
     return k, keys, d[k]
 
 
+def clean_dict(d: dict, r=0, trash=[[], {}], verbose=0):
+    """ rm all trash in a dict
+    no deepcopy, thus potential side-effects
+
+    trash :: list of values to remove
+    return :: copy of d
+    """
+    result = {}
+    for k, v in d.items():
+        if not d[k] in [[], {}]:
+            if r > 0:
+                v = clean_dict(v, r - 1)
+            result[k] = v
+        else:
+            if verbose: print('found empty item: ', k, d[k])
+    return result
+
+
 # Math
 
 
