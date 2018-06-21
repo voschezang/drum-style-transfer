@@ -3,8 +3,7 @@ Black indicates a note-on msg
 Grey indicates a probable note-on msg (intensity correlates with p())
 White indicates a rest
 """
-import string
-from utils import utils
+from utils import utils, string
 from midi import pitches
 
 from scipy.stats import norm
@@ -119,6 +118,7 @@ def custom(d,
            y_scale_margin=0.1,
            type_='line',
            std={},
+           figsize=(6, 3),
            dn=None,
            show=False):
     """
@@ -136,6 +136,7 @@ def custom(d,
     Maybe x :: None | x
 
     """
+    plt.figure(figsize=figsize)
     name = title
     labels = []
     for s in d.keys():
@@ -161,9 +162,9 @@ def custom(d,
         if max(v) + std_ >= maxx - y_scale_margin:
             maxx = max(v) + std_ + y_scale_margin
 
-    if max_y_scale:
+    if not max_y_scale is None:
         maxx = max_y_scale
-    if min_y_scale:
+    if not min_y_scale is None:
         minn = min_y_scale
 
     plt.ylim([minn, maxx])

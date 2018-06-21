@@ -212,9 +212,6 @@ def encoder(input_shape, latent_dim=2):
 
     # Convolution
     h = encoder_input
-    k = (2, 1)
-    s = (2, 1)
-
     h = Reshape((timesteps, notes))(h)
     h = Conv1D(
         64, kernel_size=2, strides=1, activation='relu', padding='valid')(h)
