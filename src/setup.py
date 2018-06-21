@@ -44,7 +44,7 @@ def init(max_bars=2):
     max_t = 60 / bpm * 2 * max_bars
     dt = 0.025  # T, sampling interval. quantized time, must be > 0
     n_timesteps = round(max_t / dt)  # vector length
-    note_length = 0.03  # seconds
+    note_length = 0.3  # seconds
     tempo = mido.bpm2tempo(bpm)
     # ticks_per_beat: 96 | 220 | 480 # midi resolution
     ticks_per_beat = mido.MidiFile().ticks_per_beat

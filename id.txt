@@ -1,20 +1,38 @@
 anova test
 
 
-
 bnai  belg nl ai conf.
 
 TODO
-- classname extraction (dirname) ~ 10 samples per class
-  count n classes, samples per class
-- PCA to extract the best latent vector for every class
-  - of classes with 10+ samples
-- NCD of incrementally transformed samples (with PCA)
-- NCD of incrementally transformed samples (without PCA)
+- NCD to original class?
 - find clear examples of tranformations (e.g. increase in note density)
+- NCD of pre-selected samples (used in experimental study)
+  - e.g. 'easy'/distinct genres
+
+- use individual transformations from every sample to every average b*
+  - alt min. transformation: choose dim with the greatest difference between 2 samples
+
+
+Thesis: proportional latent space, musical transformations
+Goal: style transfer (A->B)
+ - requires: proportional latent space, musical transformations
+
+proof
+- analytical: ncd(A,B) < ncd(A',B)
+  - but still ncd(A,A') = small?
+- experimental: 'incremental differences are percieved musical'
+
+other studies
+- latent space: clustering
+ - non-binary classification (graudal)
+- transformations: - recognizable musical properties
 
 
 - experimental study
+  - incremental transformation along a single axis
+  - transformations of different dimensions
+      - do they correspond to recognizable musical properties?
+
 
 
 TODO secondary

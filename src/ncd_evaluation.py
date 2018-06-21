@@ -1,8 +1,9 @@
 from __future__ import division
 
-import numpy as np
+import numpy as np, collections
 from typing import List, Dict
 import itertools
+import json
 
 import config
 import errors
@@ -127,7 +128,7 @@ def for_every_genre(z,
                         print(' - genre_b `%s`' % genre_b)
                     indices_b = genre_dict[genre_b]
                     x_b = generator.predict(z[indices_b])
-                    result_genre_a[genre_b] = grid_search(
+                    result_genre_a[genre_b], _ = grid_search(
                         z_original, x_b, transformation, generator, grid)
                     # TODO compute result of ncd (original, genre a)
 
@@ -135,10 +136,77 @@ def for_every_genre(z,
     return result
 
 
-def grid_search(z, x_other, transformation, generator, grid=[0, 1]):
+def grid_search(z,
+                x_other,
+                transformation,
+                generator,
+                grid=[0, 1],
+                save_transformed=False):
+    """
+    result :: {scalar: ncd(_, scalar)}
+    transformed = [prediction(_) for all scalars]
+    """
+    ncd = not save_transformed
     result = {}
+    transformed = []
     for value in grid:
         z_ = models.apply_transformation(z, transformation, value)
         x_generated = generator.predict(z_)
-        result[value] = compression.NCD_multiple(x_generated, x_other)
-    return result
+        if save_transformed:
+            transformed.append(x_generated)
+        if ncd:
+            result[value] = compression.NCD_multiple(x_generated, x_other)
+    return result, transformed
+
+
+### --------------------------------------------------------------------
+### Other (tranformations without ncd)
+### --------------------------------------------------------------------
+
+
+def transform(z,
+              genre_dict,
+              transformations,
+              generator,
+              grid=[0, 0.01, 0.1, 0.5, 1],
+              amt1=None,
+              v=0):
+    """Compute & return all transformations, sample based
+    transformations :: {genre a: {genre b: z}}
+    genre_dict = {'genre': indices}
+    x = images/midi-matrices
+    z = latent vector
+    generator has method generator.predict(z) -> x
+
+    Make sure that z, genre_dict and transformations are compatible
+    all transformations.keys should be in genre_dict.keys
+    all genre_dict.values should be in z
+
+    result = {genre a': {'genre b': grid_result}}
+    grid_result = {'scalar': index}
+    x_result = (i, grid-scalar, x)
+    meta = {genre a},{genre b}
+    """
+    result = collections.defaultdict(dict)
+    x_result = []
+    meta = collections.defaultdict(dict)
+    i = 0
+    for genre_a, d in list(transformations.items())[:amt1]:
+        for genre_b, transformation in d.items():
+            print('%s \t-> %s' % (genre_a, genre_b))
+            indices_a = genre_dict[genre_a]
+            z_genre_a = z[indices_a]
+            x_b = None
+            _, x_transformed = grid_search(
+                z_genre_a,
+                x_b,
+                transformation,
+                generator,
+                grid,
+                save_transformed=True)
+            result[genre_a][genre_b] = i
+            x_result.append(x_transformed)
+            meta[genre_a][genre_b] = {i: grid}
+            i += 1
+
+    return result, np.concatenate(x_result, axis=0), meta
