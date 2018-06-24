@@ -10,7 +10,7 @@ import config  # incl. random seed
 import numpy as np
 import collections
 from sklearn.decomposition import PCA
-from scipy.stats import norm
+import scipy.stats
 import keras
 from keras.utils import to_categorical
 from keras import optimizers, backend as K
@@ -79,8 +79,8 @@ def gen_latent(generator,
     # the inverse CDF (ppf) of the Gaussian to produce values of the latent
     # variables z, since the prior of the latent space is Gaussian
     if assume_gaussion:
-        grid_x = norm.ppf(grid_x)
-        grid_y = norm.ppf(grid_y)
+        grid_x = scipy.stats.norm.ppf(grid_x)
+        grid_y = scipy.stats.norm.ppf(grid_y)
 
     # Generation
     result = collections.defaultdict(dict)

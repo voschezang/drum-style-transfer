@@ -29,20 +29,6 @@ from utils import io
 # def info():
 # return "dict/csv per subgenre A :: {'genre B/subgenre B': vector}"
 
-### Deprecated: use utils.io.save() to save as .pkl
-# def save_to_disk(transformations={}, dn='', v=0):
-#     with open(dn + 'info.txt', "w") as text_file:
-#         print(info(), file=text_file)
-
-#     for genre_A, sub_dict in transformations.items():
-#         # sub_dict :: {'target_genre_2/genre_B_2': vector}
-#         a1, a2 = genre_A.split('/')
-#         if a1 not in os.listdir(dn): os.mkdir(dn + a1)
-#         if v:
-#             print(genre_A)
-#             print(sub_dict.keys())
-#         io.save_dict(dn + a1, a2, sub_dict)
-
 
 def between_genres(x, genre_dict, amt1=None, amt2=None, v=0):
     # genre_dict :: {genre: indices}
@@ -103,25 +89,31 @@ def transformations_from_genre(original_genre, genre_dict, x, amt=None, v=0):
     if amt:
         iter_ = list(genre_dict.keys())
         np.random.shuffle(iter_)
-        iter_ = iter_[:amt]
+        # iter_ = iter_[:amt]
     else:
         iter_ = genre_dict.keys()
+    iter_i = 0
     for target_genre in iter_:
         target_indices = genre_dict[target_genre]
         if not original_genre == target_genre:
             if max(target_indices) >= x.shape[0]:
                 print('target_indices >= x.shape', max(target_indices),
                       x.shape[0])
-            i, value, t, min_t = _transformation_ab(original_indices,
-                                                    target_indices, x)
+            dim_i, value, t, min_t = _transformation_ab(
+                original_indices, target_indices, x)
             if v > 0:
                 print('  genre B: \t%s (len: %i)' % (target_genre,
                                                      len(target_indices)))
-                print(' \t i: %i, importance: %f' % (i, value))
-            best_dims.append(i)
+                print(' \t i: %i, importance: %f' % (dim_i, value))
+            best_dims.append(dim_i)
             importance_list.append(value)
             transformations_to[target_genre] = t
             min_transformations_to[target_genre] = min_t
+            if amt and iter_i >= amt:
+                return best_dims, importance_list, transformations_to, min_transformations_to
+
+            iter_i += 1
+
     return best_dims, importance_list, transformations_to, min_transformations_to
 
 

@@ -80,10 +80,15 @@ def import_data(context,
     return matrices, labels
 
 
-def build_label_dict(labels):
+def build_label_dict(labels, min_samples=7):
     # result :: {label: indices}
     result = collections.defaultdict(list)
     for i, genre in enumerate(labels):
         key = genre[-2] + '/' + genre[-1]
         result[key].append(i)
+    # reduce class imbalance
+    for label in result.copy().keys():
+        if len(result[label]) < min_samples:
+            result.pop(label)
+
     return result
