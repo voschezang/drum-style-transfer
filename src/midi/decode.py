@@ -1,3 +1,7 @@
+"""
+Convert numpy.ndarray representations of midifiles
+"""
+
 from __future__ import division
 
 import numpy as np
@@ -8,28 +12,41 @@ from typing import List, Dict
 import config
 import errors
 import midi
-from midi import pitches
+from midi import pitches, encode
 from midi import generators as g
 from midi import NoteVector, MultiTrack, Track
 from utils import utils
 
 
-def tracks(c, matrices) -> List[mido.MidiTrack]:
+def identity(c, matrix, v=0):
+    """decode & encode multiple MidiTracks
+    (conversion is lossy)
+
+    matrices :: MultiTrack | [MultiTrack ]
+    """
+    if len(matrix.shape) == 4:
+        return encode.midiFiles(c, tracks(c, matrix, v=v), v=v)
+    else:
+        return encode.midiFile(c, track(c, matrix, v=v), v=v)
+
+
+def tracks(c, matrices, v=0) -> List[mido.MidiTrack]:
     """
     matrices :: np.ndarray :: (samples,) + MultiTrack
     """
-    return [track(c, matrices[i]) for i in range(matrices.shape[0])]
+    return [track(c, matrices[i], v=v) for i in range(matrices.shape[0])]
 
 
-def track(c, matrix: MultiTrack, transpose=0,
-          name='track_01') -> mido.MidiTrack:
+def track(c, matrix: MultiTrack, transpose=0, name='track_01',
+          v=0) -> mido.MidiTrack:
     # c :: data.Context
     # matrix :: [ vector per instance ]
     # vector :: [ notes ]
     if not isinstance(matrix, MultiTrack):
         if not len(matrix.shape) == 3:
-            config.debug('decode_track - input was not MultiTrack.',
-                         'Assuming MultiTrack')
+            if v:
+                config.debug('decode_track - input was not MultiTrack.',
+                             'Assuming MultiTrack')
 
     # decode notes for each instance
     track = mido.MidiTrack()
@@ -53,17 +70,17 @@ def track(c, matrix: MultiTrack, transpose=0,
     # convert absolute time in seconds to relative ticks
     track.sort(key=lambda msg: msg.time)
     track = midi.convert_time_to_relative_value(
-        track, lambda t: midi.second2tick(c, t))
+        track, lambda t: midi.second2tick(c, t), v=v)
 
     mid = mido.MidiFile()
     mid.ticks_per_beat = c.ticks_per_beat
     mid.tracks.append(track)
-    config.info('len, max_t', mid.length, c.max_t)
+    if v: config.info('len, max_t', mid.length, c.max_t)
     return mid
 
 
-def notes(c, notes: NoteVector, t, lookahead_matrix=None,
-          transpose=0) -> List[mido.Message]:
+def notes(c, notes: NoteVector, t, lookahead_matrix=None, transpose=0,
+          v=0) -> List[mido.Message]:
     # :t :: seconds
     # msg.time = absolute, in seconds
     if not isinstance(notes, NoteVector):  # np.generic
@@ -72,11 +89,11 @@ def notes(c, notes: NoteVector, t, lookahead_matrix=None,
     for note_index, velocity in enumerate(notes):
         if lookahead_matrix is None or lookahead_matrix[:, note_index].max(
         ) < midi.MIDI_NOISE_FLOOR:
-            msgs.extend(note(c, note_index, velocity, t, transpose))
+            msgs.extend(note(c, note_index, velocity, t, transpose, v=v))
     return msgs
 
 
-def note(c, note_index, velocity, t, transpose=0):
+def note(c, note_index, velocity, t, transpose=0, v=0):
     # return ::  [] | a list of midi messages (note on, note off)
     if velocity < midi.MIDI_NOISE_FLOOR:
         return []
@@ -86,14 +103,10 @@ def note(c, note_index, velocity, t, transpose=0):
     # note = midi.LOWEST_NOTE + note_index - midi.SILENT_NOTES
     note = _note(note_index)
     if note > midi.HIGHEST_NOTE:
-        config.debug('decode_note: note index > highest note')
+        if v: config.debug('decode_note: note index > highest note')
     return g.note_on_off(c, note + transpose, 127, t)
 
 
 def _note(note_index):
     i = note_index - midi.SILENT_NOTES - 1
     return midi.USED_PITCHES[i][0]
-    # note = pitches.USED_DRUMS
-    # for i, note_list in enumerate(pitches.DRUMS):
-    #     if value in note_list:
-    #         return midi.SILENT_NOTES + i

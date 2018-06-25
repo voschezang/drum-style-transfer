@@ -37,7 +37,7 @@ Context_desciption = """ Context :: namedtuple(
 """
 
 
-def init(max_bars=2):
+def init(max_bars=4):
     print(Context_desciption)
     print('Setting up params\n')
     bpm = 120.  # default bpm

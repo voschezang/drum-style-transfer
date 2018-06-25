@@ -193,34 +193,33 @@ def combine_notes(v1, v2):
     return v
 
 
-def convert_time_to_relative_value(ls, convert_time):
+def convert_time_to_relative_value(ls, convert_time, v=0):
     # convert in place
     current_t = 0
     prev_t = 0
     for msg in ls:
         old_t = msg.time
         if prev_t > old_t:
-            config.debug('prev-t >', prev_t, old_t)
+            if v: config.debug('prev-t >', prev_t, old_t)
         prev_t = old_t
         if old_t < current_t:
-            config.debug('old current', old_t, current_t)
+            if v: config.debug('old current', old_t, current_t)
         dt = old_t - current_t
         msg.time = convert_time(dt)
         current_t += dt
     return ls
 
 
-def reduce_MultiTrack_list_dims(tracks):
+def reduce_MultiTrack_list_dims(tracks, v=0):
     # [ MultiTrack ] -> [ MultiTrack ]
     used_indices = []
     for note_i in range(tracks.shape[-1]):
         if tracks[:, :, note_i].max() > MIDI_NOISE_FLOOR:
             used_indices.append(note_i)
     tracks = tracks[:, :, used_indices]
-    config.info('reduced mt list dims:', tracks.shape)
+    if v: config.info('reduced mt list dims:', tracks.shape)
     return tracks  # return tracks[:, :, indices]
 
 
 def is_note_on(msg: mido.Message):
     return not msg.is_meta and msg.type == NOTE_ON
-    # config.info('to_vector: msg is meta')

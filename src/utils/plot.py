@@ -4,7 +4,7 @@ Grey indicates a probable note-on msg (intensity correlates with p())
 White indicates a rest
 """
 from utils import utils, string
-from midi import pitches
+from midi import pitches, decode
 
 from scipy.stats import norm
 import numpy as np
@@ -35,22 +35,48 @@ for i in range(len(TABLEAU20)):
 ### --------------------------------------------------------------------
 
 
-def single(m, ylabels=pitches.all_keys, figsize=(10, 10), fn=None):
-    # set ylabels to [] to hide them
-    if len(m.shape) > 2:
-        m = m.reshape(m.shape[:-1])
-    xlength = m.shape[0]
-    m = _rotate_midi_matrix(m)
-    fig = plt.figure(figsize=figsize)
-    _midi_grid(fig, ylabels, n_bars=1, length=xlength)
-    plt.imshow(m, interpolation='nearest', cmap='gray_r')
-    plt.show()
+def single(m,
+           ylabels=pitches.all_keys,
+           figsize=(10, 10),
+           fn=None,
+           show=True,
+           subplot=(False, None),
+           transform=None,
+           v=1):
+    """
+    transform :: None | context
+    """
+    if len(m.shape) == 4:
+        # TODO does not work
+        if v: print('plot multiple')
+        n = m.shape[0]
+        for i in range(n):
+            subplot = (True, (str(n) + '1' + str(i + 1)))
+            single(m[i], ylabels, figsize, fn=None, subplot=subplot)
+    else:
+        if transform:
+            m = decode.identity(transform, m)[0]
+        if subplot[0]:
+            plt.subplot(subplot[1])
+        # set ylabels to [] to hide them
+        if len(m.shape) > 2:
+            m = m.reshape(m.shape[:-1])
+        xlength = m.shape[0]
+        m = _rotate_midi_matrix(m)
+        fig = plt.figure(figsize=figsize)
+        _midi_grid(fig, ylabels, length=xlength)
+        plt.imshow(m, interpolation='nearest', cmap='gray_r')
+
+    if show and not subplot[0]:
+        plt.show()
+
     if not fn is None:
         fn = string.to_dirname(fn)
         plt.savefig(fn + '-plot.png')
 
 
-def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
+def multi(x, crop_size=160, figsize=(10, 10), margin_top=1, margin_left=0,
+          v=0):
     """
     x :: {x_pos: {y_pos: np.ndarray}} | np.ndarray
     """
@@ -69,7 +95,7 @@ def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
     x_sample = utils.get(x, 1)[-1]
     size1 = x_sample.shape[1]
     size2 = crop_size  # crop x_train.shape[1]
-    margin_y, margin_x = n * margin_top * 1, m * margin_left * 1
+    margin_y, margin_x = n * margin_top, m * margin_left
     figure = np.zeros((size1 * n + margin_y, size2 * m + margin_x))
     ylabels = []
     for i, yi in enumerate(sorted(x.keys())):
@@ -83,12 +109,12 @@ def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
             b = (i + 1) * size1 + i * margin_top
             c = j * size2 + j * margin_left
             d = (j + 1) * size2 + j * margin_left
-            c, d = c + 1, d + 1
+            # c, d = c + 1, d + 1
             a, b = a + 1, b + 1
             figure[a:b, c:d] = sample
 
-    fig = plt.figure(figsize=(10, 10))
-    _midi_grid(fig, ylabels, n_bars=crop_size / 40, length=x_sample.shape[0])
+    fig = plt.figure(figsize=figsize)
+    _midi_grid(fig, ylabels, length=crop_size)
     plt.imshow(figure, cmap='gray_r')
     plt.show()
 
@@ -276,7 +302,8 @@ def _midi_yticks(ax, ylabels=[]):
         np.arange(len(ylabels), 0, -1) - 1, ylabels, weight=1, size='x-small')
 
 
-def _midi_grid(fig, ylabels=[], n_bars=1, length=50):
+def _midi_grid(fig, ylabels=[], length=40, d=10):
+    n_bars = length / d / 4
     ax = fig.add_subplot(1, 1, 1)
     _midi_yticks(ax, ylabels)
     _midi_xticks(ax, n_bars, length)

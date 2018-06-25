@@ -33,6 +33,12 @@ def reset_tmp_dir():
     return True
 
 
+def reset_midis_dir():
+    os.system('rm -r ' + config.export_dir)
+    os.system('mkdir ' + config.export_dir)
+    return True
+
+
 def save(obj, fn='obj.pkl'):
     fn = string.end_with(fn, '.pkl')
     with open(fn, 'wb') as f:
@@ -173,9 +179,13 @@ def import_midifile(fn='../mary.mid', convert=True):
     return data
 
 
-def export_midifile(mid, fn='../song_export.mid'):
+def export_midifile(mid, fn='../song_export.mid', name=None):
+    # name :: None | str
     if not fn[-4:] == '.mid':
         fn += '.mid'
+    if not name is None:
+        track = mid.tracks[0]
+        track.append(mido.MetaMessage('track_name', name=name))
     mid.save(fn)
     return fn
 

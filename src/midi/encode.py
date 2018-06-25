@@ -1,3 +1,6 @@
+"""
+Convert mido midi objects representations of midifiles
+"""
 from __future__ import division
 
 import numpy as np
@@ -8,18 +11,31 @@ from typing import List, Dict
 import config
 import errors
 import midi
-from midi import pitches
+from midi import pitches, decode
+
 # from midi import NoteVector, MultiTrack, Track
 from utils import utils
 
 
+def identity(c, m, v=0):
+    """encode & decode midifiles
+    (conversion is lossy)
+    m :: MultiTrack | [MultiTrack]
+    """
+    if type(m) is list:
+        return decode.tracks(c, midiFiles(c, m, v=v), v=v)
+    else:
+        return decode.track(c, midiFile(c, m, v=v), v=v)
+
+
 def midiFiles(c,
-              midis,
+              midis: List[midi.MultiTrack],
               multiTrack=True,
               reduce_dims=midi.ReduceDimsOptions.NONE,
               velocity=None,
-              dim4=False,
-              split_files=False):
+              dim4=True,
+              split_files=False,
+              v=0):
     """ Encode a list of mido.MidiFile
     reduce dims filters out unused dimensions
      'global' -> filter after all midiFiles have been encoded (keep note-structure)
@@ -36,12 +52,12 @@ def midiFiles(c,
     #     for mid in midis
     # ]
 
-    config.info(multiTrack)
+    if v: config.info(multiTrack)
     n_notes = 1
     tracks = []
     for mid in midis:
-        encoded_tracks = midiFile(c, mid, multiTrack, velocity, reduce_dims,
-                                  split_files)
+        encoded_tracks = midiFile(
+            c, mid, multiTrack, velocity, reduce_dims, split_files, v=v)
         for track in encoded_tracks:
             if track.n_notes() > n_notes:
                 n_notes = track.n_notes()
@@ -66,7 +82,8 @@ def midiFile(c,
              multiTrack=True,
              velocity=None,
              reduce_dims=True,
-             split_files=False):
+             split_files=False,
+             v=0):
     """
     c :: setup.Context
     return :: [ MultiTrack ] | [ Track ]
@@ -82,7 +99,7 @@ def midiFile(c,
     if not mid.ticks_per_beat == 96:
         # e.g. 96 PPQ  # pulses per quarter note (beat)
         # TODO prevent usage of msg.time in ticks_per_beat
-        config.info('PPQ is not 96 but [%i]' % mid.ticks_per_beat)
+        if v: config.info('PPQ is not 96 but [%i]' % mid.ticks_per_beat)
 
     # TODO a midifile that consists of multiple tracks is interpreted
     # as multiple independent files
@@ -103,7 +120,8 @@ def midiFile(c,
 
     if multiTrack:
         return [matrix]
-    return midi.multiTrack_to_list_of_Track(matrix)
+    # return midi.multiTrack_to_list_of_Track(matrix)
+    return matrix.multiTrack_to_list_of_Track()
 
 
 def _extend_MultiTrack(c, matrix: midi.MultiTrack, mid, t,
@@ -159,7 +177,6 @@ def single_msg(msg: mido.Message, velocity=None) -> midi.NoteVector:
     # for each instance
     #   for each channel: [note], [velocity]
     if not midi.is_note_on(msg):
-        # config.info('to_vector: msg is meta')
         return notes
 
     note_index = note(msg.note)

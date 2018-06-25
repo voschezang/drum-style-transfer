@@ -170,6 +170,7 @@ def transform(z,
               generator,
               grid=[0, 0.01, 0.1, 0.5, 1],
               amt1=None,
+              amt2=None,
               v=0):
     """Compute & return all transformations, sample based
     transformations :: {genre a: {genre b: z}}
@@ -192,8 +193,8 @@ def transform(z,
     meta = collections.defaultdict(dict)
     i = 0
     for genre_a, d in list(transformations.items())[:amt1]:
-        for genre_b, transformation in d.items():
-            print('%s \t-> %s' % (genre_a, genre_b))
+        for genre_b, transformation in list(d.items())[:amt2]:
+            if v: print('%s \t-> %s' % (genre_a, genre_b))
             indices_a = genre_dict[genre_a]
             z_genre_a = z[indices_a]
             x_b = None
