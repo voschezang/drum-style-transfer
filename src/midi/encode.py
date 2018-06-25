@@ -25,7 +25,7 @@ def identity(c, m, v=0):
     if type(m) is list:
         return decode.tracks(c, midiFiles(c, m, v=v), v=v)
     else:
-        return decode.track(c, midiFile(c, m, v=v), v=v)
+        return decode.track(c, midiFile(c, m, v=v)[0], v=v)
 
 
 def midiFiles(c,

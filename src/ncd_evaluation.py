@@ -172,34 +172,44 @@ def transform(z,
               amt1=None,
               amt2=None,
               v=0):
-    """Compute & return all transformations, sample based
+    """Apply all transformations, sample based
     transformations :: {genre a: {genre b: z}}
     genre_dict = {'genre': indices}
-    x = images/midi-matrices
-    z = latent vector
+    x = list of images/midi-matrices
+    z = list of latent vector
     generator has method generator.predict(z) -> x
 
     Make sure that z, genre_dict and transformations are compatible
     all transformations.keys should be in genre_dict.keys
     all genre_dict.values should be in z
 
-    result = {genre a': {'genre b': grid_result}}
-    grid_result = {'scalar': index}
-    x_result = (i, grid-scalar, x)
+    result = {genre a': {'genre b': index of x_result}}
+    x_result = list of grid_result
+    grid_result :: (grid_scalar, x)
+    lookup_table :: {i : (genre_a, genre_b)}
     meta = {genre a},{genre b}
     """
     result = collections.defaultdict(dict)
     x_result = []
+    lookup_table = {}
     meta = collections.defaultdict(dict)
     i = 0
-    for genre_a, d in list(transformations.items())[:amt1]:
-        for genre_b, transformation in list(d.items())[:amt2]:
+    if amt1:
+        iter1 = list(transformations.items())[:amt1]
+    else:
+        iter1 = transformations.items()
+    for genre_a, d in iter1:
+        if amt2:
+            iter2 = list(d.items())[:amt2]
+        else:
+            iter2 = d.items()
+        for genre_b, transformation in iter2:
             if v: print('%s \t-> %s' % (genre_a, genre_b))
-            indices_a = genre_dict[genre_a]
-            z_genre_a = z[indices_a]
+            indices_a = genre_dict[genre_a][genre_b]
+            z_samples = z[indices_a]
             x_b = None
-            _, x_transformed = grid_search(
-                z_genre_a,
+            _ncd_result, x_transformed = grid_search(
+                z_samples,
                 x_b,
                 transformation,
                 generator,
@@ -207,7 +217,8 @@ def transform(z,
                 save_transformed=True)
             result[genre_a][genre_b] = i
             x_result.append(x_transformed)
+            lookup_table[i] = (genre_a, genre_b)
             meta[genre_a][genre_b] = {i: grid}
             i += 1
 
-    return result, np.concatenate(x_result, axis=0), meta
+    return result, x_result, lookup_table, meta

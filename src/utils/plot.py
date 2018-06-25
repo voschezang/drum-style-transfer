@@ -302,10 +302,12 @@ def _midi_yticks(ax, ylabels=[]):
         np.arange(len(ylabels), 0, -1) - 1, ylabels, weight=1, size='x-small')
 
 
-def _midi_grid(fig, ylabels=[], length=40, d=10):
+def _midi_grid(fig, ylabels=[], length=40, d=10, v=1):
     n_bars = length / d / 4
     ax = fig.add_subplot(1, 1, 1)
     _midi_yticks(ax, ylabels)
-    _midi_xticks(ax, n_bars, length)
+    if n_bars > 1:
+        if v: print('n_bars = %f, \tlength=%f' % (n_bars, length))
+        _midi_xticks(ax, n_bars, length)
     ax.grid(which='minor', alpha=0.3, linewidth=2)
     ax.grid(which='major', alpha=0.5)

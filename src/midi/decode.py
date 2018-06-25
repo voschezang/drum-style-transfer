@@ -27,7 +27,7 @@ def identity(c, matrix, v=0):
     if len(matrix.shape) == 4:
         return encode.midiFiles(c, tracks(c, matrix, v=v), v=v)
     else:
-        return encode.midiFile(c, track(c, matrix, v=v), v=v)
+        return encode.midiFile(c, track(c, matrix, v=v), v=v)[0]
 
 
 def tracks(c, matrices, v=0) -> List[mido.MidiTrack]:
@@ -90,6 +90,7 @@ def notes(c, notes: NoteVector, t, lookahead_matrix=None, transpose=0,
         if lookahead_matrix is None or lookahead_matrix[:, note_index].max(
         ) < midi.MIDI_NOISE_FLOOR:
             msgs.extend(note(c, note_index, velocity, t, transpose, v=v))
+
     return msgs
 
 
@@ -108,5 +109,6 @@ def note(c, note_index, velocity, t, transpose=0, v=0):
 
 
 def _note(note_index):
-    i = note_index - midi.SILENT_NOTES - 1
+    # i = note_index - midi.SILENT_NOTES - 1
+    i = note_index - midi.SILENT_NOTES - 0
     return midi.USED_PITCHES[i][0]
