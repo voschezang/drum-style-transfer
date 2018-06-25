@@ -45,38 +45,28 @@ def cross(z,
     if v: print('different_genre_a =', different_genre_a)
     if amt1:
         iter_ = np.array(list(genre_dict.keys()))
-        i = 0
-        while i < amt1:
-            if v: print('\n%i' % i)
-            original_genre = np.random.choice(iter_)
-            if v: print('original genre: `%s`' % original_genre)
-            result = for_every_genre(z, original_genre, genre_dict,
-                                     transformations, generator, grid,
-                                     different_genre_a, amt2, v)
-            if result:
-                results[original_genre] = result
-            i += 1
-
+        np.random.shuffle(iter_)
+        iter_ = iter_[:amt]
     else:
         iter_ = genre_dict.keys()
 
-        for original_genre in iter_:
-            if v: print('\noriginal genre: `%s`' % original_genre)
-            # TODO non-global ncd-s?
-            # for i in range(min(sample_size, len(indices))):
-            result = for_every_genre(
-                z,
-                original_genre,
-                genre_dict,
-                transformations,
-                generator,
-                grid,
-                different_genre_a,
-                amt2,
-                v=v)
+    for original_genre in iter_:
+        if v: print('\noriginal genre: `%s`' % original_genre)
+        # TODO non-global ncd-s?
+        # for i in range(min(sample_size, len(indices))):
+        result = for_every_genre(
+            z,
+            original_genre,
+            genre_dict,
+            transformations,
+            generator,
+            grid,
+            different_genre_a,
+            amt2,
+            v=v)
 
-            if result:
-                results[original_genre] = result
+        if result:
+            results[original_genre] = result
     return results
 
 

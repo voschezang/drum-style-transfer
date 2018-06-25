@@ -42,23 +42,26 @@ def between_genres(x, genre_dict, amt1=None, amt2=None, v=0):
         # "sample with replacement"
         iter_ = np.array(list(genre_dict.keys()))
         np.random.shuffle(iter_)
-        i = 0
-        while i < amt1:
-            if v: print('\n%i' % i)
-            genre = np.random.choice(iter_)
-            result = (transformations, min_transformations, best_dims,
-                      importances)
-            result_ = _between_genres(x, genre, genre_dict, result, amt2, v)
-            transformations, min_transformations, best_dims, importances = result_
-            i += 1
+        if amt1 > len(iter_):
+            if v: print('Warning, amt too high', amt1, len(iter_))
+        iter_ = iter_[:amt1]
+        # i = 0
+        # while i < amt1:
+        #     if v: print('\n%i' % i)
+        #     genre = np.random.choice(iter_)
+        #     result = (transformations, min_transformations, best_dims,
+        #               importances)
+        #     result_ = _between_genres(x, genre, genre_dict, result, amt2, v)
+        #     transformations, min_transformations, best_dims, importances = result_
+        #     i += 1
 
     else:
         iter_ = genre_dict.keys()
-        for genre in iter_:
-            result = (transformations, min_transformations, best_dims,
-                      importances)
-            result_ = _between_genres(x, genre, genre_dict, result, amt2, v)
-            transformations, min_transformations, best_dims, importances = result_
+
+    for genre in iter_:
+        result = (transformations, min_transformations, best_dims, importances)
+        result_ = _between_genres(x, genre, genre_dict, result, amt2, v)
+        transformations, min_transformations, best_dims, importances = result_
 
     return best_dims, importances, transformations, min_transformations
 
@@ -89,7 +92,6 @@ def transformations_from_genre(original_genre, genre_dict, x, amt=None, v=0):
     if amt:
         iter_ = list(genre_dict.keys())
         np.random.shuffle(iter_)
-        # iter_ = iter_[:amt]
     else:
         iter_ = genre_dict.keys()
     iter_i = 0
@@ -109,10 +111,9 @@ def transformations_from_genre(original_genre, genre_dict, x, amt=None, v=0):
             importance_list.append(value)
             transformations_to[target_genre] = t
             min_transformations_to[target_genre] = min_t
+            iter_i += 1
             if amt and iter_i >= amt:
                 return best_dims, importance_list, transformations_to, min_transformations_to
-
-            iter_i += 1
 
     return best_dims, importance_list, transformations_to, min_transformations_to
 

@@ -16,7 +16,7 @@ from utils import utils
 def midiFiles(c,
               midis,
               multiTrack=True,
-              reduce_dims=midi.ReduceDimsOptions.GLOBAL,
+              reduce_dims=midi.ReduceDimsOptions.NONE,
               velocity=None,
               dim4=False,
               split_files=False):

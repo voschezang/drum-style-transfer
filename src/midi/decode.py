@@ -14,6 +14,13 @@ from midi import NoteVector, MultiTrack, Track
 from utils import utils
 
 
+def tracks(c, matrices) -> List[mido.MidiTrack]:
+    """
+    matrices :: np.ndarray :: (samples,) + MultiTrack
+    """
+    return [track(c, matrices[i]) for i in range(matrices.shape[0])]
+
+
 def track(c, matrix: MultiTrack, transpose=0,
           name='track_01') -> mido.MidiTrack:
     # c :: data.Context

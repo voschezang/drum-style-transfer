@@ -35,21 +35,19 @@ for i in range(len(TABLEAU20)):
 ### --------------------------------------------------------------------
 
 
-def single(m, ylabels=pitches.all_keys):
+def single(m, ylabels=pitches.all_keys, figsize=(10, 10), fn=None):
     # set ylabels to [] to hide them
     if len(m.shape) > 2:
         m = m.reshape(m.shape[:-1])
-    m = rotate_midi_matrix(m)
-    # fig, ax = plt.subplots()
+    xlength = m.shape[0]
+    m = _rotate_midi_matrix(m)
+    fig = plt.figure(figsize=figsize)
+    _midi_grid(fig, ylabels, n_bars=1, length=xlength)
     plt.imshow(m, interpolation='nearest', cmap='gray_r')
-    # fig.canvas.set_window_title(name + '...')
-    # fig.set_title(name)
-    # fig.set_xlabel('Time [iterations]')
-    # fig.set_ylabel('Score')
-    plt.yticks(
-        np.arange(len(ylabels), 0, -1) - 1, ylabels, weight=1, size='xx-small')
     plt.show()
-    return plt
+    if not fn is None:
+        fn = string.to_dirname(fn)
+        plt.savefig(fn + '-plot.png')
 
 
 def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
@@ -71,36 +69,27 @@ def multi(x, crop_size=40, margin_top=1, margin_left=1, v=0):
     x_sample = utils.get(x, 1)[-1]
     size1 = x_sample.shape[1]
     size2 = crop_size  # crop x_train.shape[1]
-    margin_y, margin_x = n * margin_top * 3, m * margin_left * 3
+    margin_y, margin_x = n * margin_top * 1, m * margin_left * 1
     figure = np.zeros((size1 * n + margin_y, size2 * m + margin_x))
-
+    ylabels = []
     for i, yi in enumerate(sorted(x.keys())):
+        ylabels += pitches.all_keys + ['']
         for j, xi in enumerate(sorted(x[yi].keys())):
             x_decoded = x[yi][xi]
             sample = x_decoded[:size2].reshape((size2, size1))
-            sample = rotate_midi_matrix(sample).reshape(size1, size2)
+            sample = _rotate_midi_matrix(sample).reshape(size1, size2)
             # coordinates of the current sample
-            a = i * size1 + i * margin_top * 3
-            b = (i + 1) * size1 + i * margin_top * 3
-            c = j * size2 + j * margin_left * 3
-            d = (j + 1) * size2 + j * margin_left * 3
-            # table separators (partially overlapping)
-            border_color = 0.3
-            figure[a, :] = 0
-            figure[a + 1, 1:-1] = border_color
-            figure[a + 2, :] = 0
-            if vertical_borders:
-                figure[:, c] = 0
-                figure[1:, c + 1] = border_color
-                figure[:, c + 2] = 0
-                c, d = c + 3, d + 3
-            a, b = a + 3, b + 3
+            a = i * size1 + i * margin_top
+            b = (i + 1) * size1 + i * margin_top
+            c = j * size2 + j * margin_left
+            d = (j + 1) * size2 + j * margin_left
+            c, d = c + 1, d + 1
+            a, b = a + 1, b + 1
             figure[a:b, c:d] = sample
 
-    plt.figure(figsize=(10, 10))
+    fig = plt.figure(figsize=(10, 10))
+    _midi_grid(fig, ylabels, n_bars=crop_size / 40, length=x_sample.shape[0])
     plt.imshow(figure, cmap='gray_r')
-    plt.xticks([])
-    plt.yticks([])
     plt.show()
 
 
@@ -246,5 +235,50 @@ def plot_dict(d, minn=0, maxx=1):
     return plots
 
 
-def rotate_midi_matrix(m):
+def _rotate_midi_matrix(m):
     return np.flip(m.copy().transpose(), axis=0)
+
+
+def _midi_xticks(ax, n_bars=1, length=40, d=10):
+    # d = resolution
+    n_beats = 4  # beats per bar (4/4 time signature)
+    n_bars = int(np.floor(n_bars))
+    n_extra_beats = int((length / d) % 4)
+    # sub_labels = np.arange(n_beats) + 1
+    labels_full_bars = list(np.arange(n_beats) + 1) * n_bars
+    labels_extra_beats = list(np.arange(n_extra_beats) + 1)
+    labels = labels_full_bars + labels_extra_beats
+    for bar in range(n_bars):
+        for beat in range(n_beats):
+            labels[bar * n_beats + beat] = str(bar + 1) + ':' + str(
+                labels[bar * n_beats + beat])
+    bar += 1
+    for beat in range(n_extra_beats):
+        labels[bar * n_beats + beat] = str(bar + 1) + ':' + str(
+            labels[bar * n_beats + beat])
+
+    # labels = [i + ':' + sub_label[i] for i in range(n)]
+    n_total_beats = n_bars * n_beats + n_extra_beats
+    major_ticks = np.arange(0, n_total_beats * d + 1, 40)
+    minor_ticks = np.arange(0, n_total_beats * d + 1, 5)
+    ax.set_xticks(major_ticks)
+    ax.set_xticks(minor_ticks, minor=True)
+    plt.xticks(np.arange(0, d * n_total_beats, d), labels)
+
+
+def _midi_yticks(ax, ylabels=[]):
+    n = len(ylabels)
+    major_ticks = np.arange(0, n + 1, 1)
+    minor_ticks = np.arange(0, n + 1, 10 + 1)
+    ax.set_yticks(major_ticks)
+    ax.set_yticks(minor_ticks, minor=True)
+    plt.yticks(
+        np.arange(len(ylabels), 0, -1) - 1, ylabels, weight=1, size='x-small')
+
+
+def _midi_grid(fig, ylabels=[], n_bars=1, length=50):
+    ax = fig.add_subplot(1, 1, 1)
+    _midi_yticks(ax, ylabels)
+    _midi_xticks(ax, n_bars, length)
+    ax.grid(which='minor', alpha=0.3, linewidth=2)
+    ax.grid(which='major', alpha=0.5)
