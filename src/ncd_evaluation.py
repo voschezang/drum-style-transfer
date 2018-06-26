@@ -24,6 +24,7 @@ def cross(z,
           different_genre_a=True,
           amt1=None,
           amt2=None,
+          compare_to_target=True,
           v=0):
     """
     transformations :: {genre a: {genre b: z}}
@@ -31,6 +32,12 @@ def cross(z,
     x = images/midi-matrices
     z = latent vector
     generator has method generator.predict(z) -> x
+
+    if compare_to_target:
+        compute ncd(transformed, target)
+    else:
+        compute ncd(transformed, original)
+
 
     Make sure that z, genre_dict and transformations are compatible
     all transformations.keys should be in genre_dict.keys
@@ -63,6 +70,7 @@ def cross(z,
             grid,
             different_genre_a,
             amt2,
+            compare_to_target,
             v=v)
 
         if result:
