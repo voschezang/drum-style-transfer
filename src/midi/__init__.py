@@ -58,7 +58,7 @@ N_NOTES = SILENT_NOTES + len(USED_PITCHES) + UNKNOWN_NOTES
 VELOCITY_RANGE = 127
 NOTE_OFF = 'note_off'
 NOTE_ON = 'note_on'
-MIDI_NOISE_FLOOR = 0.2  # values below this number will be ignored by midi decoders
+MIDI_NOISE_FLOOR = 0.1  # values below this number will be ignored by midi decoders
 PADDING = 3  # n array cells after an instance of a note-on msg (should be > 0)
 VELOCITY_DECAY = 0.2  # velocity decay for every padded-cell
 

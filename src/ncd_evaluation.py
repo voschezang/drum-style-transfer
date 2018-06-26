@@ -78,6 +78,7 @@ def for_every_genre(z,
                     grid=[0, 1],
                     different_genre_a=True,
                     amt=None,
+                    compare_to_target=True,
                     v=0):
     """
     'grid search' of the NCD of original_genre to 'genre b' for 'amt' transformations
@@ -126,10 +127,13 @@ def for_every_genre(z,
                 transformation = transformations[genre_a][genre_b]
                 if genre_b != original_genre:
                     if v > 1: print(' - genre_b `%s`' % genre_b)
-                    indices_b = genre_dict[genre_b]
-                    x_b = generator.predict(z[indices_b])
+                    if compare_to_target:
+                        indices_other = genre_dict[genre_b]
+                    else:
+                        indices_other = genre_dict[genre_a]
+                    x_other = generator.predict(z[indices_other])
                     result_genre_a[genre_b], _ = grid_search(
-                        z_original, x_b, transformation, generator, grid)
+                        z_original, x_other, transformation, generator, grid)
                     # TODO compute result of ncd (original, genre a)
 
             result[genre_a] = result_genre_a

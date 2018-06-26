@@ -21,7 +21,7 @@ DRUMS = [BD, SN, HH, OH, T3, T2, T1, CC, RD, UNKNOWN]
 keys = ['BD', 'SN', 'HH', 'OH', 'T3', 'T2', ' T1', ' CC', 'RD', 'UNKNOWN']
 keys_full = [
     'Bassdrum', 'Snaredrum', 'Closed hi-hat', 'Open hi-hat', 'Floortom',
-    'Low tom', 'High tom', ' Crash cymbal', 'Ride cymbal', 'Unknown'
+    'Low tom', 'High tom', 'Crash cymbal', 'Ride cymbal', 'Unknown'
 ]
 all_keys = keys_full  # + ['Unknown']
 
@@ -65,4 +65,16 @@ def used_note_list(drums, kit_size):
                 result.append([note_list[i]])
             result.append(note_list[i + 1:])
 
+    return result
+
+
+def to_string():
+    result = []
+    for i, k in enumerate(midi.pitches.keys_full[:-1]):
+        pitches = ''
+        for pitch in midi.pitches.DRUMS[i][:-1]:
+            pitches += '%i, ' % pitch
+            pitches += '%i' % midi.pitches.DRUMS[i][-1]
+            '%s: \t{%s}' % (k, pitches)
+            result.append('%s: {%s}\n' % (k, pitches))
     return result

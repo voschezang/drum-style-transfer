@@ -38,10 +38,14 @@ Context_desciption = """ Context :: namedtuple(
 
 
 def init(max_bars=4):
+    # due to miscalculation, max-bars is divided by 2
     print(Context_desciption)
     print('Setting up params\n')
     bpm = 120.  # default bpm
+    # 120/60 = 2 beats / s, 0.5 s / beat
+    # 8 * 0.5 = 4 s
     max_t = 60 / bpm * 2 * max_bars
+    # max_t = 60 / bpm * 4 * max_bars
     dt = 0.025  # T, sampling interval. quantized time, must be > 0
     n_timesteps = round(max_t / dt)  # vector length
     note_length = 0.01  # seconds
