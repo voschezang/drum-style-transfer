@@ -251,20 +251,20 @@ def bar(d={}, std={}):
     return plots
 
 
-def scatter(d={}, options={}, v=1, **kwargs):
+def scatter(d={}, options={}, v=1, show_regress=False, **kwargs):
     for key, y in d.items():
         if 'x_ticks' in options.keys():
             x = options['x_ticks']
         else:
             x = np.linspace(0, 1, len(y))
         plt.scatter(x, y, **kwargs)
-        line_, _ = utils.least_squares(y, x, line=True, v=v)
-        # print(len(line_), len(x))
-        line(x, line_)
+        if show_regress:
+            line_, _result = utils.regression(y, x, line=True, v=v)
+            line(x, line_)
 
 
 def line(x, y):
-    plt.plot(x, y, alpha=0.5, color='black')
+    plt.plot(x, y, alpha=0.3, color='black', linewidth=2)
 
 
 def plot_dict(d, minn=0, maxx=1):

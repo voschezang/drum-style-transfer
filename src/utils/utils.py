@@ -64,16 +64,9 @@ def min_f(max_t):
     return 1.0 / max_t
 
 
-def least_squares(y, x=None, line=True, v=0):
-    if x is None:
-        x = np.linspace(0, 1, len(y))
-    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
-    if v:
-        print('slope, intercept, r_value, p_value, std_err:', slope, intercept,
-              r_value, p_value, std_err)
-    if line:
-        line = [intercept + slope * a for a in x]
-    return line, (slope, intercept, r_value, p_value, std_err)
+def gen_line(x=[0, 1], a=1, b=0):
+    # y = ax + b
+    return [b + a * x1 for x1 in x]
 
 
 # Logic
@@ -100,7 +93,11 @@ def summary_multi(data={}, mode=dict):
     """
     data :: {'parameter': [ value ]}
     mode :: dict | list
-    return :: {'statistic': {param: score} }
+
+    if mode is dict:
+        return :: {'statistic': {param: score} }
+    if mode is list:
+        return :: {'statistic': [score] }
     """
     if mode is dict:
         result = collections.defaultdict(dict)
@@ -131,14 +128,30 @@ def summary(v=[]):
     }
 
 
-def ttest(alpha=0.05, a=[], b=[]):
-    s, p = stats.ttest_ind(a, b)
+def regression(y, x=None, line=True, v=0):
+    if x is None:
+        x = np.linspace(0, 1, len(y))
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
+    result = {}
+    result['slope'] = slope
+    result['intercept'] = intercept
+    result['p_value'] = p_value
+    result['std_err'] = std_err
+    if v:
+        print(result)
+    if line:
+        line = gen_line(x, slope, intercept)
+    return line, result
+
+
+def ttest(a=[], b=[], alpha=0.05, f=scipy.stats.ttest_ind, v=0):
+    s, p = f(a, b)
     if p < alpha:
         result = True
-        if config.result_: print('RESULT - significant difference found')
+        if v: print('RESULT - significant difference found')
     else:
         result = False
-        if config.result_: print('RESULT - NO significant difference found')
+        if v: print('RESULT - NO significant difference found')
     return result, s, p
 
 
