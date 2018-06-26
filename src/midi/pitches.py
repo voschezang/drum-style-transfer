@@ -15,8 +15,8 @@ T2 = [48, 47, 60, 63, 77, 86, 87]
 T1 = [50, 30, 43, 62, 76, 83]
 CC = [49, 55, 57, 58]
 RD = [51, 52, 53, 59, 82]
-UNKNOWN = [127]
-DRUMS = [BD, SN, HH, OH, T3, T2, T1, CC, RD, UNKNOWN]
+# UNKNOWN = [127]
+DRUMS = [BD, SN, HH, OH, T3, T2, T1, CC, RD]
 
 keys = ['BD', 'SN', 'HH', 'OH', 'T3', 'T2', ' T1', ' CC', 'RD', 'UNKNOWN']
 keys_full = [
@@ -55,7 +55,7 @@ all_keys = keys_full  # + ['Unknown']
 # ]
 
 
-def used_note_list(drums, kit_size):
+def used_note_list(drums, kit_size=1):
     result = []
     for note_list in drums:
         if kit_size == 1:

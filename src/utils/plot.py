@@ -6,7 +6,7 @@ White indicates a rest
 from utils import utils, string
 from midi import pitches, decode
 
-from scipy.stats import norm
+# import scipy, scipy.stats
 import numpy as np
 
 from matplotlib import rcParams
@@ -135,7 +135,8 @@ def custom(d,
            std={},
            figsize=(6, 3),
            dn=None,
-           show=False):
+           show=False,
+           **kwargs):
     """
     d :: {label: [value]}
     if dn:
@@ -161,7 +162,9 @@ def custom(d,
     if type_ == 'line':
         plots = plot_dict(d)
     elif type_ == 'bar':
-        plots = bar_plot(d, std)
+        plots = bar(d, std)
+    elif type_ == 'scatter':
+        plots = scatter(d, options, color='black', alpha=0.5, **kwargs)
     else:
         print('WARNING unkown arg value: `type_` was %s' % type_)
 
@@ -212,7 +215,12 @@ def custom(d,
 
     if 'x_labels' in options.keys():
         x_labels = options['x_labels']
-        plt.xticks(range(len(x_labels)), x_labels)
+        if 'x_ticks' in options.keys():
+            x_ticks = options['x_ticks']
+        else:
+            x_ticks = range(len(x_labels))
+
+        plt.xticks(x_ticks, x_labels)
 
     # plt.text(50, 12, "lorem ipsum", fontsize=17, ha="center")
     if log:
@@ -226,7 +234,7 @@ def custom(d,
         plt.close()
 
 
-def bar_plot(d={}, std={}):
+def bar(d={}, std={}):
     """e.g.
     d = {'male': [], 'female':[]}
     std = {'male': [], 'female':[]}
@@ -241,6 +249,22 @@ def bar_plot(d={}, std={}):
             p1 = plt.bar(ind, v, width)
         plots.append(p1)
     return plots
+
+
+def scatter(d={}, options={}, v=1, **kwargs):
+    for key, y in d.items():
+        if 'x_ticks' in options.keys():
+            x = options['x_ticks']
+        else:
+            x = np.linspace(0, 1, len(y))
+        plt.scatter(x, y, **kwargs)
+        line_, _ = utils.least_squares(y, x, line=True, v=v)
+        # print(len(line_), len(x))
+        line(x, line_)
+
+
+def line(x, y):
+    plt.plot(x, y, alpha=0.5, color='black')
 
 
 def plot_dict(d, minn=0, maxx=1):

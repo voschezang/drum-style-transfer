@@ -3,6 +3,7 @@
 import numpy as np, collections
 import operator as op
 import importlib
+import scipy, scipy.stats
 
 
 def reload(package, *args):
@@ -61,6 +62,18 @@ def max_f(dt):
 def min_f(max_t):
     # return the lowest frequency that a sampler with sample rate (1/dt) can record
     return 1.0 / max_t
+
+
+def least_squares(y, x=None, line=True, v=0):
+    if x is None:
+        x = np.linspace(0, 1, len(y))
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
+    if v:
+        print('slope, intercept, r_value, p_value, std_err:', slope, intercept,
+              r_value, p_value, std_err)
+    if line:
+        line = [intercept + slope * a for a in x]
+    return line, (slope, intercept, r_value, p_value, std_err)
 
 
 # Logic

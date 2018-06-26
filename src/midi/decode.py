@@ -106,6 +106,7 @@ def note(c, note_index, velocity, t, transpose=0, v=0):
     if note > midi.HIGHEST_NOTE:
         if v: config.debug('decode_note: note index > highest note')
         return g.note_on_off(c, note + transpose, int(velocity * 127), t)
+    return []
 
 
 def _note(note_index):

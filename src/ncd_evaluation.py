@@ -53,7 +53,7 @@ def cross(z,
     if amt1:
         iter_ = np.array(list(genre_dict.keys()))
         np.random.shuffle(iter_)
-        iter_ = iter_[:amt]
+        iter_ = iter_[:amt1]
     else:
         iter_ = genre_dict.keys()
 
