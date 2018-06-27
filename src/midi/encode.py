@@ -149,6 +149,7 @@ def msg_in_MultiTrack(c,
                       msg: mido.Message,
                       i: int,
                       matrix: midi.MultiTrack,
+                      use_padding: True,
                       velocity=None) -> midi.MultiTrack:
     # :velocity = None | float in range(0,1)
     if not midi.is_note_on(msg):
@@ -158,7 +159,12 @@ def msg_in_MultiTrack(c,
         velocity = min(msg.velocity, midi.VELOCITY_RANGE) / float(
             midi.VELOCITY_RANGE)
 
-    for i_ in range(i, i + midi.PADDING):
+    # use_padding = False
+    if use_padding:
+        iter1 = range(i, i + midi.PADDING)
+    else:
+        iter1 = [i]
+    for i_ in iter1:
         if i_ < c.n_timesteps:
             vector = single_msg(msg, velocity)
             matrix[i_, ] = midi.combine_notes(matrix[i_], vector)

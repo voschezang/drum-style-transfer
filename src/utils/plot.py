@@ -164,6 +164,7 @@ def custom(d,
 
     """
     plt.figure(figsize=figsize)
+    plt.margins(x=0)
     name = title
     labels = []
     for s in d.keys():
@@ -257,7 +258,7 @@ def bar(d={}, std={}):
         if std:
             p1 = plt.bar(ind, v, width, yerr=std[k])
         else:
-            p1 = plt.bar(ind, v, width)
+            p1 = plt.bar(ind, v, width, alpha=0.85, color='black')
         plots.append(p1)
     return plots
 
@@ -275,7 +276,8 @@ def scatter(d={}, options={}, v=1, show_regress=False, **kwargs):
 
 
 def line(x, y):
-    plt.plot(x, y, alpha=0.3, color='black', linewidth=2)
+    plt.plot(x, y, alpha=0.5, color='black', linewidth=2)
+    plt.margins(x=0.01)
 
 
 def plot_dict(d, minn=0, maxx=1):
