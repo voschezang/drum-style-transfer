@@ -3,7 +3,7 @@ Black indicates a note-on msg
 Grey indicates a probable note-on msg (intensity correlates with p())
 White indicates a rest
 """
-from utils import utils, string
+from utils import utils, string, io
 from midi import pitches, decode
 
 # import scipy, scipy.stats
@@ -67,15 +67,21 @@ def single(m,
         _midi_grid(fig, ylabels, length=xlength)
         plt.imshow(m, interpolation='nearest', cmap='gray_r')
 
+    if not fn is None:
+        # fn = string.to_dirname(fn)
+        # plt.savefig(fn + '-plot.png', bbox_inches='tight')
+        io.save_plt(fn)
+
     if show and not subplot[0]:
         plt.show()
 
-    if not fn is None:
-        fn = string.to_dirname(fn)
-        plt.savefig(fn + '-plot.png')
 
-
-def multi(x, crop_size=160, figsize=(10, 10), margin_top=1, margin_left=0,
+def multi(x,
+          crop_size=160,
+          figsize=(10, 10),
+          margin_top=1,
+          margin_left=0,
+          fn=None,
           v=0):
     """
     x :: {x_pos: {y_pos: np.ndarray}} | np.ndarray
@@ -115,7 +121,12 @@ def multi(x, crop_size=160, figsize=(10, 10), margin_top=1, margin_left=0,
 
     fig = plt.figure(figsize=figsize)
     _midi_grid(fig, ylabels, length=crop_size)
+
     plt.imshow(figure, cmap='gray_r')
+    if not fn is None:
+        # fn = string.to_dirname(fn)
+        # plt.savefig(fn + '-plot.png', bbox_inches='tight')
+        io.save_plt(fn)
     plt.show()
 
 

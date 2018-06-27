@@ -44,6 +44,7 @@ USED_DRUMS = [note_list[:KIT_SIZE]
 #                  for i in range(KIT_SIZE - 1)] + [note_list[KIT_SIZE:]]
 #                 for note_list in pitches.DRUMS]
 USED_PITCHES = pitches.used_note_list(pitches.DRUMS, KIT_SIZE)
+USED_PITCHES2 = USED_PITCHES + [pitches.UNKNOWN]
 
 SILENT_NOTES = 0  # 0: no silent notes | int: silent notes
 UNKNOWN_NOTES = 1  # must be 1

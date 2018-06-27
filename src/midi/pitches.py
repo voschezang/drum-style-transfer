@@ -15,8 +15,8 @@ T2 = [48, 47, 60, 63, 77, 86, 87]
 T1 = [50, 30, 43, 62, 76, 83]
 CC = [49, 55, 57, 58]
 RD = [51, 52, 53, 59, 82]
-# UNKNOWN = [127]
 DRUMS = [BD, SN, HH, OH, T3, T2, T1, CC, RD]
+UNKNOWN = [127]
 
 keys = ['BD', 'SN', 'HH', 'OH', 'T3', 'T2', ' T1', ' CC', 'RD', 'UNKNOWN']
 keys_full = [

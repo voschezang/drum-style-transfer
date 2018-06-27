@@ -1,5 +1,6 @@
 import os, re, time, datetime, pandas, numpy as np, collections
 import mido, bz2, pickle
+import matplotlib.pyplot as plt
 
 import config
 from utils import string
@@ -128,6 +129,10 @@ def import_mididata(c,
         if mid.tracks[0]:
             midis.append(mid)
     return midis, filenames
+
+
+def save_plt(fn):
+    plt.savefig(fn + '-plot.png', bbox_inches='tight')
 
 
 def search(dirname, max_n, add_cond, r=False):

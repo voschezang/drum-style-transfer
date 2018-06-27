@@ -27,7 +27,7 @@ def identity(c, matrix, v=0):
     if len(matrix.shape) == 4:
         return encode.midiFiles(c, tracks(c, matrix, v=v), v=v)
     else:
-        return encode.midiFile(c, track(c, matrix, v=v), v=v)
+        return encode.midiFile(c, track(c, matrix, v=v), v=v)[0]
 
 
 def tracks(c, matrices, v=0) -> List[mido.MidiTrack]:
@@ -105,11 +105,10 @@ def note(c, note_index, velocity, t, transpose=0, v=0):
     note = _note(note_index)
     if note > midi.HIGHEST_NOTE:
         if v: config.debug('decode_note: note index > highest note')
-        return g.note_on_off(c, note + transpose, int(velocity * 127), t)
-    return []
+    return g.note_on_off(c, note + transpose, int(velocity * 127), t)
 
 
 def _note(note_index):
     # i = note_index - midi.SILENT_NOTES - 1
     i = note_index - midi.SILENT_NOTES - 0
-    return midi.USED_PITCHES[i][0]
+    return midi.USED_PITCHES2[i][0]
