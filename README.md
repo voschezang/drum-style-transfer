@@ -10,7 +10,7 @@ Direct links
 
 ## Setup
 
-Install dependencies (use sudo on linux).
+Install dependencies (use `sudo` on linux).
 ```
 make deps
 ```
