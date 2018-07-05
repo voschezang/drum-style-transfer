@@ -6,6 +6,7 @@ Direct links
  - Lakh MIDI dataset, partly matched to the Million Song Dataset.
  - [ "The largest midi collection on the internet" ](https://www.reddit.com/r/WeAreTheMusicMakers/comments/3anwu8/the_drum_percussion_midi_archive_800k/)
 
+This project is inspired by [Magenta's MusicVAE](https://github.com/tensorflow/magenta)
 
 
 ## Setup
