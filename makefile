@@ -75,15 +75,9 @@ rm-env:
 dialyzer:
 	mypy src/test_midi.py
 
-predict:
-	python3 src/main.py $(book)
-
 clean:
 	find . -name \*.pyc -delete
 
 build-docs:
 	mkdocs build --clean
 
-deploy:
-	mkdocs gh-deploy
-ldropout=0.1
