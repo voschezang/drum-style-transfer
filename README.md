@@ -40,6 +40,9 @@ There are a number of notebooks. Depending on your usecase you'll have to look a
 
 The folder `ableton` contains an [Ableton](https://www.ableton.com/en/) project that can be used to synthesize MIDI files (i.e. generate audiofiles).
 
+<br/>
+<hr/>
+
 ## About
 
 The project uses [mypy](https://github.com/python/mypy) type definitions _(e.g. f(x:int)-> int)_. However, due to issues with unsupported (external) modules, type checking is not implemented. Types are to be used solely for documentation purposes.
