@@ -29,7 +29,6 @@ make start
 There are a number of notebooks. Depeding on your usecase you'll have to look at different notebooks.
 
 
-
 ## About
 
 The project uses [mypy](https://github.com/python/mypy) type definitions _(e.g. f(x:int)-> int)_. However, due to issues with unsupported (external) modules, type checking is not implemented. Types are to be used solely for documentation purposes.
