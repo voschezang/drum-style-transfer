@@ -11,7 +11,7 @@ This project was inspired by [Magenta's MusicVAE](https://magenta.tensorflow.org
 
 ## Setup
 
-Install dependencies (use `sudo` on linux).
+Clone repo and install dependencies (use `sudo` on linux).
 ```
 git clone https://github.com/voschezang/drum-style-transfer
 cd drum-style-transfer
@@ -19,6 +19,14 @@ make deps
 ```
 
 Make sure that 'data_format' your keras config file (`~/.keras/keras.json`) is set to 'channels_last'. Otherwise it should be changed manually in every script/notebook
+
+## Usage
+
+Start jupyter and navigate to `http://localhost:8888/`
+```
+make start
+```
+There are a number of notebooks. Depending on your usecase you'll have to look at different notebooks.
 
 
 ## About
