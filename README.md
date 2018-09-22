@@ -11,7 +11,7 @@ This project was inspired by [Magenta's MusicVAE](https://magenta.tensorflow.org
 
 ## Setup
 
-Install dependencies (use `sudo` on linux).
+Clone repo and install dependencies (use `sudo` on linux).
 ```
 git clone https://github.com/voschezang/drum-style-transfer
 cd drum-style-transfer
