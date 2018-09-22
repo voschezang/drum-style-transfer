@@ -13,6 +13,8 @@ This project was inspired by [Magenta's MusicVAE](https://magenta.tensorflow.org
 
 Install dependencies (use `sudo` on linux).
 ```
+git clone https://github.com/voschezang/drum-style-transfer
+cd drum-style-transfer
 make deps
 ```
 
