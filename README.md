@@ -26,7 +26,7 @@ Start jupyter and navigate to `http://localhost:8888/`
 ```
 make start
 ```
-There are a number of notebooks. Depeding on your usecase you'll have to look at different notebooks.
+There are a number of notebooks. Depending on your usecase you'll have to look at different notebooks.
 
 
 ## About
