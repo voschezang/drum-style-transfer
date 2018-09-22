@@ -38,7 +38,7 @@ make start
 ```
 There are a number of notebooks. Depending on your usecase you'll have to look at different notebooks.
 
-The folder `ableton` contains an [Ableton](https://www.ableton.com/en/) project that can be used to synthesize MIDI files (i.e. generate audiofiles).
+The folder `ableton` contains an [Ableton](https://www.ableton.com/en/) project that can be used to synthesize MIDI files (i.e. generate audiofiles). The project may display some errors about missing (fx-)plugins but these can be ingored.
 
 <br/>
 <hr/>
