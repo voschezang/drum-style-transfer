@@ -20,6 +20,15 @@ make deps
 
 Make sure that 'data_format' your keras config file (`~/.keras/keras.json`) is set to 'channels_last'. Otherwise it should be changed manually in every script/notebook
 
+## Usage
+
+Start jupyter and navigate to `http://localhost:8888/`
+```
+make start
+```
+There are a number of notebooks. Depeding on your usecase you'll have to look at different notebooks.
+
+
 
 ## About
 
