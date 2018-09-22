@@ -1,4 +1,4 @@
-# Pattern recognition
+# Drum style transfer
 
 List of datasets datasets [link](https://github.com/midi-ld/machine-readable-datasets).
 
