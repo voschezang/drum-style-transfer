@@ -8,7 +8,11 @@ The main features are:
 
 This not meant as a standalone application but with a bit of tweaking you should be able to use the code to train your own models.
 
-<hr>
+Listen to `sample03.wav` and `sample12.wav` to get an impression for the type music that can be generated. 
+These patterns were produced by decoding a random walk through the 10-dimensional latent space.
+
+
+<hr/>
 
 List of datasets datasets [link](https://github.com/midi-ld/machine-readable-datasets).
 
