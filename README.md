@@ -4,11 +4,11 @@ This repo contains the code used during a research project about style transfer 
 The main features are:
 - Training a model on an exsiting dataset (see links below)
 - Use a model to generate new drum patterns
+- Analyze the similarity of groups of patterns
 
+This not meant as a standalone application but with a bit of tweaking you should be able to use the code to train your own models.
 
-It is not meant as a standalone application but with a bit of tweaking you should be able to use the code to train your own models.
-
-
+<hr>
 
 List of datasets datasets [link](https://github.com/midi-ld/machine-readable-datasets).
 
