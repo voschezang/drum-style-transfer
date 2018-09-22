@@ -1,5 +1,15 @@
 # Drum style transfer
 
+This repo contains the code used during a research project about style transfer of MIDI drum patterns.
+The main features are:
+- Training a model on an exsiting dataset (see links below)
+- Use a model to generate new drum patterns
+
+
+It is not meant as a standalone application but with a bit of tweaking you should be able to use the code to train your own models.
+
+
+
 List of datasets datasets [link](https://github.com/midi-ld/machine-readable-datasets).
 
 Direct links
@@ -22,7 +32,7 @@ Make sure that 'data_format' your keras config file (`~/.keras/keras.json`) is s
 
 ## Usage
 
-Start jupyter and navigate to `http://localhost:8888/`
+Start jupyter. This should open `http://localhost:8888/` in your default webbrowser.
 ```
 make start
 ```
