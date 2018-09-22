@@ -1,4 +1,0 @@
-mido==1.2.8
-python-rtmidi==1.1.0
-
-pyknon==1.2
