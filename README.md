@@ -1,6 +1,6 @@
 # Drum style transfer
 
-This repo contains the code used during a research project about style transfer of MIDI drum patterns.
+This repository is part of this [research paper](https://link.springer.com/chapter/10.1007%2F978-3-030-31978-6_10) and revolves around style transfer of MIDI drum patterns.
 The main features are:
 - Training a model on an exsiting dataset (see links below)
 - Use a model to generate new drum patterns
